@@ -21,7 +21,7 @@ end
 
 function zmqRemoteApi.getField(f)
     local v=_G
-    for w in string.gfind(f,'[%w_]+') do
+    for w in string.gmatch(f,'[%w_]+') do
         v=v[w]
         if not v then return nil end
     end
