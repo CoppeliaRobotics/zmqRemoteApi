@@ -81,9 +81,14 @@ function zmqRemoteApi.handleQueue()
     end
 end
 
+function sysCall_info()
+    return {autoStart=true}
+end
+
 function sysCall_init()
     if not simZMQ then
-        error('The ZeroMQ plugin is not available')
+        sim.addLog(sim.verbosity_errors,'zmqRemoteApi: the ZMQ plugin is not available')
+        return {cmd='cleanup'}
     end
     json=require 'dkjson'
     cbor=require 'cbor'
@@ -104,15 +109,14 @@ function sysCall_cleanup()
     if zmqRemoteApi.verbose()>0 then
         sim.addLog(sim.verbosity_scriptinfos,'ZeroMQ Remote API stopped')
     end
-    return sim.syscb_cleanup
 end
 
 function sysCall_addOnScriptSuspend()
-    return sim.syscb_cleanup
+    return {cmd='cleanup'}
 end
 
 function sysCall_addOnScriptSuspended()
-    return sim.syscb_cleanup
+    return {cmd='cleanup'}
 end
 
 function sysCall_nonSimulation()
