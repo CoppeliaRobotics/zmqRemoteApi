@@ -1,5 +1,7 @@
 """CoppeliaSim's Remote API client."""
 
+from time import sleep
+
 import cbor
 
 import zmq
@@ -70,4 +72,9 @@ if __name__ in ('__main__', '__console__'):
 if __name__ in ('__main__',):
     print(sim.getObjectHandle('Floor'))
     print(sim.unpackTable(sim.packTable({'a': 1, 'b': 2})))
-    print(sim.getObjectHandle('foo'))
+    handles = [sim.createDummy(0.01, 12 * [0]) for _ in range(50)]
+    for i, h in enumerate(handles):
+        sim.setObjectPosition(h, -1, [0.01 * i, 0.01 * i, 0.01 * i])
+    sleep(10)
+    for h in handles:
+        sim.removeObject(h)
