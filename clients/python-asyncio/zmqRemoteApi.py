@@ -13,15 +13,28 @@ class RemoteAPIClient:
 
     def __init__(self, host='localhost', port=23000, *, verbose=False):
         """Create client and connect to the ZMQ Remote API server."""
-        self.context = zmq.asyncio.Context()
-        self.socket = self.context.socket(zmq.REQ)
         self.verbose = verbose
-        self.socket.connect(f'tcp://{host}:{port}')
+        self.host, self.port = host, port
+        # multiple sockets will be created for multiple concurrent requests, as needed
+        self.sockets = []
 
-    def __del__(self):
+    async def __aenter__(self):
+        """Add one socket to the pool."""
+        self.context = zmq.asyncio.Context()
+        self._add_socket()
+        return self
+
+    async def __aexit__(self, *excinfo):
         """Disconnect and destroy client."""
-        self.socket.close()
+        for socket in self.sockets:
+            socket.close()
         self.context.term()
+
+    def _add_socket(self):
+        socket = self.context.socket(zmq.REQ)
+        socket.connect(f'tcp://{self.host}:{self.port}')
+        self.sockets.append(socket)
+        return socket
 
     async def call(self, func, args, verbose=None):
         """Call function with specified arguments."""
@@ -37,8 +50,12 @@ class RemoteAPIClient:
         req = {'func': func, 'args': args}
         if verbose:
             print(req)
-        await self.socket.send(cbor.dumps(req))
-        resp = cbor.loads(await self.socket.recv())
+        if not self.sockets:
+            socket = self._add_socket()
+        socket = self.sockets.pop()
+        await socket.send(cbor.dumps(req))
+        resp = cbor.loads(await socket.recv())
+        self.sockets.append(socket)
         resp = deepmapitem(lambda k, v: (k.decode('utf8'), v), resp)
         if verbose:
             print(resp)
@@ -69,11 +86,15 @@ class RemoteAPIClient:
 
 async def main():
     """Test basic usage."""
-    client = RemoteAPIClient(verbose=False)
-    sim = await client.getobject('sim')
-    print(await sim.getObjectHandle('Floor'))
-    print(await sim.unpackTable(await sim.packTable({'a': 1, 'b': 2})))
-    print(await sim.getObjectHandle('foo'))
+    async with RemoteAPIClient() as client:
+        sim = await client.getobject('sim')
+        print(await sim.getObjectHandle('Floor'))
+        print(await sim.unpackTable(await sim.packTable({'a': 1, 'b': 2})))
+        handles = await asyncio.gather(*[sim.createDummy(0.01, 12 * [0]) for _ in range(50)])
+        await asyncio.gather(*[sim.setObjectPosition(h, -1, [0.01 * i, 0.01 * i, 0.01 * i]) for i, h in enumerate(handles)])
+        await asyncio.sleep(10)
+        await asyncio.gather(*[sim.removeObject(h) for h in handles])
+
 
 if __name__ in ('__main__',):
     asyncio.run(main())
