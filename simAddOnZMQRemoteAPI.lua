@@ -104,6 +104,7 @@ function sysCall_init()
 end
 
 function sysCall_cleanup()
+    if not simZMQ then return end
     simZMQ.close(socket)
     simZMQ.ctx_term(context)
     if zmqRemoteApi.verbose()>0 then
