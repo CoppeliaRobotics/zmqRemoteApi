@@ -16,6 +16,7 @@ class RemoteAPIClient:
         self.socket = self.context.socket(zmq.REQ)
         self.verbose = verbose
         self.socket.connect(f'tcp://{host}:{port}')
+        self.sim = None
 
     def __del__(self):
         """Disconnect and destroy client."""
@@ -64,6 +65,17 @@ class RemoteAPIClient:
             else:
                 setattr(ret, k, self.getobject(f'{name}.{k}', _info=v))
         return ret
+
+    def call_addon(self, func, *args):
+        if self.sim is None:
+            self.sim = self.getobject('sim')
+        return self.sim.callScriptFunction(f'{func}@ZMQ remote API', self.sim.scripttype_addonscript, *args)
+
+    def setsynchronous(self, enable=True):
+        return self.call_addon('setSynchronous', enable)
+
+    def step(self):
+        return self.call_addon('step')
 
 
 if __name__ in ('__main__', '__console__'):
