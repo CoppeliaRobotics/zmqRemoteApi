@@ -101,6 +101,7 @@ function sysCall_init()
     if zmqRemoteApi.verbose()>0 then
         sim.addLog(sim.verbosity_scriptinfos,'ZeroMQ Remote API started')
     end
+    stepping=false
 end
 
 function sysCall_cleanup()
@@ -124,9 +125,21 @@ function sysCall_nonSimulation()
     zmqRemoteApi.handleQueue()
 end
 
-function sysCall_actuation()
+function sysCall_beforeMainScript()
     zmqRemoteApi.handleQueue()
+    local outData
+    if stepping then
+        outData={doNotRunMainScript=not step}
+        step=nil
+    end
+    return outData
 end
 
-function sysCall_sensing()
+function setSynchronous(enable)
+    stepping=enable
+    step=nil
+end
+
+function step()
+    step=true
 end
