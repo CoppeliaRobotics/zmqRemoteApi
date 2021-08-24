@@ -129,17 +129,17 @@ function sysCall_beforeMainScript()
     zmqRemoteApi.handleQueue()
     local outData
     if stepping then
-        outData={doNotRunMainScript=not step}
-        step=nil
+        outData={doNotRunMainScript=not go}
+        go=nil
     end
     return outData
 end
 
 function setSynchronous(enable)
     stepping=enable
-    step=nil
+    go=nil
 end
 
 function step()
-    step=true
+    go=true
 end
