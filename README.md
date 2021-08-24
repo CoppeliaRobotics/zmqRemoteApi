@@ -60,3 +60,45 @@ In case of error, the exception message will be present:
     "error": "Object does not exist. (in function 'sim.getObjectHandle')"
 }
 ```
+
+### Clients
+
+#### Python client
+
+(Make sure to have directory `zmqRemoteApi` (from `clients/python`) somewhere in `sys.path`)
+
+```python
+import zmqRemoteApi
+
+# create a client to connect to zmqRemoteApi server:
+# (creation arguments can specify different host/port,
+# defaults are host='localhost', port=23000)
+client = RemoteAPIClient()
+
+# get a remote object:
+sim = client.getobject('sim')
+
+# call API function:
+h = sim.getObjectHandle('Floor')
+print(h)
+```
+
+#### Python asyncio client
+
+Normal `asyncio` principles apply. All methods are async.
+
+```python
+async def main():
+    async with RemoteAPIClient() as client:
+        sim = await client.getobject('sim')
+        h = await sim.getObjectHandle('Floor')
+        print(h)
+
+asyncio.run(main())
+```
+
+If performing many commands in one shot, and results will be used later, consider using `asyncio.gather` for improved throughput. E.g. getting the handles of 100 objects:
+
+```python
+    handles = await asyncio.gather(*[sim.getObjectHandle(f'Object{i+1}') for i in range(100)])
+```
