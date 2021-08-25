@@ -98,13 +98,13 @@ class RemoteAPIClient:
 
     async def call_addon(self, func, *args):
         if self.sim is None:
-            self.sim = await sef.getobject('sim')
-        return self.sim.callScriptFunction(f'{func}@ZMQ remote API', self.sim.scripttype_addonscript, *args)
+            self.sim = await self.getobject('sim')
+        return await self.sim.callScriptFunction(f'{func}@ZMQ remote API', self.sim.scripttype_addonscript, *args)
 
-    async def setsynchronous(self, enable=True):
+    def setsynchronous(self, enable=True):
         return self.call_addon('setSynchronous', enable)
 
-    async def step(self):
+    def step(self):
         return self.call_addon('step')
 
 
