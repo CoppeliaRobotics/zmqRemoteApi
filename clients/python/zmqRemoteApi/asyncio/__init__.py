@@ -21,6 +21,11 @@ if sys.platform == 'win32' and sys.version_info >= (3, 8, 0):
 ''')
 
 
+def b64(b):
+    import base64
+    return base64.b64encode(b).decode('ascii')
+
+
 class RemoteAPIClient:
     """Client to connect to CoppeliaSim's ZMQ Remote API."""
 
@@ -63,16 +68,22 @@ class RemoteAPIClient:
             verbose = self.verbose
         req = {'func': func, 'args': args}
         if verbose:
-            print(req)
+            print('Sending:', req)
         if not self.sockets:
             socket = self._add_socket()
         socket = self.sockets.pop()
-        await socket.send(cbor.dumps(req))
-        resp = cbor.loads(await socket.recv())
+        rawReq = cbor.dumps(req)
+        if verbose:
+            print(f'Sending raw len={len(rawReq)}, base64={b64(rawReq)}')
+        await socket.send(rawReq)
+        rawResp = await socker.recv()
+        if verbose:
+            print(f'Received raw len={len(rawResp)}, base64={b64(rawResp)}')
+        resp = cbor.loads(rawResp)
         self.sockets.append(socket)
         resp = deepmapitem(lambda k, v: (k.decode('utf8'), v), resp)
         if verbose:
-            print(resp)
+            print('Received:', resp)
         if not resp.get('success', False):
             raise Exception(resp.get('error'))
         ret = resp['ret']
