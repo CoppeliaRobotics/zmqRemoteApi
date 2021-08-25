@@ -97,6 +97,13 @@ async def main():
 asyncio.run(main())
 ```
 
+Note: on Windows and Python 3.8+, `asyncio` might not work properly; in case, just add the following before `asyncio.run`:
+
+```python
+if sys.platform == 'win32' and sys.version_info >= (3, 8, 0):
+    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+```
+
 If performing many commands in one shot, and results will be used later, consider using `asyncio.gather` for improved throughput. E.g. getting the handles of 100 objects:
 
 ```python
