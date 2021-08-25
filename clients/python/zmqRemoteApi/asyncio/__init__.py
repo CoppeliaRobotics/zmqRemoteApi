@@ -1,6 +1,7 @@
 """CoppeliaSim's Remote API client."""
 
 import asyncio
+import sys
 
 import cbor
 
