@@ -90,3 +90,6 @@ if __name__ in ('__main__',):
     sleep(10)
     for h in handles:
         sim.removeObject(h)
+
+
+__all__ = ['RemoteAPIClient']

@@ -20,6 +20,7 @@ if sys.platform == 'win32' and sys.version_info >= (3, 8, 0):
 
 ''')
 
+
 class RemoteAPIClient:
     """Client to connect to CoppeliaSim's ZMQ Remote API."""
 
@@ -122,3 +123,6 @@ async def main():
 
 if __name__ in ('__main__',):
     asyncio.run(main())
+
+
+__all__ = ['RemoteAPIClient']
