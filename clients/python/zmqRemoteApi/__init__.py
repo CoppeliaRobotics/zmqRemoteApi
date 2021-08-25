@@ -28,7 +28,7 @@ class RemoteAPIClient:
         self.socket.close()
         self.context.term()
 
-    def call(self, func, args, verbose=None):
+    def call(self, func, args, *, verbose=None):
         """Call function with specified arguments."""
         def deepmapitem(fn, d):
             if isinstance(d, (list, tuple)):
