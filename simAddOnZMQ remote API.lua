@@ -76,7 +76,17 @@ function zmqRemoteApi.handleQueue()
         local rc,revents=simZMQ.poll({socket},{simZMQ.POLLIN},0)
         if rc<=0 then break end
         local rc,req=simZMQ.recv(socket,0)
+
+        if zmqRemoteApi.verbose()>2 then
+            print('Received raw request: len='..#req..', base64='..sim.transformBuffer(req,sim.buffer_uint8,0,0,sim.buffer_base64))
+        end
+
         local resp=zmqRemoteApi.handleRawMessage(req)
+
+        if zmqRemoteApi.verbose()>2 then
+            print('Sending raw response: len='..#resp..', base64='..sim.transformBuffer(resp,sim.buffer_uint8,0,0,sim.buffer_base64))
+        end
+
         simZMQ.send(socket,resp,0)
     end
 end
