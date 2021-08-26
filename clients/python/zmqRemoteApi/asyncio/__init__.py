@@ -76,7 +76,7 @@ class RemoteAPIClient:
         if verbose:
             print(f'Sending raw len={len(rawReq)}, base64={b64(rawReq)}')
         await socket.send(rawReq)
-        rawResp = await socker.recv()
+        rawResp = await socket.recv()
         if verbose:
             print(f'Received raw len={len(rawResp)}, base64={b64(rawResp)}')
         resp = cbor.loads(rawResp)

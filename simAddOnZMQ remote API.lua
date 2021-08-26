@@ -158,6 +158,10 @@ function sysCall_beforeMainScript()
     return outData
 end
 
+function sysCall_afterSimulation()
+    stepping=false -- auto disable sync. mode
+end
+
 function setSynchronous(enable)
     stepping=enable
     go=nil
