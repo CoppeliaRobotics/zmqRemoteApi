@@ -20,9 +20,12 @@ async def mainFunc():
         defaultIdlsFps=await sim.getInt32Param(sim.intparam_idle_fps)
         await sim.setInt32Param(sim.intparam_idle_fps,0)
 
-        # Create a few dummies (below executes in one chunck on CoppeliaSim's side):
+        # Create a few dummies (below executes "concurrently", i.e. without
+        # waiting for the result of one call, before sending the request for
+        # the next call; this will significantly improve speed when order of
+        # calls is not important; see also the documentation of asyncio.gather):
         handles = await asyncio.gather(*[sim.createDummy(0.01, 12 * [0]) for _ in range(50)])
-        # Set the positions of the created dummies (below executes in one chunck on CoppeliaSim's side):
+        # Set the positions of the dummies (executes "concurrently", see above):
         await asyncio.gather(*[sim.setObjectPosition(h, -1, [0.01 * i, 0.01 * i, 0.01 * i]) for i, h in enumerate(handles)])
 
         # Run a simulation in asynchronous mode:
@@ -46,7 +49,7 @@ async def mainFunc():
             await client.step() # triggers next simulation step
         await sim.stopSimulation()
 
-        # Remove the dummies created earlier (below executes in one chunck on CoppeliaSim's side):
+        # Remove the dummies created earlier (executes "concurrently", see above):
         await asyncio.gather(*[sim.removeObject(h) for h in handles])
 
         # Restore the original idle loop frequency:
