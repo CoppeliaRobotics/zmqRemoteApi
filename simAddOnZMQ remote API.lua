@@ -73,7 +73,7 @@ end
 
 function zmqRemoteApi.handleQueue()
     while true do
-        local rc,revents=simZMQ.poll({socket},{simZMQ.POLLIN},0)
+        local rc,revents=simZMQ.poll({rpcSocket},{simZMQ.POLLIN},0)
         if rc<=0 then break end
 
         -- use a msg_recv() instead of recv() because we don't know the payload
@@ -81,13 +81,13 @@ function zmqRemoteApi.handleQueue()
         -- max_buf_size, whatever it is
         local msg=simZMQ.msg_new()
         local rc=simZMQ.msg_init(msg)
-        assert(rc==0,'msg_init')
-        local rc=simZMQ.msg_recv(msg,socket,0)
-        assert(rc~=-1,'msg_recv')
+        assert(rc==0,'msg_init() failed')
+        local rc=simZMQ.msg_recv(msg,rpcSocket,0)
+        assert(rc~=-1,'msg_recv() failed')
         local req=simZMQ.msg_data(msg)
-        assert(req~=nil,'msg_data')
+        assert(req~=nil,'msg_data() failed')
         local rc=simZMQ.msg_close(msg)
-        assert(rc~=-1,'msg_close')
+        assert(rc~=-1,'msg_close() failed')
         simZMQ.msg_destroy(msg)
 
         if zmqRemoteApi.verbose()>2 then
@@ -100,8 +100,15 @@ function zmqRemoteApi.handleQueue()
             print('Sending raw response: len='..#resp..', base64='..sim.transformBuffer(resp,sim.buffer_uint8,0,0,sim.buffer_base64))
         end
 
-        simZMQ.send(socket,resp,0)
+        simZMQ.send(rpcSocket,resp,0)
     end
+end
+
+function zmqRemoteApi.publishStepCount()
+    if zmqRemoteApi.verbose()>1 then
+        print('publishing simulationTimeStepCount='..simulationTimeStepCount)
+    end
+    simZMQ.send(cntSocket,sim.packUInt32Table{simulationTimeStepCount},0)
 end
 
 function sysCall_info()
@@ -113,14 +120,22 @@ function sysCall_init()
         sim.addLog(sim.verbosity_errors,'zmqRemoteApi: the ZMQ plugin is not available')
         return {cmd='cleanup'}
     end
+    rpcPort=tonumber(sim.getStringNamedParam('zmqRemoteApi.rpcPort') or '23000')
+    cntPort=tonumber(sim.getStringNamedParam('zmqRemoteApi.cntPort') or (rpcPort+1))
+    if zmqRemoteApi.verbose()>0 then
+        sim.addLog(sim.verbosity_scriptinfos,string.format('ZeroMQ Remote API starting (rpcPort=%d, cntPort=%d)...',rpcPort,cntPort))
+    end
     json=require 'dkjson'
     cbor=require 'cbor'
     context=simZMQ.ctx_new()
-    socket=simZMQ.socket(context,simZMQ.REP)
-    local rc=simZMQ.bind(socket,'tcp://*:23000')
-    if rc~=0 then
-        error('bind() failed')
-    end
+    rpcSocket=simZMQ.socket(context,simZMQ.REP)
+    local rc=simZMQ.bind(rpcSocket,string.format('tcp://*:%d',rpcPort))
+    assert(rc==0,'bind() failed (rpcPort)')
+    cntSocket=simZMQ.socket(context,simZMQ.PUB)
+    local rc=simZMQ.setsockopt(cntSocket,simZMQ.CONFLATE,sim.packUInt32Table{1})
+    assert(rc==0,'setsockopt() failed (cntPort)')
+    local rc=simZMQ.bind(cntSocket,string.format('tcp://*:%d',cntPort))
+    assert(rc==0,'bind() failed (cntPort)')
     if zmqRemoteApi.verbose()>0 then
         sim.addLog(sim.verbosity_scriptinfos,'ZeroMQ Remote API started')
     end
@@ -129,7 +144,8 @@ end
 
 function sysCall_cleanup()
     if not simZMQ then return end
-    simZMQ.close(socket)
+    simZMQ.close(cntSocket)
+    simZMQ.close(rpcSocket)
     simZMQ.ctx_term(context)
     if zmqRemoteApi.verbose()>0 then
         sim.addLog(sim.verbosity_scriptinfos,'ZeroMQ Remote API stopped')
@@ -158,8 +174,14 @@ function sysCall_beforeMainScript()
     return outData
 end
 
-function sysCall_afterSimulation()
-    stepping=false -- auto disable sync. mode
+function sysCall_beforeSimulation()
+    simulationTimeStepCount=0
+    zmqRemoteApi.publishStepCount()
+end
+
+function sysCall_actuation()
+    simulationTimeStepCount=simulationTimeStepCount+1
+    zmqRemoteApi.publishStepCount()
 end
 
 function setSynchronous(enable)

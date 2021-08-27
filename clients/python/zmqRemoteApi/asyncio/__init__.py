@@ -29,10 +29,11 @@ def b64(b):
 class RemoteAPIClient:
     """Client to connect to CoppeliaSim's ZMQ Remote API."""
 
-    def __init__(self, host='localhost', port=23000, *, verbose=False):
+    def __init__(self, host='localhost', port=23000, cntport=None, *, verbose=False):
         """Create client and connect to the ZMQ Remote API server."""
         self.verbose = verbose
-        self.host, self.port = host, port
+        self.host, self.port, self.cntport = host, port, cntport or port + 1
+        self.cntsocket = None
         # multiple sockets will be created for multiple concurrent requests, as needed
         self.sockets = []
         self.sim = None
@@ -40,6 +41,10 @@ class RemoteAPIClient:
     async def __aenter__(self):
         """Add one socket to the pool."""
         self.context = zmq.asyncio.Context()
+        self.cntsocket = self.context.socket(zmq.SUB)
+        self.cntsocket.setsockopt(zmq.SUBSCRIBE, b'')
+        self.cntsocket.setsockopt(zmq.CONFLATE, 1)
+        self.cntsocket.connect(f'tcp://{self.host}:{self.cntport}')
         self._add_socket()
         return self
 
@@ -113,11 +118,26 @@ class RemoteAPIClient:
             self.sim = await self.getobject('sim')
         return await self.sim.callScriptFunction(f'{func}@ZMQ remote API', self.sim.scripttype_addonscript, *args)
 
-    def setsynchronous(self, enable=True):
-        return self.call_addon('setSynchronous', enable)
+    async def setsynchronous(self, enable=True):
+        return await self.call_addon('setSynchronous', enable)
 
-    def step(self):
-        return self.call_addon('step')
+    async def step(self, *, wait=True):
+        async def hasnewstepcount():
+            poller = zmq.asyncio.Poller()
+            poller.register(self.cntsocket, zmq.POLLIN)
+            socks = dict(await poller.poll(0))
+            b = self.cntsocket in socks and socks[self.cntsocket] == zmq.POLLIN
+            return b
+
+        async def getstepcount():
+            import struct
+            return struct.unpack('i', await self.cntsocket.recv())[0]
+
+        if wait and await hasnewstepcount():
+            await getstepcount()
+        await self.call_addon('step')
+        if wait:
+            await getstepcount()
 
 
 async def main():

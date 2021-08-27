@@ -15,12 +15,16 @@ def b64(b):
 class RemoteAPIClient:
     """Client to connect to CoppeliaSim's ZMQ Remote API."""
 
-    def __init__(self, host='localhost', port=23000, *, verbose=False):
+    def __init__(self, host='localhost', port=23000, cntport=None, *, verbose=False):
         """Create client and connect to the ZMQ Remote API server."""
         self.context = zmq.Context()
         self.socket = self.context.socket(zmq.REQ)
+        self.cntsocket = self.context.socket(zmq.SUB)
         self.verbose = verbose
         self.socket.connect(f'tcp://{host}:{port}')
+        self.cntsocket.setsockopt(zmq.SUBSCRIBE, b'')
+        self.cntsocket.setsockopt(zmq.CONFLATE, 1)
+        self.cntsocket.connect(f'tcp://{host}:{cntport if cntport else port+1}')
         self.sim = None
 
     def __del__(self):
@@ -85,8 +89,24 @@ class RemoteAPIClient:
     def setsynchronous(self, enable=True):
         return self.call_addon('setSynchronous', enable)
 
-    def step(self):
-        return self.call_addon('step')
+    def step(self, *, wait=True):
+        def hasnewstepcount():
+            poller = zmq.Poller()
+            poller.register(self.cntsocket, zmq.POLLIN)
+            socks = dict(poller.poll(0))
+            b = self.cntsocket in socks and socks[self.cntsocket] == zmq.POLLIN
+            return b
+
+        def getstepcount():
+            import struct
+            return struct.unpack('i', self.cntsocket.recv())[0]
+
+        if wait and hasnewstepcount():
+            getstepcount()
+        self.call_addon('step')
+        if wait:
+            getstepcount()
+
 
 
 if __name__ in ('__main__', '__console__'):
