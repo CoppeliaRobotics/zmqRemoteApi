@@ -80,14 +80,10 @@ function zmqRemoteApi.handleQueue()
         -- size in advance and long messages might get truncated at
         -- max_buf_size, whatever it is
         local msg=simZMQ.msg_new()
-        local rc=simZMQ.msg_init(msg)
-        assert(rc==0,'msg_init() failed')
-        local rc=simZMQ.msg_recv(msg,rpcSocket,0)
-        assert(rc~=-1,'msg_recv() failed')
+        simZMQ.msg_init(msg)
+        simZMQ.msg_recv(msg,rpcSocket,0)
         local req=simZMQ.msg_data(msg)
-        assert(req~=nil,'msg_data() failed')
-        local rc=simZMQ.msg_close(msg)
-        assert(rc~=-1,'msg_close() failed')
+        simZMQ.msg_close(msg)
         simZMQ.msg_destroy(msg)
 
         if zmqRemoteApi.verbose()>2 then
@@ -120,6 +116,7 @@ function sysCall_init()
         sim.addLog(sim.verbosity_errors,'zmqRemoteApi: the ZMQ plugin is not available')
         return {cmd='cleanup'}
     end
+    simZMQ.__raiseErrors(true) -- so we don't need to check retval with every call
     rpcPort=tonumber(sim.getStringNamedParam('zmqRemoteApi.rpcPort') or '23000')
     cntPort=tonumber(sim.getStringNamedParam('zmqRemoteApi.cntPort') or (rpcPort+1))
     if zmqRemoteApi.verbose()>0 then
@@ -129,13 +126,10 @@ function sysCall_init()
     cbor=require 'cbor'
     context=simZMQ.ctx_new()
     rpcSocket=simZMQ.socket(context,simZMQ.REP)
-    local rc=simZMQ.bind(rpcSocket,string.format('tcp://*:%d',rpcPort))
-    assert(rc==0,'bind() failed (rpcPort)')
+    simZMQ.bind(rpcSocket,string.format('tcp://*:%d',rpcPort))
     cntSocket=simZMQ.socket(context,simZMQ.PUB)
-    local rc=simZMQ.setsockopt(cntSocket,simZMQ.CONFLATE,sim.packUInt32Table{1})
-    assert(rc==0,'setsockopt() failed (cntPort)')
-    local rc=simZMQ.bind(cntSocket,string.format('tcp://*:%d',cntPort))
-    assert(rc==0,'bind() failed (cntPort)')
+    simZMQ.setsockopt(cntSocket,simZMQ.CONFLATE,sim.packUInt32Table{1})
+    simZMQ.bind(cntSocket,string.format('tcp://*:%d',cntPort))
     if zmqRemoteApi.verbose()>0 then
         sim.addLog(sim.verbosity_scriptinfos,'ZeroMQ Remote API started')
     end
