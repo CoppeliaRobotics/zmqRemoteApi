@@ -178,6 +178,10 @@ function sysCall_actuation()
     zmqRemoteApi.publishStepCount()
 end
 
+function sysCall_afterSimulation()
+    stepping=false -- auto disable sync. mode
+end
+
 function setSynchronous(enable)
     stepping=enable
     go=nil
