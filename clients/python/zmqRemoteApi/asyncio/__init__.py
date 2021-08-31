@@ -52,6 +52,7 @@ class RemoteAPIClient:
         """Disconnect and destroy client."""
         for socket in self.sockets:
             socket.close()
+        self.cntsocket.close()
         self.context.term()
 
     def _add_socket(self):

@@ -30,6 +30,7 @@ class RemoteAPIClient:
     def __del__(self):
         """Disconnect and destroy client."""
         self.socket.close()
+        self.cntsocket.close()
         self.context.term()
 
     def call(self, func, args, *, verbose=None):
