@@ -76,15 +76,7 @@ function zmqRemoteApi.handleQueue()
         local rc,revents=simZMQ.poll({rpcSocket},{simZMQ.POLLIN},0)
         if rc<=0 then break end
 
-        -- use a msg_recv() instead of recv() because we don't know the payload
-        -- size in advance and long messages might get truncated at
-        -- max_buf_size, whatever it is
-        local msg=simZMQ.msg_new()
-        simZMQ.msg_init(msg)
-        simZMQ.msg_recv(msg,rpcSocket,0)
-        local req=simZMQ.msg_data(msg)
-        simZMQ.msg_close(msg)
-        simZMQ.msg_destroy(msg)
+        local rc,req=simZMQ.recv(rpcSocket,0)
 
         if zmqRemoteApi.verbose()>2 then
             print('Received raw request: len='..#req..', base64='..sim.transformBuffer(req,sim.buffer_uint8,0,0,sim.buffer_base64))
