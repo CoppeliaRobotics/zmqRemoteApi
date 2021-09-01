@@ -6,18 +6,20 @@
 # blocking example, see simpleTest-nonBlocking.py
 
 import time
+
 from zmqRemoteApi import RemoteAPIClient
 
-print ('Program started')
 
-client = RemoteAPIClient('localhost',23000)
+print('Program started')
+
+client = RemoteAPIClient()
 sim = client.getobject('sim')
 
 # When simulation is not running, ZMQ message handling could be a bit
 # slow, since the idle loop runs at 8 Hz by default. So let's make
 # sure that the idle loop runs at full speed for this program:
-defaultIdlsFps=sim.getInt32Param(sim.intparam_idle_fps)
-sim.setInt32Param(sim.intparam_idle_fps,0)
+defaultIdleFps = sim.getInt32Param(sim.intparam_idle_fps)
+sim.setInt32Param(sim.intparam_idle_fps, 0)
 
 # Create a few dummies and set their positions:
 handles = [sim.createDummy(0.01, 12 * [0]) for _ in range(50)]
@@ -27,22 +29,24 @@ for i, h in enumerate(handles):
 # Run a simulation in asynchronous mode:
 sim.startSimulation()
 while (t := sim.getSimulationTime()) < 3:
-    s=f'Simulation time: {t:.2f} [s] (simulation running asynchronously to client, i.e. non-stepped)'
+    s = f'Simulation time: {t:.2f} [s] (simulation running asynchronously '\
+         'to client, i.e. non-stepped)'
     print(s)
-    sim.addLog(sim.verbosity_scriptinfos,s)
+    sim.addLog(sim.verbosity_scriptinfos, s)
 sim.stopSimulation()
 # If you need to make sure we really stopped:
-while sim.getSimulationState()!=sim.simulation_stopped:
+while sim.getSimulationState() != sim.simulation_stopped:
     time.sleep(0.1)
 
 # Run a simulation in stepping mode:
 client.setstepping(True)
 sim.startSimulation()
 while (t := sim.getSimulationTime()) < 3:
-    s=f'Simulation time: {t:.2f} [s] (simulation running synchronously to client, i.e. stepped)'
+    s = f'Simulation time: {t:.2f} [s] (simulation running synchronously '\
+         'to client, i.e. stepped)'
     print(s)
-    sim.addLog(sim.verbosity_scriptinfos,s)
-    client.step() # triggers next simulation step
+    sim.addLog(sim.verbosity_scriptinfos, s)
+    client.step()  # triggers next simulation step
 sim.stopSimulation()
 
 # Remove the dummies created earlier:
@@ -50,6 +54,6 @@ for h in handles:
     sim.removeObject(h)
 
 # Restore the original idle loop frequency:
-sim.setInt32Param(sim.intparam_idle_fps,defaultIdlsFps)
+sim.setInt32Param(sim.intparam_idle_fps, defaultIdleFps)
 
-print ('Program ended')
+print('Program ended')

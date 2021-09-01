@@ -7,24 +7,26 @@
 #
 
 import time
+
 from zmqRemoteApi import RemoteAPIClient
 
-print ('Program started')
 
-client = RemoteAPIClient('localhost',23000)
+print('Program started')
+
+client = RemoteAPIClient()
 sim = client.getobject('sim')
 
-visionSensorHandle=sim.getObjectHandle('/VisionSensor')
-passiveVisionSensorHandle=sim.getObjectHandle('/PassiveVisionSensor')
+visionSensorHandle = sim.getObjectHandle('/VisionSensor')
+passiveVisionSensorHandle = sim.getObjectHandle('/PassiveVisionSensor')
 
 client.setstepping(True)
 sim.startSimulation()
 
-startTime=time.time()
+startTime = time.time()
 while time.time()-startTime < 5:
-    img,resX,resY=sim.getVisionSensorCharImage(visionSensorHandle)
-    sim.setVisionSensorCharImage(passiveVisionSensorHandle,img)
+    img, resX, resY = sim.getVisionSensorCharImage(visionSensorHandle)
+    sim.setVisionSensorCharImage(passiveVisionSensorHandle, img)
     client.step()
 sim.stopSimulation()
 
-print ('Program ended')
+print('Program ended')
