@@ -31,7 +31,7 @@ async def mainFunc():
         # Run a simulation in asynchronous mode:
         await sim.startSimulation()
         while (t := await sim.getSimulationTime()) < 3:
-            s=f'Simulation time: {t:.2f} [s] (simulation running asynchronously to client)'
+            s=f'Simulation time: {t:.2f} [s] (simulation running asynchronously to client, i.e. non-stepped)'
             print(s)
             await sim.addLog(sim.verbosity_scriptinfos,s)
         await sim.stopSimulation()
@@ -39,11 +39,11 @@ async def mainFunc():
         while sim.simulation_stopped!=await sim.getSimulationState():
             await asyncio.sleep(0.1)
 
-        # Run a simulation in synchronous mode:
-        await client.setsynchronous(True)
+        # Run a simulation in stepping mode:
+        await client.setstepping(True)
         await sim.startSimulation()
         while (t := await sim.getSimulationTime()) < 3:
-            s=f'Simulation time: {t:.2f} [s] (simulation running synchronously to client)'
+            s=f'Simulation time: {t:.2f} [s] (simulation running synchronously to client, i.e. stepped)'
             print(s)
             await sim.addLog(sim.verbosity_scriptinfos,s)
             await client.step() # triggers next simulation step

@@ -174,7 +174,7 @@ function sysCall_afterSimulation()
     stepping=false -- auto disable sync. mode
 end
 
-function setSynchronous(enable)
+function setStepping(enable)
     stepping=enable
     go=nil
 end

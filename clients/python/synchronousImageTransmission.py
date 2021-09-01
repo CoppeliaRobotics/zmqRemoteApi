@@ -1,5 +1,5 @@
 # Make sure to have the add-on "ZMQ remote API" running in
-# CoppeliaSim and have followig scene loaded:
+# CoppeliaSim and have following scene loaded:
 #
 # scenes/messaging/synchronousImageTransmissionViaRemoteApi.ttt
 #
@@ -17,7 +17,7 @@ sim = client.getobject('sim')
 visionSensorHandle=sim.getObjectHandle('/VisionSensor')
 passiveVisionSensorHandle=sim.getObjectHandle('/PassiveVisionSensor')
 
-client.setsynchronous(True)
+client.setstepping(True)
 sim.startSimulation()
 
 startTime=time.time()

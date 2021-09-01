@@ -27,7 +27,7 @@ for i, h in enumerate(handles):
 # Run a simulation in asynchronous mode:
 sim.startSimulation()
 while (t := sim.getSimulationTime()) < 3:
-    s=f'Simulation time: {t:.2f} [s] (simulation running asynchronously to client)'
+    s=f'Simulation time: {t:.2f} [s] (simulation running asynchronously to client, i.e. non-stepped)'
     print(s)
     sim.addLog(sim.verbosity_scriptinfos,s)
 sim.stopSimulation()
@@ -35,12 +35,13 @@ sim.stopSimulation()
 while sim.getSimulationState()!=sim.simulation_stopped:
     time.sleep(0.1)
 
-# Run a simulation in synchronous mode:
-client.setsynchronous(True)
+# Run a simulation in stepping mode:
+client.setstepping(True)
 sim.startSimulation()
 while (t := sim.getSimulationTime()) < 3:
-    print(f'Simulation time: {t:.2f} [s] (synchronous simulation)')
-    sim.addLog(sim.verbosity_scriptinfos,f'Simulation time: {t:.2f} [s] (synchronous simulation)')
+    s=f'Simulation time: {t:.2f} [s] (simulation running synchronously to client, i.e. stepped)'
+    print(s)
+    sim.addLog(sim.verbosity_scriptinfos,s)
     client.step() # triggers next simulation step
 sim.stopSimulation()
 
