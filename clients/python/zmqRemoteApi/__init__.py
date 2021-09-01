@@ -87,8 +87,8 @@ class RemoteAPIClient:
             self.sim = self.getobject('sim')
         return self.sim.callScriptFunction(f'{func}@ZMQ remote API', self.sim.scripttype_addonscript, *args)
 
-    def setsynchronous(self, enable=True):
-        return self.call_addon('setSynchronous', enable)
+    def setstepping(self, enable=True):
+        return self.call_addon('setStepping', enable)
 
     def step(self, *, wait=True):
         def hasnewstepcount():
