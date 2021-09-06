@@ -23,7 +23,7 @@ client.setstepping(True)
 sim.startSimulation()
 
 startTime = time.time()
-while time.time()-startTime < 5:
+while time.time() - startTime < 5:
     img, resX, resY = sim.getVisionSensorCharImage(visionSensorHandle)
     sim.setVisionSensorCharImage(passiveVisionSensorHandle, img)
     client.step()

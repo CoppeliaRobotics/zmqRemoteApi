@@ -11,14 +11,14 @@ import zmq.asyncio
 
 if sys.platform == 'win32' and sys.version_info >= (3, 8, 0):
     if isinstance(asyncio.get_event_loop_policy(), asyncio.windows_events.WindowsProactorEventLoopPolicy):
-        print('''
+        print("""
 
     WARNING: on Windows and Python 3.8+, `asyncio` might not work properly; in case, add the following before `asyncio.run(...)`:
 
     if sys.platform == 'win32' and sys.version_info >= (3, 8, 0):
         asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 
-''')
+""")
 
 
 def b64(b):

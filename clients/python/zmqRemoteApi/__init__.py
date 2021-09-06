@@ -109,7 +109,6 @@ class RemoteAPIClient:
             getstepcount()
 
 
-
 if __name__ in ('__main__', '__console__'):
     client = RemoteAPIClient()
     sim = client.getobject('sim')
