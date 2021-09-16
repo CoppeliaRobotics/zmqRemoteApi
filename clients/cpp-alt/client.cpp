@@ -22,7 +22,7 @@ public:
     json call(const std::string &func, const json &args = json(json_array_arg))
     {
         json req;
-        req["func"] = "sim.getObjectHandle";
+        req["func"] = func;
         req["args"] = args;
         send(req);
 
