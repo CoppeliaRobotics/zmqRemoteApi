@@ -63,13 +63,6 @@ class RemoteAPIClient:
 
     async def call(self, func, args, *, verbose=None):
         """Call function with specified arguments."""
-        def deepmapitem(fn, d):
-            if isinstance(d, (list, tuple)):
-                return type(d)(deepmapitem(fn, x) for x in d)
-            elif isinstance(d, dict):
-                return {k: deepmapitem(fn, v) for k, v in map(lambda t: fn(*t), d.items())}
-            else:
-                return d
         if verbose is None:
             verbose = self.verbose
         req = {'func': func, 'args': args}
@@ -87,7 +80,6 @@ class RemoteAPIClient:
             print(f'Received raw len={len(rawResp)}, base64={b64(rawResp)}')
         resp = cbor.loads(rawResp)
         self.sockets.append(socket)
-        resp = deepmapitem(lambda k, v: (k.decode('utf8'), v), resp)
         if verbose:
             print('Received:', resp)
         if not resp.get('success', False):
