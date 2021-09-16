@@ -6,6 +6,7 @@ end
 
 function zmqRemoteApi.info(obj)
     if type(obj)=='string' then obj=zmqRemoteApi.getField(obj) end
+    if type(obj)~='table' then return obj end
     local ret={}
     for k,v in pairs(obj) do
         if type(v)=='table' then
