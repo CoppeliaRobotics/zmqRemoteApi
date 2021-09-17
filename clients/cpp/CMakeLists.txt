@@ -29,7 +29,7 @@ if(NOT cppzmq_POPULATED)
     add_subdirectory(${cppzmq_SOURCE_DIR} ${cppzmq_BINARY_DIR} EXCLUDE_FROM_ALL)
 endif()
 
-add_library(RemoteAPIClient SHARED RemoteAPIClient.cpp)
+add_library(RemoteAPIClient STATIC RemoteAPIClient.cpp)
 target_link_libraries(RemoteAPIClient PUBLIC nlohmann_json::nlohmann_json)
 target_link_libraries(RemoteAPIClient PUBLIC cppzmq)
 

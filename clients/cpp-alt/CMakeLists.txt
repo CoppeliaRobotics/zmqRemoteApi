@@ -29,7 +29,7 @@ if(NOT cppzmq_POPULATED)
     add_subdirectory(${cppzmq_SOURCE_DIR} ${cppzmq_BINARY_DIR} EXCLUDE_FROM_ALL)
 endif()
 
-add_library(RemoteAPIClient SHARED RemoteAPIClient.cpp)
+add_library(RemoteAPIClient STATIC RemoteAPIClient.cpp)
 target_include_directories(RemoteAPIClient PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/jsoncons/include)
 target_link_libraries(RemoteAPIClient PUBLIC cppzmq)
 
