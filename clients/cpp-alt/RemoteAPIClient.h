@@ -18,6 +18,7 @@ class RemoteAPIClient
 public:
     RemoteAPIClient(const std::string host = "localhost", const int port = 23000, bool verbose_ = false);
     json call(const std::string &func, const json &args = json(json_array_arg));
+    json getObject(const std::string &name);
     void setStepping(bool enable = true);
     void step();
 

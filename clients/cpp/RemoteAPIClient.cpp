@@ -44,6 +44,11 @@ json RemoteAPIClient::call(const std::string &func, const json &args)
     return ret;
 }
 
+json RemoteAPIClient::getObject(const std::string &name)
+{
+    return call("zmqRemoteApi.info", json::array({name}));
+}
+
 void RemoteAPIClient::setStepping(bool enable)
 {
     callAddOn("setStepping", json::array({enable}));
