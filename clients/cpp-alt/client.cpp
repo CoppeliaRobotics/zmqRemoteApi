@@ -14,6 +14,13 @@ std::string str(const json& j)
     return std::string{v.begin(), v.end()};
 }
 
+json bin(const char *s, int size = -1)
+{
+    if(size == -1) size = strlen(s);
+    auto b = reinterpret_cast<const uint8_t *>(s);
+    return json{byte_string_arg, std::vector<uint8_t>{b, b + size}, semantic_tag::base64};
+}
+
 class RemoteAPIClient
 {
 public:
