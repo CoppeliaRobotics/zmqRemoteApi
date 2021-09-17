@@ -98,5 +98,7 @@ int main()
     ret = client.call("sim.getObjectAlias", json(json_array_arg, {ret[0]}));
     std::cout << "ret[0]: " << str(ret[0]) << std::endl;
 
+    ret = client.call("sim.getObjectHandle", json(json_array_arg, {"gh"}));
+
     return 0;
 }

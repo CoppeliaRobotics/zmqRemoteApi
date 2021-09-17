@@ -7,6 +7,12 @@
 
 using json = nlohmann::json;
 
+std::string str(const json &j)
+{
+    const auto &b = j.get_binary();
+    return std::string{reinterpret_cast<const char*>(b.data()), b.size()};
+}
+
 class RemoteAPIClient
 {
 public:
@@ -30,7 +36,7 @@ public:
         if(!ok)
         {
             if(resp.contains("error"))
-                throw std::runtime_error(resp["error"].get<std::string>());
+                throw std::runtime_error(str(resp["error"]));
             else
                 throw std::runtime_error("unknown error");
         }
@@ -73,7 +79,15 @@ private:
 int main()
 {
     RemoteAPIClient client;
-    auto ret = client.call("sim.getObjectHandle", R"(["Floor"])"_json);
-    std::cout << "Ret: " << ret << std::endl;
+
+    std::cout << "sim.getObjectHandle(\"Floor\")..." << std::endl;
+    auto ret = client.call("sim.getObjectHandle", json::array({"Floor"}));
+    for(size_t i = 0; i < ret.size(); i++)
+        std::cout << "ret[" << i << "]: " << ret[i] << std::endl;
+
+    std::cout << "sim.getObjectAlias(" << ret[0] << ")..." << std::endl;
+    ret = client.call("sim.getObjectAlias", json::array({ret[0]}));
+    std::cout << "ret[0]: " << str(ret[0]) << std::endl;
+
     return 0;
 }
