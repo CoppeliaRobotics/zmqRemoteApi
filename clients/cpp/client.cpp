@@ -13,6 +13,13 @@ std::string str(const json &j)
     return std::string{reinterpret_cast<const char*>(b.data()), b.size()};
 }
 
+json bin(const char *s, int size = -1)
+{
+    if(size == -1) size = strlen(s);
+    auto b = reinterpret_cast<const uint8_t *>(s);
+    return json{std::vector<uint8_t>{b, b + size}};
+}
+
 class RemoteAPIClient
 {
 public:
