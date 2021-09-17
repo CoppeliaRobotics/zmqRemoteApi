@@ -8,6 +8,12 @@
 
 using namespace jsoncons;
 
+std::string str(const json& j)
+{
+    const auto &v = j.as< std::vector<uint8_t> >(byte_string_arg, semantic_tag::base64);
+    return std::string{v.begin(), v.end()};
+}
+
 class RemoteAPIClient
 {
 public:
@@ -75,8 +81,15 @@ private:
 int main()
 {
     RemoteAPIClient client;
+
+    std::cout << "sim.getObjectHandle(\"Floor\")..." << std::endl;
     auto ret = client.call("sim.getObjectHandle", json(json_array_arg, {"Floor"}));
     for(size_t i = 0; i < ret.size(); i++)
         std::cout << "ret[" << i << "]: " << ret[i] << std::endl;
+
+    std::cout << "sim.getObjectAlias(" << ret[0] << ")..." << std::endl;
+    ret = client.call("sim.getObjectAlias", json(json_array_arg, {ret[0]}));
+    std::cout << "ret[0]: " << str(ret[0]) << std::endl;
+
     return 0;
 }
