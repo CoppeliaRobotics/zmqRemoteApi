@@ -37,7 +37,7 @@ public:
         if(!ok)
         {
             if(resp.contains("error"))
-                throw std::runtime_error(resp["error"].as<std::string>());
+                throw std::runtime_error(str(resp["error"]));
             else
                 throw std::runtime_error("unknown error");
         }
