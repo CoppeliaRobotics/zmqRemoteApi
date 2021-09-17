@@ -29,7 +29,9 @@ if(NOT cppzmq_POPULATED)
     add_subdirectory(${cppzmq_SOURCE_DIR} ${cppzmq_BINARY_DIR} EXCLUDE_FROM_ALL)
 endif()
 
-add_executable(client client.cpp)
-target_include_directories(client PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/jsoncons/include)
-target_link_libraries(client PRIVATE Eigen3::Eigen)
-target_link_libraries(client PRIVATE cppzmq)
+add_library(RemoteAPIClient SHARED RemoteAPIClient.cpp)
+target_include_directories(RemoteAPIClient PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/jsoncons/include)
+target_link_libraries(RemoteAPIClient PUBLIC cppzmq)
+
+add_executable(example example.cpp)
+target_link_libraries(example PRIVATE RemoteAPIClient)
