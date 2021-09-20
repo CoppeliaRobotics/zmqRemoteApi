@@ -13,8 +13,22 @@ std::string str(const json& j)
 json bin(const char *s, int size)
 {
     if(size == -1) size = strlen(s);
-    auto b = reinterpret_cast<const uint8_t *>(s);
-    return json{byte_string_arg, std::vector<uint8_t>{b, b + size}, semantic_tag::base64};
+    return bin(reinterpret_cast<const uint8_t *>(s), size);
+}
+
+json bin(const uint8_t *b, int size)
+{
+    return bin(std::vector<uint8_t>{b, b + size});
+}
+
+json bin(const std::string &s)
+{
+    return bin(s.data(), s.length());
+}
+
+json bin(const std::vector<uint8_t> &v)
+{
+    return json{byte_string_arg, v};
 }
 
 RemoteAPIClient::RemoteAPIClient(const std::string host, const int port, bool verbose_)
