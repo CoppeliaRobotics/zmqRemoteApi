@@ -13,7 +13,7 @@ print('Program started')
 maxForce = 100
 
 client = RemoteAPIClient()
-sim = client.getobject('sim')
+sim = client.getObject('sim')
 
 
 def moveToAngle(targetAngle):
@@ -53,7 +53,7 @@ jointAngle = sim.getJointPosition(jointHandle)
 sim.setJointTargetVelocity(jointHandle, 360 * math.pi / 180)
 
 # enable the stepping mode on the client:
-client.setstepping(True)
+client.setStepping(True)
 
 sim.startSimulation()
 

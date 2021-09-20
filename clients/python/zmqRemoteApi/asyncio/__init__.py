@@ -90,7 +90,7 @@ class RemoteAPIClient:
         if len(ret) > 1:
             return tuple(ret)
 
-    async def getobject(self, name, _info=None):
+    async def getObject(self, name, _info=None):
         """Retrieve remote object from server."""
         ret = type(name, (), {})
         if not _info:
@@ -103,16 +103,16 @@ class RemoteAPIClient:
             elif len(v) == 1 and 'const' in v:
                 setattr(ret, k, v['const'])
             else:
-                setattr(ret, k, self.getobject(f'{name}.{k}', _info=v))
+                setattr(ret, k, self.getObject(f'{name}.{k}', _info=v))
         return ret
 
-    async def call_addon(self, func, *args):
+    async def callAddOn(self, func, *args):
         if self.sim is None:
-            self.sim = await self.getobject('sim')
+            self.sim = await self.getObject('sim')
         return await self.sim.callScriptFunction(f'{func}@ZMQ remote API', self.sim.scripttype_addonscript, *args)
 
-    async def setstepping(self, enable=True):
-        return await self.call_addon('setStepping', enable)
+    async def setStepping(self, enable=True):
+        return await self.callAddOn('setStepping', enable)
 
     async def step(self, *, wait=True):
         async def hasnewstepcount():
@@ -128,7 +128,7 @@ class RemoteAPIClient:
 
         if wait and await hasnewstepcount():
             await getstepcount()
-        await self.call_addon('step')
+        await self.callAddOn('step')
         if wait:
             await getstepcount()
 
@@ -136,7 +136,7 @@ class RemoteAPIClient:
 async def main():
     """Test basic usage."""
     async with RemoteAPIClient() as client:
-        sim = await client.getobject('sim')
+        sim = await client.getObject('sim')
         print(await sim.getObjectHandle('Floor'))
         print(await sim.unpackTable(await sim.packTable({'a': 1, 'b': 2})))
         handles = await asyncio.gather(*[sim.createDummy(0.01, 12 * [0]) for _ in range(50)])

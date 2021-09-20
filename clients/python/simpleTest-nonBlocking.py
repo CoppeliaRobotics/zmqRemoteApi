@@ -14,7 +14,7 @@ async def mainFunc():
     print('Program started')
 
     async with RemoteAPIClient() as client:
-        sim = await client.getobject('sim')
+        sim = await client.getObject('sim')
 
         # When simulation is not running, ZMQ message handling could be a bit
         # slow, since the idle loop runs at 8 Hz by default. So let's make
@@ -48,7 +48,7 @@ async def mainFunc():
             await asyncio.sleep(0.1)
 
         # Run a simulation in stepping mode:
-        await client.setstepping(True)
+        await client.setStepping(True)
         await sim.startSimulation()
         while (t := await sim.getSimulationTime()) < 3:
             s = f'Simulation time: {t:.2f} [s] (simulation running '\

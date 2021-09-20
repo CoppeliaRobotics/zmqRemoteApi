@@ -9,7 +9,7 @@ from zmqRemoteApi import RemoteAPIClient
 print('Program started')
 
 client = RemoteAPIClient()
-sim = client.getobject('sim')
+sim = client.getObject('sim')
 
 executedMovId = 'notReady'
 

@@ -58,7 +58,7 @@ class RemoteAPIClient:
         if len(ret) > 1:
             return tuple(ret)
 
-    def getobject(self, name, _info=None):
+    def getObject(self, name, _info=None):
         """Retrieve remote object from server."""
         ret = type(name, (), {})
         if not _info:
@@ -71,16 +71,16 @@ class RemoteAPIClient:
             elif len(v) == 1 and 'const' in v:
                 setattr(ret, k, v['const'])
             else:
-                setattr(ret, k, self.getobject(f'{name}.{k}', _info=v))
+                setattr(ret, k, self.getObject(f'{name}.{k}', _info=v))
         return ret
 
-    def call_addon(self, func, *args):
+    def callAddOn(self, func, *args):
         if self.sim is None:
-            self.sim = self.getobject('sim')
+            self.sim = self.getObject('sim')
         return self.sim.callScriptFunction(f'{func}@ZMQ remote API', self.sim.scripttype_addonscript, *args)
 
-    def setstepping(self, enable=True):
-        return self.call_addon('setStepping', enable)
+    def setStepping(self, enable=True):
+        return self.callAddOn('setStepping', enable)
 
     def step(self, *, wait=True):
         def hasnewstepcount():
@@ -96,14 +96,14 @@ class RemoteAPIClient:
 
         if wait and hasnewstepcount():
             getstepcount()
-        self.call_addon('step')
+        self.callAddOn('step')
         if wait:
             getstepcount()
 
 
 if __name__ in ('__main__', '__console__'):
     client = RemoteAPIClient()
-    sim = client.getobject('sim')
+    sim = client.getObject('sim')
 if __name__ in ('__main__',):
     print(sim.getObjectHandle('Floor'))
     print(sim.unpackTable(sim.packTable({'a': 1, 'b': 2})))

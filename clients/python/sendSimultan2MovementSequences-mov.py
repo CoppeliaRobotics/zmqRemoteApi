@@ -14,7 +14,7 @@ executedMovId1 = 'notReady'
 executedMovId2 = 'notReady'
 
 client = RemoteAPIClient()
-sim = client.getobject('sim')
+sim = client.getObject('sim')
 
 targetArm1 = '/blueArm'
 targetArm2 = '/redArm'

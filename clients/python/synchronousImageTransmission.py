@@ -14,12 +14,12 @@ from zmqRemoteApi import RemoteAPIClient
 print('Program started')
 
 client = RemoteAPIClient()
-sim = client.getobject('sim')
+sim = client.getObject('sim')
 
 visionSensorHandle = sim.getObjectHandle('/VisionSensor')
 passiveVisionSensorHandle = sim.getObjectHandle('/PassiveVisionSensor')
 
-client.setstepping(True)
+client.setStepping(True)
 sim.startSimulation()
 
 startTime = sim.getSimulationTime()

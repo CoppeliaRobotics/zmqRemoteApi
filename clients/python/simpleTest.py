@@ -13,7 +13,7 @@ from zmqRemoteApi import RemoteAPIClient
 print('Program started')
 
 client = RemoteAPIClient()
-sim = client.getobject('sim')
+sim = client.getObject('sim')
 
 # When simulation is not running, ZMQ message handling could be a bit
 # slow, since the idle loop runs at 8 Hz by default. So let's make
@@ -39,7 +39,7 @@ while sim.getSimulationState() != sim.simulation_stopped:
     time.sleep(0.1)
 
 # Run a simulation in stepping mode:
-client.setstepping(True)
+client.setStepping(True)
 sim.startSimulation()
 while (t := sim.getSimulationTime()) < 3:
     s = f'Simulation time: {t:.2f} [s] (simulation running synchronously '\
