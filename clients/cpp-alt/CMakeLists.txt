@@ -35,3 +35,6 @@ target_link_libraries(RemoteAPIClient PUBLIC cppzmq)
 
 add_executable(example example.cpp)
 target_link_libraries(example PRIVATE RemoteAPIClient)
+
+add_executable(synchronousImageTransmission synchronousImageTransmission.cpp)
+target_link_libraries(synchronousImageTransmission PRIVATE RemoteAPIClient)
