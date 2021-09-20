@@ -14,8 +14,8 @@ int main()
 {
     RemoteAPIClient client;
 
-    auto visionSensorHandle = client.call("sim.getObjectHandle", json(json_array_arg, {"/VisionSensor"}))[0];
-    auto passiveVisionSensorHandle = client.call("sim.getObjectHandle", json(json_array_arg, {"/PassiveVisionSensor"}))[0];
+    auto visionSensorHandle = client.call("sim.getObjectHandle", {"/VisionSensor"})[0];
+    auto passiveVisionSensorHandle = client.call("sim.getObjectHandle", {"/PassiveVisionSensor"})[0];
 
     client.setStepping(true);
     client.call("sim.startSimulation");
@@ -23,11 +23,11 @@ int main()
     auto startTime = client.call("sim.getSimulationTime")[0].as<double>();
     while(client.call("sim.getSimulationTime")[0].as<double>() - startTime < 5)
     {
-        auto ret = client.call("sim.getVisionSensorCharImage", json(json_array_arg, {visionSensorHandle}));
+        auto ret = client.call("sim.getVisionSensorCharImage", {visionSensorHandle});
         auto img = ret[0];
         auto resX = ret[1];
         auto resY = ret[2];
-        client.call("sim.setVisionSensorCharImage", json(json_array_arg, {passiveVisionSensorHandle, img}));
+        client.call("sim.setVisionSensorCharImage", {passiveVisionSensorHandle, img});
         client.step();
     }
     client.call("sim.stopSimulation");

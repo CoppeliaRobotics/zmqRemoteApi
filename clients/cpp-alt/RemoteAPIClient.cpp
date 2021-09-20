@@ -25,6 +25,11 @@ RemoteAPIClient::RemoteAPIClient(const std::string host, const int port, bool ve
     sock.connect(addr);
 }
 
+json RemoteAPIClient::call(const std::string &func, std::initializer_list<json> args)
+{
+    return call(func, json::make_array(args));
+}
+
 json RemoteAPIClient::call(const std::string &func, const json &args)
 {
     json req;
