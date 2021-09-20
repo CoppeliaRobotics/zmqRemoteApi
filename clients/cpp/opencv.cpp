@@ -8,12 +8,18 @@
  */
 
 #include "RemoteAPIClient.h"
+
 #include <iostream>
 
 #include <opencv2/core/utility.hpp>
 #include <opencv2/imgproc.hpp>
 #include <opencv2/imgcodecs.hpp>
 #include <opencv2/highgui.hpp>
+
+json bin(const cv::Mat &mat)
+{
+    return bin(mat.data, mat.rows * mat.cols * mat.elemSize());
+}
 
 int edgeThresh = 12;
 cv::Mat image, gray, blurImage, edge, cedge;
@@ -35,6 +41,7 @@ int main()
     RemoteAPIClient client;
 
     auto visionSensorHandle = client.call("sim.getObjectHandle", {"/VisionSensor"})[0];
+    auto passiveVisionSensorHandle = client.call("sim.getObjectHandle", {"/PassiveVisionSensor"})[0];
 
     client.setStepping(true);
     client.call("sim.startSimulation");
@@ -64,6 +71,11 @@ int main()
         cv::createTrackbar("Canny threshold default", window_name, &edgeThresh, 100, onTrackbar);
         // Trigger image processing function:
         onTrackbar(0, 0);
+
+        // Write displayed image back to CoppeliaSim:
+        cv::cvtColor(cedge, cedge, cv::COLOR_BGR2RGB);
+        cv::flip(cedge, cedge, 0);
+        client.call("sim.setVisionSensorCharImage", {passiveVisionSensorHandle, bin(cedge)});
 
         // Wait for a key stroke; the same function arranges events processing:
         auto key = cv::waitKey(0) & 0xFF;
