@@ -22,8 +22,8 @@ passiveVisionSensorHandle = sim.getObjectHandle('/PassiveVisionSensor')
 client.setstepping(True)
 sim.startSimulation()
 
-startTime = time.time()
-while time.time() - startTime < 5:
+startTime = sim.getSimulationTime()
+while sim.getSimulationTime() - startTime < 5:
     img, resX, resY = sim.getVisionSensorCharImage(visionSensorHandle)
     sim.setVisionSensorCharImage(passiveVisionSensorHandle, img)
     client.step()
