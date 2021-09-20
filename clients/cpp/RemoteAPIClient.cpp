@@ -69,6 +69,11 @@ json RemoteAPIClient::getObject(const std::string &name)
     return call("zmqRemoteApi.info", json(json_array_arg, {name}));
 }
 
+void RemoteAPIClient::setVerbose(bool enable)
+{
+    verbose = enable;
+}
+
 void RemoteAPIClient::setStepping(bool enable)
 {
     callAddOn("setStepping", json(json_array_arg, {enable}));

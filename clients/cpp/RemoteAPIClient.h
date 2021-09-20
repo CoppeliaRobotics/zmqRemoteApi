@@ -23,6 +23,7 @@ public:
     json call(const std::string &func, std::initializer_list<json> args);
     json call(const std::string &func, const json &args = json(json_array_arg));
     json getObject(const std::string &name);
+    void setVerbose(bool enable = true);
     void setStepping(bool enable = true);
     void step();
 
