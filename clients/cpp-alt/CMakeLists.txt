@@ -38,3 +38,11 @@ target_link_libraries(example PRIVATE RemoteAPIClient)
 
 add_executable(synchronousImageTransmission synchronousImageTransmission.cpp)
 target_link_libraries(synchronousImageTransmission PRIVATE RemoteAPIClient)
+
+find_package(OpenCV COMPONENTS core imgproc highgui)
+if(OpenCV_FOUND)
+    add_executable(opencv opencv.cpp)
+    target_include_directories(opencv PRIVATE ${OpenCV_INCLUDE_DIRS})
+    target_link_libraries(opencv PRIVATE RemoteAPIClient)
+    target_link_libraries(opencv PRIVATE ${OpenCV_LIBS})
+endif()
