@@ -19,15 +19,16 @@ json bin(const std::vector<uint8_t> &v);
 class RemoteAPIClient
 {
 public:
-    RemoteAPIClient(const std::string host = "localhost", const int port = 23000, bool verbose_ = false);
+    RemoteAPIClient(const std::string host = "localhost", int rpcPort = 23000, int cntPort = -1, bool verbose_ = false);
     json call(const std::string &func, std::initializer_list<json> args);
     json call(const std::string &func, const json &args = json(json_array_arg));
     json getObject(const std::string &name);
     void setVerbose(bool enable = true);
     void setStepping(bool enable = true);
-    void step();
+    void step(bool wait = true);
 
 protected:
+    long getStepCount(bool wait);
     void send(const json &j);
     json recv();
     json callAddOn(const std::string &func, const json &args = json(json_array_arg));
@@ -35,5 +36,6 @@ protected:
 private:
     bool verbose{false};
     zmq::context_t ctx;
-    zmq::socket_t sock;
+    zmq::socket_t rpcSocket;
+    zmq::socket_t cntSocket;
 };

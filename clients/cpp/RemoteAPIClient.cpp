@@ -31,12 +31,21 @@ json bin(const std::vector<uint8_t> &v)
     return json{byte_string_arg, v};
 }
 
-RemoteAPIClient::RemoteAPIClient(const std::string host, const int port, bool verbose_)
-    : sock(ctx, zmq::socket_type::req),
+RemoteAPIClient::RemoteAPIClient(const std::string host, int rpcPort, int cntPort, bool verbose_)
+    : rpcSocket(ctx, zmq::socket_type::req),
+      cntSocket(ctx, zmq::socket_type::sub),
       verbose(verbose_)
 {
-    auto addr = (boost::format("tcp://%s:%d") % host % port).str();
-    sock.connect(addr);
+    if(cntPort == -1)
+        cntPort = rpcPort + 1;
+
+    auto rpcAddr = (boost::format("tcp://%s:%d") % host % rpcPort).str();
+    rpcSocket.connect(rpcAddr);
+
+    auto cntAddr = (boost::format("tcp://%s:%d") % host % cntPort).str();
+    cntSocket.set(zmq::sockopt::subscribe, "");
+    cntSocket.set(zmq::sockopt::conflate, 1);
+    cntSocket.connect(cntAddr);
 }
 
 json RemoteAPIClient::call(const std::string &func, std::initializer_list<json> args)
@@ -79,9 +88,25 @@ void RemoteAPIClient::setStepping(bool enable)
     callAddOn("setStepping", json(json_array_arg, {enable}));
 }
 
-void RemoteAPIClient::step()
+void RemoteAPIClient::step(bool wait)
 {
+    if(wait) getStepCount(false);
     callAddOn("step");
+    if(wait) getStepCount(true);
+}
+
+long RemoteAPIClient::getStepCount(bool wait)
+{
+    zmq::message_t msg;
+    if(!cntSocket.recv(msg, wait ? zmq::recv_flags::none : zmq::recv_flags::dontwait))
+        return -1;
+
+    auto c = reinterpret_cast<const int*>(msg.data())[0];
+
+    if(verbose)
+        std::cout << "Step count: " << c << std::endl;
+
+    return c;
 }
 
 void RemoteAPIClient::send(const json &j)
@@ -93,13 +118,13 @@ void RemoteAPIClient::send(const json &j)
     cbor::encode_cbor(j, data);
 
     zmq::message_t msg(data.data(), data.size());
-    sock.send(msg, zmq::send_flags::dontwait);
+    rpcSocket.send(msg, zmq::send_flags::dontwait);
 }
 
 json RemoteAPIClient::recv()
 {
     zmq::message_t msg;
-    sock.recv(msg);
+    rpcSocket.recv(msg);
 
     auto data = reinterpret_cast<const uint8_t*>(msg.data());
     json j = cbor::decode_cbor<json>(data, data + msg.size());
