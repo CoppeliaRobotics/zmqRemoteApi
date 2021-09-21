@@ -115,22 +115,15 @@ class RemoteAPIClient:
         return await self.callAddOn('setStepping', enable)
 
     async def step(self, *, wait=True):
-        async def hasnewstepcount():
-            poller = zmq.asyncio.Poller()
-            poller.register(self.cntsocket, zmq.POLLIN)
-            socks = dict(await poller.poll(0))
-            b = self.cntsocket in socks and socks[self.cntsocket] == zmq.POLLIN
-            return b
-
-        async def getstepcount():
-            import struct
-            return struct.unpack('i', await self.cntsocket.recv())[0]
-
-        if wait and await hasnewstepcount():
-            await getstepcount()
+        await self.getStepCount(False)
         await self.callAddOn('step')
-        if wait:
-            await getstepcount()
+        await self.getStepCount(wait)
+
+    async def getStepCount(self, wait):
+        try:
+            await self.cntsocket.recv(0 if wait else zmq.NOBLOCK)
+        except zmq.ZMQError:
+            pass
 
 
 async def main():
