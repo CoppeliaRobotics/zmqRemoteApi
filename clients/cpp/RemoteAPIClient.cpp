@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 #include <boost/format.hpp>
+#include <boost/optional.hpp>
 
 std::string str(const json& j)
 {
@@ -137,12 +138,17 @@ json RemoteAPIClient::recv()
 
 json RemoteAPIClient::callAddOn(const std::string &func, const json &args)
 {
-    auto r = call("zmqRemoteApi.info", json(json_array_arg, {"sim_scripttype_addonscript"}));
-    auto sim_scripttype_addonscript = r[0];
+    static boost::optional<int> sim_scripttype_addonscript;
+
+    if(!sim_scripttype_addonscript)
+    {
+        auto r = call("zmqRemoteApi.info", json(json_array_arg, {"sim_scripttype_addonscript"}));
+        sim_scripttype_addonscript = r[0].as<int>();
+    }
 
     auto args1 = json(json_array_arg, {
         (boost::format("%s@ZMQ remote API") % func).str(),
-        sim_scripttype_addonscript,
+        *sim_scripttype_addonscript,
     });
     for(size_t i = 0; i < args.size(); i++)
         args1.push_back(args[i]);
