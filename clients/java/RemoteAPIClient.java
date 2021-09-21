@@ -14,12 +14,20 @@ public class RemoteAPIClient
 
     public RemoteAPIClient(String host, int port)
     {
-        this(host, port, false);
+        this(host, port, -1);
     }
 
-    public RemoteAPIClient(String host, int port, boolean verbose)
+    public RemoteAPIClient(String host, int port, int verbose)
     {
         this.verbose = verbose;
+        if(this.verbose == -1)
+        {
+            String verboseStr = System.getenv("VERBOSE");
+            if(verboseStr != null)
+                this.verbose = Integer.parseInt(verboseStr);
+            else
+                this.verbose = 0;
+        }
         this.context = new ZContext(1);
         this.socket = context.createSocket(SocketType.REQ);
         this.socket.connect("tcp://localhost:23000");
@@ -44,14 +52,14 @@ public class RemoteAPIClient
             args.put(_args[i]);
         req.put("args", args);
 
-        if(this.verbose)
+        if(this.verbose > 0)
             System.out.println("Sending: " + req.toString());
 
         this.send(req);
 
         JSONObject rep = this.recv();
 
-        if(this.verbose)
+        if(this.verbose > 0)
             System.out.println("Received: " + rep.toString());
 
         if(rep.getBoolean("success") == false)
@@ -65,7 +73,7 @@ public class RemoteAPIClient
         return (JSONArray)rep.get("ret");
     }
 
-    private boolean verbose = false;
+    private int verbose = -1;
     ZContext context;
     ZMQ.Socket socket;
 }

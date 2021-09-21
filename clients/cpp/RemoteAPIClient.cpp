@@ -2,6 +2,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <cstdlib>
 #include <boost/format.hpp>
 #include <boost/optional.hpp>
 
@@ -32,11 +33,19 @@ json bin(const std::vector<uint8_t> &v)
     return json{byte_string_arg, v};
 }
 
-RemoteAPIClient::RemoteAPIClient(const std::string host, int rpcPort, int cntPort, bool verbose_)
+RemoteAPIClient::RemoteAPIClient(const std::string host, int rpcPort, int cntPort, int verbose_)
     : rpcSocket(ctx, zmq::socket_type::req),
       cntSocket(ctx, zmq::socket_type::sub),
       verbose(verbose_)
 {
+    if(verbose == -1)
+    {
+        if(const char* verboseStr = std::getenv("VERBOSE"))
+            verbose = std::atoi(verboseStr);
+        else
+            verbose = 0;
+    }
+
     if(cntPort == -1)
         cntPort = rpcPort + 1;
 
@@ -79,9 +88,9 @@ json RemoteAPIClient::getObject(const std::string &name)
     return call("zmqRemoteApi.info", json(json_array_arg, {name}));
 }
 
-void RemoteAPIClient::setVerbose(bool enable)
+void RemoteAPIClient::setVerbose(int level)
 {
-    verbose = enable;
+    verbose = level;
 }
 
 void RemoteAPIClient::setStepping(bool enable)
@@ -104,7 +113,7 @@ long RemoteAPIClient::getStepCount(bool wait)
 
     auto c = reinterpret_cast<const int*>(msg.data())[0];
 
-    if(verbose)
+    if(verbose > 0)
         std::cout << "Step count: " << c << std::endl;
 
     return c;
@@ -112,7 +121,7 @@ long RemoteAPIClient::getStepCount(bool wait)
 
 void RemoteAPIClient::send(const json &j)
 {
-    if(verbose)
+    if(verbose > 0)
         std::cout << "Sending: " << pretty_print(j) << std::endl;
 
     std::vector<uint8_t> data;
@@ -130,7 +139,7 @@ json RemoteAPIClient::recv()
     auto data = reinterpret_cast<const uint8_t*>(msg.data());
     json j = cbor::decode_cbor<json>(data, data + msg.size());
 
-    if(verbose)
+    if(verbose > 0)
         std::cout << "Received: " << pretty_print(j) << std::endl;
 
     return j;

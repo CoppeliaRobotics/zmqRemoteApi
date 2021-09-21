@@ -1,5 +1,7 @@
 """CoppeliaSim's Remote API client."""
 
+import os
+
 from time import sleep
 
 import cbor
@@ -15,12 +17,12 @@ def b64(b):
 class RemoteAPIClient:
     """Client to connect to CoppeliaSim's ZMQ Remote API."""
 
-    def __init__(self, host='localhost', port=23000, cntport=None, *, verbose=False):
+    def __init__(self, host='localhost', port=23000, cntport=None, *, verbose=None):
         """Create client and connect to the ZMQ Remote API server."""
+        self.verbose = int(os.environ.get('VERBOSE', '0')) if verbose is None else verbose
         self.context = zmq.Context()
         self.socket = self.context.socket(zmq.REQ)
         self.cntsocket = self.context.socket(zmq.SUB)
-        self.verbose = verbose
         self.socket.connect(f'tcp://{host}:{port}')
         self.cntsocket.setsockopt(zmq.SUBSCRIBE, b'')
         self.cntsocket.setsockopt(zmq.CONFLATE, 1)
@@ -32,23 +34,24 @@ class RemoteAPIClient:
         self.cntsocket.close()
         self.context.term()
 
-    def call(self, func, args, *, verbose=None):
-        """Call function with specified arguments."""
-        if verbose is None:
-            verbose = self.verbose
-        req = {'func': func, 'args': args}
-        if verbose:
+    def _send(self, req):
+        if self.verbose > 0:
             print('Sending:', req)
         rawReq = cbor.dumps(req)
-        if verbose:
+        if self.verbose > 1:
             print(f'Sending raw len={len(rawReq)}, base64={b64(rawReq)}')
         self.socket.send(rawReq)
+
+    def _recv(self):
         rawResp = self.socket.recv()
-        if verbose:
+        if self.verbose > 1:
             print(f'Received raw len={len(rawResp)}, base64={b64(rawResp)}')
         resp = cbor.loads(rawResp)
-        if verbose:
+        if self.verbose > 0:
             print('Received:', resp)
+        return resp
+
+    def _process_response(self, resp):
         if not resp.get('success', False):
             raise Exception(resp.get('error'))
         ret = resp['ret']
@@ -56,6 +59,11 @@ class RemoteAPIClient:
             return ret[0]
         if len(ret) > 1:
             return tuple(ret)
+
+    def call(self, func, args):
+        """Call function with specified arguments."""
+        self._send({'func': func, 'args': args})
+        return self._process_response(self._recv())
 
     def getObject(self, name, _info=None):
         """Retrieve remote object from server."""
@@ -88,18 +96,9 @@ class RemoteAPIClient:
             pass
 
 
-if __name__ in ('__main__', '__console__'):
+if __name__ == '__console__':
     client = RemoteAPIClient()
     sim = client.getObject('sim')
-if __name__ in ('__main__',):
-    print(sim.getObjectHandle('Floor'))
-    print(sim.unpackTable(sim.packTable({'a': 1, 'b': 2})))
-    handles = [sim.createDummy(0.01, 12 * [0]) for _ in range(50)]
-    for i, h in enumerate(handles):
-        sim.setObjectPosition(h, -1, [0.01 * i, 0.01 * i, 0.01 * i])
-    sleep(10)
-    for h in handles:
-        sim.removeObject(h)
 
 
 __all__ = ['RemoteAPIClient']

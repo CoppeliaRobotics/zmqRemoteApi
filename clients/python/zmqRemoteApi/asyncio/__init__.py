@@ -2,6 +2,9 @@
 
 import asyncio
 import sys
+import os
+
+from contextlib import contextmanager
 
 import cbor
 
@@ -29,9 +32,9 @@ def b64(b):
 class RemoteAPIClient:
     """Client to connect to CoppeliaSim's ZMQ Remote API."""
 
-    def __init__(self, host='localhost', port=23000, cntport=None, *, verbose=False):
+    def __init__(self, host='localhost', port=23000, cntport=None, *, verbose=None):
         """Create client and connect to the ZMQ Remote API server."""
-        self.verbose = verbose
+        self.verbose = int(os.environ.get('VERBOSE', '0')) if verbose is None else verbose
         self.host, self.port, self.cntport = host, port, cntport or port + 1
         self.cntsocket = None
         # multiple sockets will be created for multiple concurrent requests, as needed
@@ -44,7 +47,6 @@ class RemoteAPIClient:
         self.cntsocket.setsockopt(zmq.SUBSCRIBE, b'')
         self.cntsocket.setsockopt(zmq.CONFLATE, 1)
         self.cntsocket.connect(f'tcp://{self.host}:{self.cntport}')
-        self._add_socket()
         return self
 
     async def __aexit__(self, *excinfo):
@@ -54,33 +56,40 @@ class RemoteAPIClient:
         self.cntsocket.close()
         self.context.term()
 
-    def _add_socket(self):
-        socket = self.context.socket(zmq.REQ)
-        socket.connect(f'tcp://{self.host}:{self.port}')
-        self.sockets.append(socket)
-        return socket
-
-    async def call(self, func, args, *, verbose=None):
-        """Call function with specified arguments."""
-        if verbose is None:
-            verbose = self.verbose
-        req = {'func': func, 'args': args}
-        if verbose:
-            print('Sending:', req)
+    @contextmanager
+    def _socket(self):
         if not self.sockets:
-            socket = self._add_socket()
-        socket = self.sockets.pop()
+            socket = self.context.socket(zmq.REQ)
+            socket.connect(f'tcp://{self.host}:{self.port}')
+            if self.verbose > 0:
+                print('Added a new socket:', socket)
+        else:
+            socket = self.sockets.pop()
+            if self.verbose > 0:
+                print('Reusing existing socket:', socket)
+        try:
+            yield socket
+        finally:
+            self.sockets.append(socket)
+
+    async def _send(self, socket, req):
+        if self.verbose > 0:
+            print('Sending:', req, socket)
         rawReq = cbor.dumps(req)
-        if verbose:
+        if self.verbose > 1:
             print(f'Sending raw len={len(rawReq)}, base64={b64(rawReq)}')
         await socket.send(rawReq)
+
+    async def _recv(self, socket):
         rawResp = await socket.recv()
-        if verbose:
+        if self.verbose > 1:
             print(f'Received raw len={len(rawResp)}, base64={b64(rawResp)}')
         resp = cbor.loads(rawResp)
-        self.sockets.append(socket)
-        if verbose:
-            print('Received:', resp)
+        if self.verbose > 0:
+            print('Received:', resp, socket)
+        return resp
+
+    def _process_response(self, resp):
         if not resp.get('success', False):
             raise Exception(resp.get('error'))
         ret = resp['ret']
@@ -88,6 +97,12 @@ class RemoteAPIClient:
             return ret[0]
         if len(ret) > 1:
             return tuple(ret)
+
+    async def call(self, func, args):
+        """Call function with specified arguments."""
+        with self._socket() as socket:
+            await self._send(socket, {'func': func, 'args': args})
+            return self._process_response(await self._recv(socket))
 
     async def getObject(self, name, _info=None):
         """Retrieve remote object from server."""
@@ -118,22 +133,6 @@ class RemoteAPIClient:
             await self.cntsocket.recv(0 if wait else zmq.NOBLOCK)
         except zmq.ZMQError:
             pass
-
-
-async def main():
-    """Test basic usage."""
-    async with RemoteAPIClient() as client:
-        sim = await client.getObject('sim')
-        print(await sim.getObjectHandle('Floor'))
-        print(await sim.unpackTable(await sim.packTable({'a': 1, 'b': 2})))
-        handles = await asyncio.gather(*[sim.createDummy(0.01, 12 * [0]) for _ in range(50)])
-        await asyncio.gather(*[sim.setObjectPosition(h, -1, [0.01 * i, 0.01 * i, 0.01 * i]) for i, h in enumerate(handles)])
-        await asyncio.sleep(10)
-        await asyncio.gather(*[sim.removeObject(h) for h in handles])
-
-
-if __name__ in ('__main__',):
-    asyncio.run(main())
 
 
 __all__ = ['RemoteAPIClient']
