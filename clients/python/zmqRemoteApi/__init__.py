@@ -25,7 +25,6 @@ class RemoteAPIClient:
         self.cntsocket.setsockopt(zmq.SUBSCRIBE, b'')
         self.cntsocket.setsockopt(zmq.CONFLATE, 1)
         self.cntsocket.connect(f'tcp://{host}:{cntport if cntport else port+1}')
-        self.sim = None
 
     def __del__(self):
         """Disconnect and destroy client."""
@@ -74,17 +73,12 @@ class RemoteAPIClient:
                 setattr(ret, k, self.getObject(f'{name}.{k}', _info=v))
         return ret
 
-    def callAddOn(self, func, *args):
-        if self.sim is None:
-            self.sim = self.getObject('sim')
-        return self.sim.callScriptFunction(f'{func}@ZMQ remote API', self.sim.scripttype_addonscript, *args)
-
     def setStepping(self, enable=True):
-        return self.callAddOn('setStepping', enable)
+        return self.call('setStepping', [enable])
 
     def step(self, *, wait=True):
         self.getStepCount(False)
-        self.callAddOn('step')
+        self.call('step', [])
         self.getStepCount(wait)
 
     def getStepCount(self, wait):

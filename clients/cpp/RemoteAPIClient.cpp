@@ -86,13 +86,13 @@ void RemoteAPIClient::setVerbose(bool enable)
 
 void RemoteAPIClient::setStepping(bool enable)
 {
-    callAddOn("setStepping", json(json_array_arg, {enable}));
+    call("setStepping", {enable});
 }
 
 void RemoteAPIClient::step(bool wait)
 {
     if(wait) getStepCount(false);
-    callAddOn("step");
+    call("step");
     if(wait) getStepCount(true);
 }
 
@@ -134,24 +134,4 @@ json RemoteAPIClient::recv()
         std::cout << "Received: " << pretty_print(j) << std::endl;
 
     return j;
-}
-
-json RemoteAPIClient::callAddOn(const std::string &func, const json &args)
-{
-    static boost::optional<int> sim_scripttype_addonscript;
-
-    if(!sim_scripttype_addonscript)
-    {
-        auto r = call("zmqRemoteApi.info", json(json_array_arg, {"sim_scripttype_addonscript"}));
-        sim_scripttype_addonscript = r[0].as<int>();
-    }
-
-    auto args1 = json(json_array_arg, {
-        (boost::format("%s@ZMQ remote API") % func).str(),
-        *sim_scripttype_addonscript,
-    });
-    for(size_t i = 0; i < args.size(); i++)
-        args1.push_back(args[i]);
-
-    return call("sim.callScriptFunction", args1);
 }

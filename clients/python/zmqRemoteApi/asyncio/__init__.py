@@ -36,7 +36,6 @@ class RemoteAPIClient:
         self.cntsocket = None
         # multiple sockets will be created for multiple concurrent requests, as needed
         self.sockets = []
-        self.sim = None
 
     async def __aenter__(self):
         """Add one socket to the pool."""
@@ -106,17 +105,12 @@ class RemoteAPIClient:
                 setattr(ret, k, self.getObject(f'{name}.{k}', _info=v))
         return ret
 
-    async def callAddOn(self, func, *args):
-        if self.sim is None:
-            self.sim = await self.getObject('sim')
-        return await self.sim.callScriptFunction(f'{func}@ZMQ remote API', self.sim.scripttype_addonscript, *args)
-
     async def setStepping(self, enable=True):
-        return await self.callAddOn('setStepping', enable)
+        return await self.call('setStepping', [enable])
 
     async def step(self, *, wait=True):
         await self.getStepCount(False)
-        await self.callAddOn('step')
+        await self.call('step', [])
         await self.getStepCount(wait)
 
     async def getStepCount(self, wait):

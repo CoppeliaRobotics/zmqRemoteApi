@@ -31,7 +31,6 @@ protected:
     long getStepCount(bool wait);
     void send(const json &j);
     json recv();
-    json callAddOn(const std::string &func, const json &args = json(json_array_arg));
 
 private:
     bool verbose{false};
