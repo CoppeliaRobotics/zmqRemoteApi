@@ -1,0 +1,32 @@
+<html>
+    <head>
+        <script src="https://cdn.socket.io/4.1.2/socket.io.min.js" integrity="sha384-toS6mmwu70G0fw54EGlWWeA4z3dyJ+dlXBtSURSKN4vyRFOcxd3Bzjj/AoOwY+Rg" crossorigin="anonymous"></script>
+        <script type="text/javascript">
+            var socket = io('ws://127.0.0.1:8080');
+            socket.on('error', console.error.bind(console));
+            socket.on('message', console.log.bind(console));
+            function send() {
+                var req = document.getElementById("req").value;
+                socket.send(req, function(rep) {
+                    document.getElementById("rep").value = JSON.stringify(JSON.parse(rep),null,4);
+                });
+            }
+        </script>
+        <style type="text/css">
+        textarea {
+            width: 100%;
+            height: 40%;
+        }
+        </style>
+    </head>
+    <body>
+        Request:<br/>
+        <textarea id="req">{
+    "func": "",
+    "args": []
+}</textarea><br/>
+        <input type="button" value="Send" onclick="send()" /><br/>
+        Reply:<br/>
+        <textarea id="rep" readonly></textarea><br/>
+    </body>
+</html>
