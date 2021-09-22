@@ -34,15 +34,18 @@ function zmqRemoteApi.handleRequest(req)
         print('request received:',req)
     end
     local resp={}
-    local func,args=zmqRemoteApi.getField(req['func']),req['args']
-    if not func then
-        resp['error']='No such function: '..req['func']
-    else
-        local status,retvals=pcall(function()
-            local ret={func(unpack(args))}
-            return ret
-        end)
-        resp[status and 'ret' or 'error']=retvals
+    if req['func']~=nil and req['func']~='' then
+        local func=zmqRemoteApi.getField(req['func'])
+        local args=req['args'] or {}
+        if not func then
+            resp['error']='No such function: '..req['func']
+        else
+            local status,retvals=pcall(function()
+                local ret={func(unpack(args))}
+                return ret
+            end)
+            resp[status and 'ret' or 'error']=retvals
+        end
     end
     resp['success']=resp['error']==nil
     if zmqRemoteApi.verbose()>1 then
