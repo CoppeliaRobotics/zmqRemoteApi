@@ -54,8 +54,8 @@ end
 function zmqRemoteApi.handleRawMessage(rawReq)
     -- if first byte is '{', it *might* be a JSON payload
     if rawReq:byte(1)==123 then
-        local status,req=pcall(json.decode,rawReq)
-        if status then
+        local req,ln,err=json.decode(rawReq)
+        if req~=nil then
             local resp=zmqRemoteApi.handleRequest(req)
             return json.encode(resp)
         end
