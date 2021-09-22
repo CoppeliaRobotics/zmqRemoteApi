@@ -46,6 +46,12 @@ function zmqRemoteApi.handleRequest(req)
             end)
             resp[status and 'ret' or 'error']=retvals
         end
+    elseif req['eval']~=nil and req['eval']~='' then
+        local status,retvals=pcall(function()
+            local ret={loadstring('return '..req['eval'])()}
+            return ret
+        end)
+        resp[status and 'ret' or 'error']=retvals
     end
     resp['success']=resp['error']==nil
     if zmqRemoteApi.verbose()>1 then
