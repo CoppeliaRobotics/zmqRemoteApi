@@ -127,6 +127,14 @@ void RemoteAPIClient::send(const json &j)
     std::vector<uint8_t> data;
     cbor::encode_cbor(j, data);
 
+    if(verbose > 1)
+    {
+        std::cout << "Sending (raw):";
+        for(size_t i = 0; i < data.size(); i++)
+            std::cout << " " << std::hex << std::setw(2) << std::setfill('0') << int(data[i]);
+        std::cout << std::endl;
+    }
+
     zmq::message_t msg(data.data(), data.size());
     rpcSocket.send(msg, zmq::send_flags::dontwait);
 }
@@ -137,6 +145,15 @@ json RemoteAPIClient::recv()
     rpcSocket.recv(msg);
 
     auto data = reinterpret_cast<const uint8_t*>(msg.data());
+
+    if(verbose > 1)
+    {
+        std::cout << "Received (raw):";
+        for(size_t i = 0; i < msg.size(); i++)
+            std::cout << " " << std::hex << std::setw(2) << std::setfill('0') << int(data[i]);
+        std::cout << std::endl;
+    }
+
     json j = cbor::decode_cbor<json>(data, data + msg.size());
 
     if(verbose > 0)
