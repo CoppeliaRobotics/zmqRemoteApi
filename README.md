@@ -2,6 +2,21 @@
 
 The ZeroMQ Remote API requires the [ZeroMQ plugin](https://github.com/CoppeliaRobotics/simExtZeroMQ).
 
+### Table of contents
+
+ - [Compiling](#compiling)
+ - [Protocol](#protocol)
+     - [Request](#request)
+     - [Response](#response)
+ - [Clients](#clients)
+     - [Python](#python-client)
+     - [Python-asyncio](#python-asyncio-client)
+     - [C++](#c-client)
+     - [Java](#java-client)
+     - [MATLAB](#matlab-client)
+     - [HTML/JavaScript](#htmljavascript-web-browser-client)
+
+
 ### Compiling
 
 1. Install required packages for [libPlugin](https://github.com/CoppeliaRobotics/libPlugin): see libPlugin's [README](external/libPlugin/README.md)
@@ -15,13 +30,13 @@ $ cmake --build .
 $ cmake --install .
 ```
 
-### Usage
+### Protocol
 
-Connect a `REQ` socket to the endpoint (by default the API server will listen to `tcp://*:23000`), send a message (see [request](#request) below), and read the response (see [response](#response) below). The request and response can be serialized to [JSON](https://www.json.org) or [CBOR](https://cbor.io). The response will be serialized using the same serialization format used in the request.
+Connect a [`REQ`](https://zeromq.org/socket-api/#req-socket) socket to the endpoint (by default the ZMQ remote API server will listen to `tcp://*:23000`), send a message (see [request](#request) below), and read the response (see [response](#response) below). The request and response can be serialized to [JSON](https://www.json.org) or [CBOR](https://cbor.io). The response will be serialized using the same serialization format used in the request.
 
 Example implementation for some languages are available in the [clients](tree/master/clients) directory.
 
-### Request
+#### Request
 
 A request is an object with fields:
 - `func` (string) the function name to call;
@@ -36,7 +51,7 @@ Example:
 }
 ```
 
-### Response
+#### Response
 
 A response is an object with fields:
 - `success` (boolean) `true` if the call succeeded, in which case the `ret` field will be set, or `false` if the call failed, in which case the `error` field will be set;
@@ -83,6 +98,8 @@ h = sim.getObjectHandle('Floor')
 print(h)
 ```
 
+Check out the examples in [`clients/python`](clients/python).
+
 #### Python asyncio client
 
 Normal `asyncio` principles apply. All methods are async.
@@ -109,3 +126,65 @@ If performing many commands in one shot, and results will be used later, conside
 ```python
     handles = await asyncio.gather(*[sim.getObjectHandle(f'Object{i+1}') for i in range(100)])
 ```
+
+Check out the examples in [`clients/python`](clients/python).
+
+#### C++ client
+
+```cpp
+#include "RemoteAPIClient.h"
+#include <iostream>
+
+int main()
+{
+    RemoteAPIClient client;
+
+    auto ret = client.call("sim.getObjectHandle", {"Floor"});
+    int handle = ret[0];
+
+    return 0;
+}
+```
+
+Check out the examples in [`clients/cpp`](clients/cpp).
+
+#### Java client
+
+```java
+RemoteAPIClient client = new RemoteAPIClient();
+JSONArray ret = client.call("sim.getObjectHandle", "Floor");
+int handle = ret.get(0);
+```
+
+Check out the examples in [`clients/java`](clients/java).
+
+#### MATLAB client
+
+```matlab
+client = RemoteAPIClient();
+ret = client.call('sim.getObjectHandle', {'Floor'})
+```
+
+Check out the examples in [`clients/matlab`](clients/matlab).
+
+#### HTML/JavaScript (web browser) client
+
+(Experimental)
+
+Since there is no way to talk to ZMQ sockets directly from a web-browser's JavaScript engine, a bridge from socket.io to ZMQ remote API server is required to be running.
+
+Start the bridge via:
+
+```bash
+python3 bridge.py
+```
+
+which by default connects to localhost port 23000. To connect to a different ZMQ remote API server endpoint, use `--host` and/or `--port` options, e.g.:
+
+```bash
+python3 bridge.py --host 10.0.1.3 --port 10563
+```
+
+then open the url [`http://127.0.0.1:8080`](http://127.0.0.1:8080) with the web-browser: page `index.html` from the same directory will be served.
+
+Have a look at [`index.html`](clients/html/index.html)'s JavaScript code.
