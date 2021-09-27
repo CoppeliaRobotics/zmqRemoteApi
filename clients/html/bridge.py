@@ -4,12 +4,12 @@ import zmq
 import argparse
 
 parser = argparse.ArgumentParser(description='ZMQ Remote API bridge for socket.io clients.')
-parser.add_argument('--host', '-H', type=str, default='localhost',
+parser.add_argument('-H', '--host', type=str, default='localhost',
                     help='hostname to connect to (defaults to localhost)')
-parser.add_argument('--port', '-P', type=int, default=23000,
+parser.add_argument('-P', '--port', type=int, default=23000,
                     help='port to connect to (defaults to 23000)')
-parser.add_argument('--verbose', '-V', action='store_true',
-                    help='port to connect to (defaults to 23000)')
+parser.add_argument('-V', '--verbose', action='store_true',
+                    help='print data being exchanged and other debug informations')
 args = parser.parse_args()
 
 sio = socketio.AsyncServer()
