@@ -76,7 +76,7 @@ import zmqRemoteApi
 client = RemoteAPIClient()
 
 # get a remote object:
-sim = client.getobject('sim')
+sim = client.getObject('sim')
 
 # call API function:
 h = sim.getObjectHandle('Floor')
@@ -90,7 +90,7 @@ Normal `asyncio` principles apply. All methods are async.
 ```python
 async def main():
     async with RemoteAPIClient() as client:
-        sim = await client.getobject('sim')
+        sim = await client.getObject('sim')
         h = await sim.getObjectHandle('Floor')
         print(h)
 
