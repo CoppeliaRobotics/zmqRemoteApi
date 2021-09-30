@@ -110,7 +110,7 @@ function zmqRemoteApi.publishStepCount()
 end
 
 function sysCall_info()
-    return {autoStart=true,menu='Connectivity//ZMQ remote API'}
+    return {autoStart=true,menu='Connectivity//ZMQ remote API server'}
 end
 
 function sysCall_init()
