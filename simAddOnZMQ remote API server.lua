@@ -122,7 +122,7 @@ function sysCall_init()
     rpcPort=tonumber(sim.getStringNamedParam('zmqRemoteApi.rpcPort') or '23000')
     cntPort=tonumber(sim.getStringNamedParam('zmqRemoteApi.cntPort') or (rpcPort+1))
     if zmqRemoteApi.verbose()>0 then
-        sim.addLog(sim.verbosity_scriptinfos,string.format('ZeroMQ Remote API starting (rpcPort=%d, cntPort=%d)...',rpcPort,cntPort))
+        sim.addLog(sim.verbosity_scriptinfos,string.format('ZeroMQ Remote API server starting (rpcPort=%d, cntPort=%d)...',rpcPort,cntPort))
     end
     json=require 'dkjson'
     cbor=require 'cbor'
@@ -133,7 +133,7 @@ function sysCall_init()
     simZMQ.setsockopt(cntSocket,simZMQ.CONFLATE,sim.packUInt32Table{1})
     simZMQ.bind(cntSocket,string.format('tcp://*:%d',cntPort))
     if zmqRemoteApi.verbose()>0 then
-        sim.addLog(sim.verbosity_scriptinfos,'ZeroMQ Remote API started')
+        sim.addLog(sim.verbosity_scriptinfos,'ZeroMQ Remote API server started')
     end
     stepping=false
 end
@@ -144,7 +144,7 @@ function sysCall_cleanup()
     simZMQ.close(rpcSocket)
     simZMQ.ctx_term(context)
     if zmqRemoteApi.verbose()>0 then
-        sim.addLog(sim.verbosity_scriptinfos,'ZeroMQ Remote API stopped')
+        sim.addLog(sim.verbosity_scriptinfos,'ZeroMQ Remote API server stopped')
     end
 end
 
