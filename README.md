@@ -169,22 +169,6 @@ Check out the examples in [`clients/matlab`](clients/matlab).
 
 #### HTML/JavaScript (web browser) client
 
-(Experimental)
+ZeroMQ is not available for web browsers.
 
-Since there is no way to talk to ZMQ sockets directly from a web-browser's JavaScript engine, a bridge from socket.io to ZMQ remote API server is required to be running.
-
-Start the bridge via:
-
-```bash
-python3 bridge.py
-```
-
-which by default connects to localhost port 23000. To connect to a different ZMQ remote API server endpoint, use `--host` and/or `--port` options, e.g.:
-
-```bash
-python3 bridge.py --host 10.0.1.3 --port 10563
-```
-
-then open the url [`http://127.0.0.1:8080`](http://127.0.0.1:8080) with the web-browser: page `index.html` from the same directory will be served.
-
-Have a look at [`index.html`](clients/html/index.html)'s JavaScript code.
+See [wsRemoteApi](https://github.com/CoppeliaRobotics/wsRemoteApi) instead.
