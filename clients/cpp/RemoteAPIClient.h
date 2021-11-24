@@ -34,6 +34,7 @@ protected:
 
 private:
     int verbose{0};
+    std::string uuid;
     zmq::context_t ctx;
     zmq::socket_t rpcSocket;
     zmq::socket_t cntSocket;

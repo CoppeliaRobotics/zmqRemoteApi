@@ -3,6 +3,7 @@
 import asyncio
 import sys
 import os
+import uuid
 
 from contextlib import contextmanager
 
@@ -37,6 +38,7 @@ class RemoteAPIClient:
         self.verbose = int(os.environ.get('VERBOSE', '0')) if verbose is None else verbose
         self.host, self.port, self.cntport = host, port, cntport or port + 1
         self.cntsocket = None
+        self.uuid=str(uuid.uuid4())
         # multiple sockets will be created for multiple concurrent requests, as needed
         self.sockets = []
 
@@ -121,11 +123,11 @@ class RemoteAPIClient:
         return ret
 
     async def setStepping(self, enable=True):
-        return await self.call('setStepping', [enable])
+        return await self.call('setStepping', [enable,self.uuid])
 
     async def step(self, *, wait=True):
         await self.getStepCount(False)
-        await self.call('step', [])
+        await self.call('step', [self.uuid])
         await self.getStepCount(wait)
 
     async def getStepCount(self, wait):

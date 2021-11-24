@@ -135,7 +135,9 @@ function sysCall_init()
     if zmqRemoteApi.verbose()>0 then
         sim.addLog(sim.verbosity_scriptinfos,'ZeroMQ Remote API server started')
     end
-    stepping=false
+    simulationTimeStepCount=0
+    steppingClients={}
+    steppedClients={}
 end
 
 function sysCall_cleanup()
@@ -157,15 +159,25 @@ function sysCall_addOnScriptSuspended()
 end
 
 function sysCall_nonSimulation()
+    zmqRemoteApi.publishStepCount() -- so that the last client.step(True) doesn't block
     zmqRemoteApi.handleQueue()
 end
 
 function sysCall_beforeMainScript()
     zmqRemoteApi.handleQueue()
     local outData
-    if stepping then
-        outData={doNotRunMainScript=not go}
-        go=nil
+    if next(steppingClients)~=nil then
+        local canStep=true
+        for uuid,v in pairs(steppingClients) do
+            if steppedClients[uuid]==nil then
+                canStep=false
+                break
+            end
+        end
+        outData={doNotRunMainScript=(not canStep)}
+        if canStep then
+            steppedClients={}
+        end
     end
     return outData
 end
@@ -181,14 +193,25 @@ function sysCall_actuation()
 end
 
 function sysCall_afterSimulation()
-    stepping=false -- auto disable sync. mode
+    steppingClients={} 
+    steppedClients={}
 end
 
-function setStepping(enable)
-    stepping=enable
-    go=nil
+function setStepping(enable,uuid)
+    if uuid==nil then
+        uuid='ANY' -- to support older clients
+    end
+    if enable then
+        steppingClients[uuid]=true
+    else
+        steppingClients[uuid]=nil
+    end
+    steppedClients[uuid]=nil
 end
 
-function step()
-    go=true
+function step(uuid)
+    if uuid==nil then
+        uuid='ANY' -- to support older clients
+    end
+    steppedClients[uuid]=true
 end

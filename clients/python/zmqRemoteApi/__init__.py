@@ -2,6 +2,8 @@
 
 import os
 
+import uuid
+
 from time import sleep
 
 import cbor
@@ -27,6 +29,7 @@ class RemoteAPIClient:
         self.cntsocket.setsockopt(zmq.SUBSCRIBE, b'')
         self.cntsocket.setsockopt(zmq.CONFLATE, 1)
         self.cntsocket.connect(f'tcp://{host}:{cntport if cntport else port+1}')
+        self.uuid=str(uuid.uuid4())
 
     def __del__(self):
         """Disconnect and destroy client."""
@@ -82,11 +85,11 @@ class RemoteAPIClient:
         return ret
 
     def setStepping(self, enable=True):
-        return self.call('setStepping', [enable])
+        return self.call('setStepping', [enable,self.uuid])
 
     def step(self, *, wait=True):
         self.getStepCount(False)
-        self.call('step', [])
+        self.call('step', [self.uuid])
         self.getStepCount(wait)
 
     def getStepCount(self, wait):
