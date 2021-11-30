@@ -175,9 +175,6 @@ function sysCall_beforeMainScript()
             end
         end
         outData={doNotRunMainScript=(not canStep)}
-        if canStep then
-            steppedClients={}
-        end
     end
     return outData
 end
@@ -188,6 +185,7 @@ function sysCall_beforeSimulation()
 end
 
 function sysCall_actuation()
+    steppedClients={}
     simulationTimeStepCount=simulationTimeStepCount+1
     zmqRemoteApi.publishStepCount()
 end
