@@ -16,7 +16,7 @@ int main(int argc, char **argv)
 {
     RemoteAPIClient client;
 
-    auto visionSensorHandle = client.call("sim.getObjectHandle", {"/VisionSensor"})[0];
+    auto visionSensorHandle = client.call("sim.getObject", {"/VisionSensor"})[0];
 
     client.setStepping(true);
     client.call("sim.startSimulation");

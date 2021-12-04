@@ -16,8 +16,8 @@ print('Program started')
 client = RemoteAPIClient()
 sim = client.getObject('sim')
 
-visionSensorHandle = sim.getObjectHandle('/VisionSensor')
-passiveVisionSensorHandle = sim.getObjectHandle('/PassiveVisionSensor')
+visionSensorHandle = sim.getObject('/VisionSensor')
+passiveVisionSensorHandle = sim.getObject('/PassiveVisionSensor')
 
 client.setStepping(True)
 sim.startSimulation()

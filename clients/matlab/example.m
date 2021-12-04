@@ -1,2 +1,2 @@
 client = RemoteAPIClient();
-client.call('sim.getObjectHandle', {'Floor'})
+client.call('sim.getObject', {'/Floor'})

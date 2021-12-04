@@ -46,8 +46,8 @@ Example:
 
 ```json
 {
-    "func": "sim.getObjectHandle",
-    "args": ["Floor"]
+    "func": "sim.getObject",
+    "args": ["/Floor"]
 }
 ```
 
@@ -72,7 +72,7 @@ In case of error, the exception message will be present:
 ```json
 {
     "success": false,
-    "error": "Object does not exist. (in function 'sim.getObjectHandle')"
+    "error": "Object does not exist. (in function 'sim.getObject')"
 }
 ```
 
@@ -94,7 +94,7 @@ client = RemoteAPIClient()
 sim = client.getObject('sim')
 
 # call API function:
-h = sim.getObjectHandle('Floor')
+h = sim.getObject('/Floor')
 print(h)
 ```
 
@@ -108,7 +108,7 @@ Normal `asyncio` principles apply. All methods are async.
 async def main():
     async with RemoteAPIClient() as client:
         sim = await client.getObject('sim')
-        h = await sim.getObjectHandle('Floor')
+        h = await sim.getObject('/Floor')
         print(h)
 
 asyncio.run(main())
@@ -124,7 +124,7 @@ if sys.platform == 'win32' and sys.version_info >= (3, 8, 0):
 If performing many commands in one shot, and results will be used later, consider using `asyncio.gather` for improved throughput. E.g. getting the handles of 100 objects:
 
 ```python
-    handles = await asyncio.gather(*[sim.getObjectHandle(f'Object{i+1}') for i in range(100)])
+    handles = await asyncio.gather(*[sim.getObject(f'/Object{i+1}') for i in range(100)])
 ```
 
 Check out the examples in [`clients/python`](clients/python).
@@ -139,7 +139,7 @@ int main()
 {
     RemoteAPIClient client;
 
-    auto ret = client.call("sim.getObjectHandle", {"Floor"});
+    auto ret = client.call("sim.getObject", {"/Floor"});
     int handle = ret[0];
 
     return 0;
@@ -152,7 +152,7 @@ Check out the examples in [`clients/cpp`](clients/cpp).
 
 ```java
 RemoteAPIClient client = new RemoteAPIClient();
-JSONArray ret = client.call("sim.getObjectHandle", "Floor");
+JSONArray ret = client.call("sim.getObject", "/Floor");
 int handle = ret.get(0);
 ```
 
@@ -162,7 +162,7 @@ Check out the examples in [`clients/java`](clients/java).
 
 ```matlab
 client = RemoteAPIClient();
-ret = client.call('sim.getObjectHandle', {'Floor'})
+ret = client.call('sim.getObject', {'/Floor'})
 ```
 
 Check out the examples in [`clients/matlab`](clients/matlab).

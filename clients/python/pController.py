@@ -48,7 +48,7 @@ def computeTargetVelocity(jointAngle, targetAngle):
     return velocity
 
 
-jointHandle = sim.getObjectHandle('/Cuboid[0]/joint')
+jointHandle = sim.getObject('/Cuboid[0]/joint')
 jointAngle = sim.getJointPosition(jointHandle)
 sim.setJointTargetVelocity(jointHandle, 360 * math.pi / 180)
 

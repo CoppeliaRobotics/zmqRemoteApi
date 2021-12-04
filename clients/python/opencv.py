@@ -22,8 +22,8 @@ print('Program started')
 client = RemoteAPIClient()
 sim = client.getObject('sim')
 
-visionSensorHandle = sim.getObjectHandle('/VisionSensor')
-passiveVisionSensorHandle = sim.getObjectHandle('/PassiveVisionSensor')
+visionSensorHandle = sim.getObject('/VisionSensor')
+passiveVisionSensorHandle = sim.getObject('/PassiveVisionSensor')
 
 # When simulation is not running, ZMQ message handling could be a bit
 # slow, since the idle loop runs at 8 Hz by default. So let's make

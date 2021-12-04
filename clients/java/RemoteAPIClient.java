@@ -46,7 +46,7 @@ public class RemoteAPIClient
     public JSONArray call(String func, Object... _args)
     {
         JSONObject req = new JSONObject();
-        req.put("func", "sim.getObjectHandle");
+        req.put("func", "sim.getObject");
         JSONArray args = new JSONArray();
         for(int i = 0; i < _args.length; i++)
             args.put(_args[i]);

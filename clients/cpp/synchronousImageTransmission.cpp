@@ -14,8 +14,8 @@ int main()
 {
     RemoteAPIClient client;
 
-    auto visionSensorHandle = client.call("sim.getObjectHandle", {"/VisionSensor"})[0];
-    auto passiveVisionSensorHandle = client.call("sim.getObjectHandle", {"/PassiveVisionSensor"})[0];
+    auto visionSensorHandle = client.call("sim.getObject", {"/VisionSensor"})[0];
+    auto passiveVisionSensorHandle = client.call("sim.getObject", {"/PassiveVisionSensor"})[0];
 
     client.setStepping(true);
     client.call("sim.startSimulation");
