@@ -163,6 +163,10 @@ function sysCall_nonSimulation()
     zmqRemoteApi.handleQueue()
 end
 
+function sysCall_suspended()
+    zmqRemoteApi.handleQueue()
+end
+
 function sysCall_beforeMainScript()
     zmqRemoteApi.handleQueue()
     local outData
