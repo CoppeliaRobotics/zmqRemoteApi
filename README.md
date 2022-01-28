@@ -13,6 +13,7 @@ The ZeroMQ Remote API requires the [ZeroMQ plugin](https://github.com/CoppeliaRo
      - [Python-asyncio](#python-asyncio-client)
      - [C++](#c-client)
      - [Java](#java-client)
+     - [Octave](#octave-client)
      - [MATLAB](#matlab-client)
      - [HTML/JavaScript](#htmljavascript-web-browser-client)
 
@@ -157,6 +158,15 @@ int handle = ret.get(0);
 ```
 
 Check out the examples in [`clients/java`](clients/java).
+
+#### Octave client
+
+```octave
+client = RemoteAPIClient();
+ret = client.call('sim.getObject', {'/Floor'})
+```
+
+Check out the examples in [`clients/octave`](clients/octave).
 
 #### MATLAB client
 
