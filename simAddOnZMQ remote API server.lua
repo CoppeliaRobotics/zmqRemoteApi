@@ -125,7 +125,8 @@ function sysCall_init()
         sim.addLog(sim.verbosity_scriptinfos,string.format('ZeroMQ Remote API server starting (rpcPort=%d, cntPort=%d)...',rpcPort,cntPort))
     end
     json=require 'dkjson'
-    cbor=require 'cbor'
+    -- cbor=require 'cbor' -- encodes strings as buffers, always. DO NOT USE!!
+    cbor=require'org.conman.cbor'
     context=simZMQ.ctx_new()
     rpcSocket=simZMQ.socket(context,simZMQ.REP)
     simZMQ.bind(rpcSocket,string.format('tcp://*:%d',rpcPort))
