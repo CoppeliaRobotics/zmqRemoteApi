@@ -1,0 +1,39 @@
+func_def: [out_arg_list "="] func_name "(" [in_arg_list] ")"
+func_name: ID ("." ID)*
+_type: type | array_type | array_type_fixed | array_type_range | array_type_min
+_basic_type: T_INT | T_FLOAT | T_BOOL | T_BUFFER | T_STRING | T_MAP | T_FUNC
+type: _basic_type
+array_type: _basic_type "[" "]"
+array_type_fixed: _basic_type "[" NUM "]"
+array_type_range: _basic_type "[" NUM T_RANGE NUM "]"
+array_type_min: _basic_type "[" NUM T_RANGE T_STAR "]"
+?value: map | array | SIGNED_NUMBER -> number | string | "true" -> true | "false" -> false | "nil" -> nil | ID ("." ID)* -> id
+string: ESCAPED_STRING | SINGLE_QUOTED_STRING
+map: "{" [ID "=" value ("," ID "=" value)*] "}"
+array: "{" [value ("," value)*] "}"
+arg: _type name
+name: ID
+_arg_list: arg ("," arg)*
+arg_with_default: _type name "=" default
+default: value
+_arg_list_with_default: arg_with_default ("," arg_with_default)*
+in_arg_list: (T_VARARGS | (_arg_list "," _arg_list_with_default | _arg_list_with_default | _arg_list) ["," T_VARARGS])
+out_arg_list: (T_VARARGS | _arg_list ["," T_VARARGS])
+
+T_INT: "int"
+T_FLOAT: "float"
+T_BOOL: "bool"
+T_BUFFER: "buffer"
+T_STRING: "string"
+T_MAP: "map"
+T_FUNC: "func"
+T_VARARGS: "..."
+T_RANGE: ".."
+T_STAR: "*"
+ID: /[a-z_][a-z0-9_]*/i
+NUM: /[0-9]+/
+SINGLE_QUOTED_STRING  : /'[^']*'/
+
+%import common.SIGNED_NUMBER
+%import common.ESCAPED_STRING
+%ignore /[ \n\t\r]/x
