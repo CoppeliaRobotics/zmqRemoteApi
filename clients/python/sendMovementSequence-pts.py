@@ -23,8 +23,6 @@ def waitForMovementExecuted(id_):
     global executedMovId, stringSignalName
     while executedMovId != id_:
         s = sim.getStringSignal(stringSignalName)
-        if type(s) == bytearray:
-            s = s.decode('ascii')  # python2/python3 differences
         executedMovId = s
 
 
@@ -41,7 +39,7 @@ j6 = [0.000, 0.000, 0.002, 0.009, 0.022, 0.042, 0.068, 0.100, 0.139, 0.185, 0.23
 sim.startSimulation()
 
 # Wait until ready:
-waitForMovementExecuted(b'ready')
+waitForMovementExecuted('ready')
 
 # Send the movement sequence:
 movementData = {
@@ -62,7 +60,7 @@ sim.callScriptFunction(
     'movSeq1')
 
 # Wait until above movement sequence finished executing:
-waitForMovementExecuted(b'movSeq1')
+waitForMovementExecuted('movSeq1')
 
 sim.stopSimulation()
 

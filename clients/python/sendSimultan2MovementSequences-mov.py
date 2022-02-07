@@ -27,8 +27,6 @@ def waitForMovementExecuted1(id_):
     global executedMovId1
     while executedMovId1 != id_:
         s = sim.getStringSignal(stringSignalName1)
-        if type(s) == bytearray:
-            s = s.decode('ascii')  # python2/python3 differences
         executedMovId1 = s
 
 
@@ -36,8 +34,6 @@ def waitForMovementExecuted2(id_):
     global executedMovId2
     while executedMovId2 != id_:
         s = sim.getStringSignal(stringSignalName2)
-        if type(s) == bytearray:
-            s = s.decode('ascii')  # python2/python3 differences
         executedMovId2 = s
 
 
@@ -52,8 +48,8 @@ targetVel = [0, 0, 0, 0, 0, 0]
 sim.startSimulation()
 
 # Wait until ready:
-waitForMovementExecuted1(b'ready')
-waitForMovementExecuted1(b'ready')
+waitForMovementExecuted1('ready')
+waitForMovementExecuted1('ready')
 
 # Send first movement sequence:
 targetConfig = [
@@ -88,8 +84,8 @@ sim.callScriptFunction(
     'movSeq1')
 
 # Wait until above movement sequence finished executing:
-waitForMovementExecuted1(b'movSeq1')
-waitForMovementExecuted1(b'movSeq1')
+waitForMovementExecuted1('movSeq1')
+waitForMovementExecuted1('movSeq1')
 
 # Send second and third movement sequence, where third one should execute
 # immediately after the second one:
@@ -152,8 +148,8 @@ sim.callScriptFunction(
     'movSeq3')
 
 # Wait until above 2 movement sequences finished executing:
-waitForMovementExecuted1(b'movSeq3')
-waitForMovementExecuted1(b'movSeq3')
+waitForMovementExecuted1('movSeq3')
+waitForMovementExecuted1('movSeq3')
 
 sim.stopSimulation()
 
