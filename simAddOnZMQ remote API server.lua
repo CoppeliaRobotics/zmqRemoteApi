@@ -66,7 +66,9 @@ function zmqRemoteApi.handleRawMessage(rawReq)
         local req,ln,err=json.decode(rawReq)
         if req~=nil then
             local resp=zmqRemoteApi.handleRequest(req)
-            return json.encode(resp)
+            local status,resp=pcall(json.encode,resp)
+            if status then return resp end
+            return json.encode({success=false,error=resp})
         end
     end
 
@@ -74,7 +76,9 @@ function zmqRemoteApi.handleRawMessage(rawReq)
     local status,req=pcall(cbor.decode,rawReq)
     if status then
         local resp=zmqRemoteApi.handleRequest(req)
-        return cbor.encode(resp)
+        local status,resp=pcall(cbor.encode,resp)
+        if status then return resp end
+        return cbor.encode({success=false,error=resp})
     end
 
     sim.addLog(sim.verbosity_errors,'cannot decode message: no suitable decoder')
