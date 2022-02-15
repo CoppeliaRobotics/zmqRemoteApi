@@ -1,3 +1,6 @@
+% this requires JeroMQ
+% call javaaddpath('path/to/jeromq.jar') before running client code
+
 classdef RemoteAPIClient
     properties
         verbose
