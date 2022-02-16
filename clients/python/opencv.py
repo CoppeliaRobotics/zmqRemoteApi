@@ -45,7 +45,7 @@ while (t := sim.getSimulationTime()) < 3:
     img = cv2.flip(cv2.cvtColor(img, cv2.COLOR_BGR2RGB), 0)
 
     cv2.imshow('', img)
-    cv2.waitKey(0)
+    cv2.waitKey(1)
     client.step()  # triggers next simulation step
 
 sim.stopSimulation()
