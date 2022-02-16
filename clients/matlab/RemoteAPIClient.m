@@ -43,6 +43,10 @@ classdef RemoteAPIClient
 
             outputArgs = resp.ret;
         end
+
+        function remoteObject = getObject(obj,name)
+            remoteObject = RemoteAPIObject(obj,name);
+        end
     end
 end
 

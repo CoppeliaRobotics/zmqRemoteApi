@@ -1,2 +1,4 @@
 client = RemoteAPIClient();
-client.call('sim.getObject', {'/Floor'})
+sim = client.getObject('sim');
+[handle] = sim.getObject('/Floor');
+fprintf('Handle of /Floor is %d\n', handle);
