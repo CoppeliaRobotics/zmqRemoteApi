@@ -24,11 +24,11 @@ classdef RemoteAPIObject
                     error('unexpected sub type %s at %d', S(i).type, i);
                 end
             end
-            if func_call
-                [varargout{1:nargout}] = self.x__client.call(fn, args);
-            else
-                [varargout{1:nargout}] = self.x__client.call('zmqRemoteApi.info', {fn});
+            if ~func_call
+                args = {fn};
+                fn = 'zmqRemoteApi.info';
             end
+            varargout = self.x__client.call(fn, args);
         end
     end
 end

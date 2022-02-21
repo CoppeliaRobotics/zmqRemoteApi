@@ -30,12 +30,15 @@ classdef RemoteAPIClient
         function outputArgs = call(obj,fn,inputArgs)
             import org.zeromq.*;
             req = struct('func', fn, 'args', {inputArgs});
-            req_msg = ZMsg.newStringMsg(jsonencode(req));
+            req_raw = cbor.encode(req);
+            req_frame = ZFrame(req_raw);
+            req_msg = ZMsg();
+            req_msg.add(req_frame);
             req_msg.send(obj.socket, 0);
-
             resp_msg = ZMsg.recvMsg(obj.socket, 0);
-            resp_raw = char(resp_msg.popString());
-            resp = jsondecode(resp_raw);
+            resp_frame = resp_msg.pop();
+            resp_raw = typecast(resp_frame.getData(), 'uint8');
+            resp = cbor.decode(resp_raw);
 
             if resp.success==0
                 error(resp.error)
