@@ -6,6 +6,8 @@ classdef RemoteAPIClient
         verbose
         ctx
         socket
+        uuid
+        cntSocket
     end
 
     methods
@@ -20,6 +22,14 @@ classdef RemoteAPIClient
             addr = sprintf('tcp://%s:%d',host,port);
             addr = java.lang.String(addr);
             obj.socket.connect(addr);
+
+            obj.uuid = java.util.UUID.randomUUID;
+            obj.cntSocket = obj.ctx.createSocket(SocketType.SUB);
+            cntAddr = sprintf('tcp://%s:%d',host,port+1);
+            cntAddr = java.lang.String(cntAddr);
+            obj.cntSocket.subscribe(java.lang.String(''));
+            obj.cntSocket.setConflate(true);
+            obj.cntSocket.connect(cntAddr);
         end
 
         function delete(obj)
@@ -49,6 +59,34 @@ classdef RemoteAPIClient
 
         function remoteObject = getObject(obj,name)
             remoteObject = RemoteAPIObject(obj,name);
+        end
+
+        function setStepping(obj,enable)
+            arguments
+                obj (1,1) RemoteAPIClient
+                enable (1,1) logical = true
+            end
+            obj.call('setStepping', {enable, char(obj.uuid)});
+        end
+
+        function step(obj,wait)
+            arguments
+                obj (1,1) RemoteAPIClient
+                wait (1,1) logical = true
+            end
+            obj.getStepCount(false);
+            obj.call('step', {char(obj.uuid)});
+            obj.getStepCount(wait);
+        end
+
+        function getStepCount(obj,wait)
+            import org.zeromq.*;
+            if wait
+                flags = 0;
+            else
+                flags = ZMQ.DONTWAIT;
+            end
+            obj.cntSocket.recv(flags);
         end
     end
 end
