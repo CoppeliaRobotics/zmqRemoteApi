@@ -38,8 +38,9 @@ classdef cbor
         FALSE = 20
         TRUE = 21
         NULL = 22
-        FLOAT = 26
-        DOUBLE = 27
+        FLOAT16 = 25
+        FLOAT32 = 26
+        FLOAT64 = 27
         UINT8 = 24
         UINT16 = 25
         UINT32 = 26
@@ -100,10 +101,27 @@ classdef cbor
                     o = true;
                 elseif info == cbor.NULL
                     o = NaN;
-                elseif info == cbor.FLOAT
+                elseif info == cbor.FLOAT16
+                    f16 = as(d1(1:2), 'uint16');
+                    d1 = d1(3:end);
+                    % due to lack of 16-bit floats support, we decode
+                    % IEEE 754 16-bit float manually:
+                    sign = (-1) ^ double(bitget(f16,16));
+                    expo = bitshift(bitand(f16,0x7C00),-10);
+                    frac = bitand(f16,0x03FF);
+                    if expo == 0
+                        o = sign * 2^-14 * double(frac) / 1024;
+                    elseif expo == 0x1F && frac == 0
+                        o = sign * inf;
+                    elseif expo == 0x1F && frac ~= 0
+                        o = nan;
+                    else
+                        o = sign * 2^(double(expo) - 15) * (1 + double(frac) / 1024);
+                    end
+                elseif info == cbor.FLOAT32
                     o = as(d1(1:4), 'single');
                     d1 = d1(5:end);
-                elseif info == cbor.DOUBLE
+                elseif info == cbor.FLOAT64
                     o = as(d1(1:8), 'double');
                     d1 = d1(9:end);
                 else
@@ -182,12 +200,12 @@ classdef cbor
                 l = numel(n);
                 d = [HDR(cbor.MAP, l)];
                 for i=1:l; d = [d, cbor.encode(n{i}), cbor.encode(info{i})]; end
-            elseif isa(o, 'double')
-                if mod(o, 1) == 0; d = cbor.encode(int64(o)); return; end
-                d = [HDR(cbor.SIMPLE_VALUE, cbor.DOUBLE), tobytes(o)];
             elseif isa(o, 'single')
                 if mod(o, 1) == 0; d = cbor.encode(int64(o)); return; end
-                d = [HDR(cbor.SIMPLE_VALUE, cbor.FLOAT), tobytes(o)];
+                d = [HDR(cbor.SIMPLE_VALUE, cbor.FLOAT32), tobytes(o)];
+            elseif isa(o, 'double')
+                if mod(o, 1) == 0; d = cbor.encode(int64(o)); return; end
+                d = [HDR(cbor.SIMPLE_VALUE, cbor.FLOAT64), tobytes(o)];
             elseif isa(o, 'integer')
                 if o < 0
                     d = [HDR(cbor.NEGATIVE_INT, -1 - o)];
@@ -271,6 +289,23 @@ classdef cbor
             T([NaN,NaN],'82F6F6');
 
             T({1},'8101');
+
+            % testcases from https://en.wikipedia.org/wiki/Half-precision_floating-point_format#Half_precision_examples
+            Td = @(a,b) assert(abs(a-dec(b))<1e-8);
+            Td(1.5,'F93E00');
+            Td(0,'F90000');
+            Td(0.000000059604645,'F90001');
+            Td(0.000060975552,'F903FF');
+            Td(0.00006103515625,'F90400');
+            Td(0.33325195,'F93555');
+            Td(0.99951172,'F93BFF');
+            Td(1,'F93C00');
+            Td(1.00097656,'F93C01');
+            Td(65504,'F97BFF');
+            assert(inf==dec('F97C00'));
+            assert(-inf==dec('F9FC00'));
+            Td(0,'F98000'); % -0
+            Td(-2,'F9C000');
 
             fprintf('All tests passed successfully.\n');
         end
