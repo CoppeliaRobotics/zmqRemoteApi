@@ -54,7 +54,11 @@ classdef RemoteAPIClient
                 error(resp.error)
             end
 
-            outputArgs = resp.ret;
+            if numel(resp.ret) == 0
+                outputArgs = {};
+            else
+                outputArgs = resp.ret;
+            end
         end
 
         function remoteObject = getObject(obj,name)
