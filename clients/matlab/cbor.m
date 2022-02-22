@@ -170,7 +170,10 @@ classdef cbor
         
             % array types
             l = numel(o);
-            if (iscell(o) || l > 1) && isvector(o)
+            if l == 0
+                d = [HDR(cbor.ARRAY, 0)];
+                return
+            elseif (iscell(o) || l > 1) && isvector(o)
                 if isa(o, 'char')
                     % char vector is handled later as a string
                 elseif isa(o, 'uint8')
