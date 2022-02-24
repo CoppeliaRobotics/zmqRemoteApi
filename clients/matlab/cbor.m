@@ -102,6 +102,10 @@ classdef cbor
                     [n{i}, d1] = cbor.decode(d1);
                     [v{i}, d1] = cbor.decode(d1);
                     n{i} = n{i}';
+                    if n{i}(1) == '_'
+                        % field names cannot start with underscore
+                        n{i} = sprintf('x%s', n{i});
+                    end
                 end
                 o = cell2struct(v, n, 2);
             elseif major == cbor.SIMPLE_VALUE
