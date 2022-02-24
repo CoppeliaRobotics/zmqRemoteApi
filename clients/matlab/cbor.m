@@ -48,7 +48,10 @@ classdef cbor
     end
 
     methods(Static)
-        function [o,d1] = decode(d)
+        function [o,d1] = decode(d,varargin)
+            opts = getopts(varargin, ...
+                'array2mat', false ...
+            );
             assert(isa(d, 'uint8'));
             major = bitshift(bitand(d(1), cbor.MASK_MAJOR), -5);
             info = bitand(d(1), cbor.MASK_INFO);
@@ -82,8 +85,15 @@ classdef cbor
                 d1 = d1((info1+1):end);
             elseif major == cbor.ARRAY
                 o = {};
+                homogeneous = true;
                 for i=1:info1
                     [o{i}, d1] = cbor.decode(d1);
+                    if homogeneous && i > 1 && ~strcmp(class(o{1}),class(o{i}))
+                        homogeneous = false;
+                    end
+                end
+                if opts.array2mat && homogeneous && (numel(o) == 0 || ~isa(o(1),'char'))
+                    o = cell2mat(o);
                 end
             elseif major == cbor.MAP
                 n = {};
@@ -130,7 +140,9 @@ classdef cbor
             end
         end
     
-        function [d] = encode(o)
+        function [d] = encode(o,varargin)
+            opts = getopts(varargin ...
+            );
             HDR = @(major, info) cbor.encode({'@HDR', {}; major, info});
             tobytes = @(x) flip(typecast(x, 'uint8'));
 
