@@ -2,7 +2,7 @@
 % call javaaddpath('path/to/jeromq.jar') before running client code
 
 classdef RemoteAPIClient
-    properties
+    properties (Access = protected)
         verbose
         ctx
         socket

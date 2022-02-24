@@ -1,5 +1,5 @@
 classdef RemoteAPIObject
-    properties
+    properties (Access = protected)
         x__client
         x__objectName
     end
