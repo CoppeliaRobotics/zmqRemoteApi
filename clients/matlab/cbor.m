@@ -141,7 +141,7 @@ classdef cbor
                 if info < 0
                     error('info value cannot be negative');
                 elseif info < 24 || major == cbor.SIMPLE_VALUE
-                    d = [info];
+                    d = [uint8(info)];
                 elseif info < 2^8
                     d = [cbor.UINT8, uint8(info)];
                 elseif info < 2^16 
