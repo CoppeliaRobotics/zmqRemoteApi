@@ -72,6 +72,7 @@ classdef cbor
             major = bitshift(bitand(d(1), cbor.MASK_MAJOR), -5);
             info = bitand(d(1), cbor.MASK_INFO);
             d1 = d(2:end);
+            d1 = d1(:)';
             info1 = double(info);
             as = @(x,t) typecast(flip(x), t);
             if major ~= cbor.SIMPLE_VALUE
@@ -117,7 +118,6 @@ classdef cbor
                 for i=1:info1
                     [n{i}, d1] = cbor.decode(d1);
                     [v{i}, d1] = cbor.decode(d1);
-                    n{i} = n{i}';
                     if n{i}(1) == '_'
                         % field names cannot start with underscore
                         n{i} = sprintf('x%s', n{i});
