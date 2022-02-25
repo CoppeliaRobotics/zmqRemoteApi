@@ -15,9 +15,9 @@ sim.setInt32Param(sim.intparam_idle_fps, 0);
 
 % Create a few dummies and set their positions:
 n = 50;
-handles = zeros(n,1);
+handles = zeros(n, 1);
 for i=1:n
-    handles(i) = sim.createDummy(0.01, zeros(12,1));
+    handles(i) = sim.createDummy(0.01, zeros(12, 1));
     sim.setObjectPosition(handles(i), -1, [0.01 * i, 0.01 * i, 0.01 * i]);
 end
 
