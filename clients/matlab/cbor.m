@@ -25,7 +25,7 @@ classdef cbor
         end
     end
 
-    properties (Constant)
+    properties(Constant, Access = private)
         MASK_MAJOR = 0xE0
         MASK_INFO = 0x1F
         UNSIGNED_INT = 0
@@ -47,9 +47,25 @@ classdef cbor
         UINT64 = 27
     end
 
+    methods(Static, Access = private)
+        function opts = getopts(args,varargin)
+            opts = struct();
+            for i=1:2:numel(varargin)
+                opts.(varargin{i}) = varargin{i+1};
+            end
+            for i=1:2:numel(args)
+                if isfield(opts,args{i})
+                    opts.(args{i}) = args{i+1};
+                else
+                    error('unknown option: "%s"',args{i});
+                end
+            end
+        end
+    end
+
     methods(Static)
         function [o,d1] = decode(d,varargin)
-            opts = getopts(varargin, ...
+            opts = cbor.getopts(varargin, ...
                 'array2mat', false ...
             );
             assert(isa(d, 'uint8'));
@@ -145,7 +161,7 @@ classdef cbor
         end
     
         function [d] = encode(o,varargin)
-            opts = getopts(varargin ...
+            opts = cbor.getopts(varargin ...
             );
             HDR = @(major, info) cbor.encode({'@HDR', {}; major, info});
             tobytes = @(x) flip(typecast(x, 'uint8'));
