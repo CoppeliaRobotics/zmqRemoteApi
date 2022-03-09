@@ -11,16 +11,16 @@ classdef RemoteAPIClient
     end
 
     methods(Static, Access = private)
-        function opts = getopts(args,varargin)
+        function opts = getopts(args, varargin)
             opts = struct();
             for i=1:2:numel(varargin)
                 opts.(varargin{i}) = varargin{i+1};
             end
             for i=1:2:numel(args)
-                if isfield(opts,args{i})
+                if isfield(opts, args{i})
                     opts.(args{i}) = args{i+1};
                 else
-                    error('unknown option: "%s"',args{i});
+                    error('unknown option: "%s"', args{i});
                 end
             end
         end
@@ -77,7 +77,7 @@ classdef RemoteAPIClient
             resp_raw = typecast(resp_frame.getData(), 'uint8');
             resp = cbor.decode(resp_raw);
 
-            if resp.success==0
+            if resp.success == 0
                 error(resp.error)
             end
 
