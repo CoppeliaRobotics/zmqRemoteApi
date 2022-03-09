@@ -61,28 +61,16 @@ function zmqRemoteApi.handleRequest(req)
 end
 
 function zmqRemoteApi.handleRawMessage(rawReq)
-    -- if first byte is '{', it *might* be a JSON payload
-    if rawReq:byte(1)==123 then
-        local req,ln,err=json.decode(rawReq)
-        if req~=nil then
-            local resp=zmqRemoteApi.handleRequest(req)
-            local status,resp=pcall(json.encode,resp)
-            if status then return resp end
-            return json.encode({success=false,error=resp})
-        end
-    end
-
-    -- if we are here, it should be a CBOR payload
     local status,req=pcall(cbor.decode,rawReq)
     if status then
         local resp=zmqRemoteApi.handleRequest(req)
         local status,resp=pcall(cbor.encode,resp)
         if status then return resp end
         return cbor.encode({success=false,error=resp})
+    else
+        sim.addLog(sim.verbosity_errors,'decode error: '..req)
+        return ''
     end
-
-    sim.addLog(sim.verbosity_errors,'cannot decode message: no suitable decoder')
-    return ''
 end
 
 function zmqRemoteApi.handleQueue()
@@ -128,7 +116,6 @@ function sysCall_init()
     if zmqRemoteApi.verbose()>0 then
         sim.addLog(sim.verbosity_scriptinfos,string.format('ZeroMQ Remote API server starting (rpcPort=%d, cntPort=%d)...',rpcPort,cntPort))
     end
-    json=require 'dkjson'
     -- cbor=require 'cbor' -- encodes strings as buffers, always. DO NOT USE!!
     cbor=require'org.conman.cbor'
     context=simZMQ.ctx_new()

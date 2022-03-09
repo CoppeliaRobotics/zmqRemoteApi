@@ -33,7 +33,7 @@ $ cmake --install .
 
 ### Protocol
 
-Connect a [`REQ`](https://zeromq.org/socket-api/#req-socket) socket to the endpoint (by default the ZMQ remote API server will listen to `tcp://*:23000`), send a message (see [request](#request) below), and read the response (see [response](#response) below). The request and response can be serialized to [JSON](https://www.json.org) or [CBOR](https://cbor.io). The response will be serialized using the same serialization format used in the request.
+Connect a [`REQ`](https://zeromq.org/socket-api/#req-socket) socket to the endpoint (by default the ZMQ remote API server will listen to `tcp://*:23000`), send a message (see [request](#request) below), and read the response (see [response](#response) below). The requests/responses are encoded/decoded using [CBOR](https://cbor.io) format.
 
 Example implementation for some languages are available in the [clients](tree/master/clients) directory.
 
@@ -163,7 +163,8 @@ Check out the examples in [`clients/java`](clients/java).
 
 ```octave
 client = RemoteAPIClient();
-ret = client.call('sim.getObject', {'/Floor'})
+sim = client.getObject('sim');
+ret = sim.getObject('/Floor')
 ```
 
 Check out the examples in [`clients/octave`](clients/octave).
@@ -172,7 +173,8 @@ Check out the examples in [`clients/octave`](clients/octave).
 
 ```matlab
 client = RemoteAPIClient();
-ret = client.call('sim.getObject', {'/Floor'})
+sim = client.getObject('sim');
+ret = sim.getObject('/Floor')
 ```
 
 Check out the examples in [`clients/matlab`](clients/matlab).
