@@ -49,7 +49,7 @@ classdef RemoteAPIClient
             obj.socket = obj.ctx.createSocket(SocketType.REQ);
             obj.socket.connect(java.lang.String(tcpaddr(opts.host, opts.port)));
 
-            obj.uuid = java.util.UUID.randomUUID;
+            obj.uuid = char(java.util.UUID.randomUUID);
 
             obj.cntSocket = obj.ctx.createSocket(SocketType.SUB);
             obj.cntSocket.subscribe(java.lang.String(''));
@@ -99,7 +99,7 @@ classdef RemoteAPIClient
                 enable (1,1) logical = true
             end
 
-            obj.call('setStepping', {enable, char(obj.uuid)});
+            obj.call('setStepping', {enable, obj.uuid});
         end
 
         function step(obj, wait)
@@ -109,7 +109,7 @@ classdef RemoteAPIClient
             end
 
             obj.getStepCount(false);
-            obj.call('step', {char(obj.uuid)});
+            obj.call('step', {obj.uuid});
             obj.getStepCount(wait);
         end
 
