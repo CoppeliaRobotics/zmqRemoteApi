@@ -9,4 +9,4 @@ This library contains ZMQ Remote API client for MATLAB.
 
 ## Examples
 
-See [`example.m`](example.m) for a usage example.
+See the scripts in this directory for a few usage examples.
