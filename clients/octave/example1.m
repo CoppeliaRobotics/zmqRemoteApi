@@ -1,3 +1,3 @@
 client = RemoteAPIClient();
 h = client.call("sim.getObject", {"/Floor"});
-printf("sim.getObject('/Floor') -> %d", h);
+printf("sim.getObject('/Floor') -> %d", h{1});
