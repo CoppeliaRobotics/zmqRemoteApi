@@ -79,5 +79,34 @@ classdef RemoteAPIClient
                 outputArgs = resp.ret;
             end
         end
+
+        function remoteObject = getObject(obj, name)
+            remoteObject = RemoteAPIObject(obj, name);
+        end
+
+        function setStepping(obj, enable)
+            if nargin < 2
+                enable = true;
+            end
+            obj.call('setStepping', {enable, obj.uuid});
+        end
+
+        function step(obj, wait)
+            if nargin < 2
+                wait = true;
+            end
+            obj.getStepCount(false);
+            obj.call('step', {obj.uuid});
+            obj.getStepCount(wait);
+        end
+
+        function getStepCount(obj, wait)
+            if wait
+                flags = 0;
+            else
+                flags = ZMQ_DONTWAIT;
+            end
+            zmq_recv(obj.cntSocket, obj.max_recv_sz, flags);
+        end
     end
 end
