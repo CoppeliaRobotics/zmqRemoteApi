@@ -59,6 +59,7 @@ classdef RemoteAPIClient
 
         function delete(obj)
             obj.socket.close();
+            obj.cntSocket.close();
             obj.ctx.close();
         end
 
