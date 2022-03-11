@@ -28,6 +28,21 @@ classdef RemoteAPIClient
 
     methods
         function obj = RemoteAPIClient(varargin)
+            try
+                ZMsg();
+            catch ex
+                if ~strcmp(ex.identifier, 'MATLAB:UndefinedFunction')
+                    rethrow(ex);
+                end
+                jeromqVer = '0.5.2';
+                jeromqJAR = sprintf('jeromq-%s.jar', jeromqVer);
+                if ~isfile(jeromqJAR)
+                    mvnRepo = 'https://repo1.maven.org/maven2';
+                    websave(jeromqJAR, sprintf('%s/org/zeromq/jeromq/%s/%s', mvnRepo, jeromqVer, jeromqJAR));
+                end
+                javaaddpath(jeromqJAR);
+            end
+
             import org.zeromq.*;
 
             opts = RemoteAPIClient.getopts(varargin, ...
