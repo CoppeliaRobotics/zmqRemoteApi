@@ -98,7 +98,7 @@ classdef cbor
                 o = d1(1:info1);
                 d1 = d1((info1+1):end);
             elseif major == cbor.TEXT_STRING
-                o = native2unicode(d1(1:info1), 'utf8');
+                o = native2unicode(d1(1:info1), 'UTF-8');
                 d1 = d1((info1+1):end);
             elseif major == cbor.ARRAY
                 o = {};
@@ -248,7 +248,7 @@ classdef cbor
                     d = [HDR(cbor.UNSIGNED_INT, o)];
                 end
             elseif isa(o, 'char')
-                u = unicode2native(o,'utf8');
+                u = unicode2native(o, 'UTF-8');
                 l = numel(u);
                 d = [HDR(cbor.TEXT_STRING, l), u];
             elseif isa(o, 'string')
