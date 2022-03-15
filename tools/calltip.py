@@ -62,7 +62,9 @@ class CallTipParser:
         return self.parser.parse(calltip)
 
     def transform(self, tree):
-        return self.transformer.transform(tree)
+        d = self.transformer.transform(tree)
+        d.validate()
+        return d
 
 @dataclass
 class Arg:
@@ -88,6 +90,12 @@ class VarArgs:
     pass
 
 class ArgList(list):
+    def validate(self):
+        n = len(self)
+        for i, arg in enumerate(self):
+            if isinstance(arg, VarArgs) and (i + 1) < n:
+                raise Exception('VarArgs must be at last position')
+
     def is_variadic(self) -> bool:
         if self:
             return isinstance(self[-1], VarArgs)
@@ -99,3 +107,7 @@ class FuncDef:
     func_name: str
     in_args: ArgList = field(default_factory=ArgList)
     out_args: ArgList = field(default_factory=ArgList)
+
+    def validate(self):
+        self.in_args.validate()
+        self.out_args.validate()
