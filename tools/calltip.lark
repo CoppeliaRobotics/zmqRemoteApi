@@ -17,8 +17,9 @@ _arg_list: arg ("," arg)*
 arg_with_default: _type name "=" default
 default: value
 _arg_list_with_default: arg_with_default ("," arg_with_default)*
-in_arg_list: (T_VARARGS | (_arg_list "," _arg_list_with_default | _arg_list_with_default | _arg_list) ["," T_VARARGS])
-out_arg_list: (T_VARARGS | _arg_list ["," T_VARARGS])
+in_arg_list: (varargs | (_arg_list "," _arg_list_with_default | _arg_list_with_default | _arg_list) ["," varargs])
+out_arg_list: (varargs | _arg_list ["," varargs])
+varargs: T_VARARGS
 
 T_INT: "int"
 T_FLOAT: "float"
