@@ -42,12 +42,6 @@ namespace uuid {
     }
 }
 
-std::string str(const json& j)
-{
-    const auto &v = j.as< std::vector<uint8_t> >(byte_string_arg, semantic_tag::base64);
-    return std::string{v.begin(), v.end()};
-}
-
 json bin(const char *s, int size)
 {
     if(size == -1) size = strlen(s);
@@ -113,7 +107,7 @@ json RemoteAPIClient::call(const std::string &func, const json &args)
     if(!ok)
     {
         if(resp.contains("error"))
-            throw std::runtime_error(str(resp["error"]));
+            throw std::runtime_error(resp["error"].as<std::string>());
         else
             throw std::runtime_error("unknown error");
     }

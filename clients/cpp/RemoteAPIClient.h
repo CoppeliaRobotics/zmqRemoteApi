@@ -9,8 +9,6 @@
 
 using namespace jsoncons;
 
-std::string str(const json& j);
-
 json bin(const char *s, int size = -1);
 json bin(const uint8_t *b, int size);
 json bin(const std::string &s);
