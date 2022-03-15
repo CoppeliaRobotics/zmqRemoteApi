@@ -111,3 +111,37 @@ class FuncDef:
     def validate(self):
         self.in_args.validate()
         self.out_args.validate()
+
+    ALL = object()
+
+    @staticmethod
+    def get(funcs):
+        import re
+        import sys
+
+        from zmqRemoteApi import RemoteAPIClient
+        from calltip import CallTipParser
+
+        client = RemoteAPIClient()
+        sim = client.getObject('sim')
+        parser = CallTipParser()
+        if funcs is FuncDef.ALL:
+            funcs = [func for func in sim.getApiFunc(-1, '+')
+                     if re.match(r'^sim\.', func) and func not in {
+                         'sim.test',
+                         'sim.auxFunc',  # reserved function - do not use
+                         'sim.handleExtCalls',  # Python only
+                     }]
+        func_defs = {}
+        for func in funcs:
+            s = sim.getApiInfo(-1, func).splitlines()[0]
+            try:
+                tree = parser.parse(s)
+                func_defs[func] = parser.transform(tree)
+            except Exception as e:
+                raise Exception(f'{func}: {e}')
+        return func_defs
+
+    @staticmethod
+    def get_all():
+        return FuncDef.get(FuncDef.ALL)
