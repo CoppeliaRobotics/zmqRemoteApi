@@ -84,7 +84,7 @@ RemoteAPIClient::RemoteAPIClient(const std::string host, int rpcPort, int cntPor
 
     if(cntPort == -1)
         cntPort = rpcPort + 1;
-    
+
     uuid = uuid::generate_uuid_v4();
 
     auto rpcAddr = (boost::format("tcp://%s:%d") % host % rpcPort).str();
@@ -133,13 +133,13 @@ void RemoteAPIClient::setVerbose(int level)
 
 void RemoteAPIClient::setStepping(bool enable)
 {
-    call("setStepping", {enable,uuid});
+    call("setStepping", {enable, uuid});
 }
 
 void RemoteAPIClient::step(bool wait)
 {
     if(wait) getStepCount(false);
-    call("step",{uuid});
+    call("step", {uuid});
     if(wait) getStepCount(true);
 }
 
