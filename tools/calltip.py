@@ -9,11 +9,11 @@ class CallTipParser:
         def func_def(self, s):
             return FuncDef(**dict([x for x in s if x]))
         def in_arg_list(self, s):
-            return ('in_args', [x for x in s if x is not None])
+            return ('in_args', ArgList([x for x in s if x is not None]))
         def func_name(self, s):
             return ('func_name', '.'.join(x.value for x in s))
         def out_arg_list(self, s):
-            return ('out_args', [x for x in s if x is not None])
+            return ('out_args', ArgList([x for x in s if x is not None]))
         def arg(self, s):
             d = dict([x for y in s for x in y])
             return TableArg(**d) if 'item_type' in d else Arg(**d)
@@ -87,8 +87,15 @@ class TableArgDef(TableArg):
 class VarArgs:
     pass
 
+class ArgList(list):
+    def is_variadic(self) -> bool:
+        if self:
+            return isinstance(self[-1], VarArgs)
+        else:
+            return False
+
 @dataclass
 class FuncDef:
     func_name: str
-    in_args: list = field(default_factory=list)
-    out_args: list = field(default_factory=list)
+    in_args: ArgList = field(default_factory=ArgList)
+    out_args: ArgList = field(default_factory=ArgList)
