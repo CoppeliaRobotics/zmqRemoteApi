@@ -1,7 +1,7 @@
 func_def: [out_arg_list "="] func_name "(" [in_arg_list] ")"
 func_name: ID ("." ID)*
 _type: type | array_type | array_type_fixed | array_type_range | array_type_min
-_basic_type: T_INT | T_FLOAT | T_BOOL | T_BUFFER | T_STRING | T_MAP | T_FUNC
+_basic_type: T_INT | T_FLOAT | T_BOOL | T_BUFFER | T_STRING | T_MAP | T_FUNC | T_ANY
 type: _basic_type
 array_type: _basic_type "[" "]"
 array_type_fixed: _basic_type "[" NUM "]"
@@ -28,6 +28,7 @@ T_BUFFER: "buffer"
 T_STRING: "string"
 T_MAP: "map"
 T_FUNC: "func"
+T_ANY: "any"
 T_VARARGS: "..."
 T_RANGE: ".."
 T_STAR: "*"
