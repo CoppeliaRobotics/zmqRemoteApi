@@ -31,7 +31,7 @@ end
 
 function zmqRemoteApi.handleRequest(req)
     if zmqRemoteApi.verbose()>1 then
-        print('request received:',req)
+        print('Received request:',req)
     end
     local resp={}
     if req['func']~=nil and req['func']~='' then
@@ -55,7 +55,7 @@ function zmqRemoteApi.handleRequest(req)
     end
     resp['success']=resp['error']==nil
     if zmqRemoteApi.verbose()>1 then
-        print('returning response:',resp)
+        print('Sending response:',resp)
     end
     return resp
 end
@@ -68,7 +68,7 @@ function zmqRemoteApi.handleRawMessage(rawReq)
         if status then return resp end
         return cbor.encode({success=false,error=resp})
     else
-        sim.addLog(sim.verbosity_errors,'decode error: '..req)
+        sim.addLog(sim.verbosity_errors,'Decode error: '..req)
         return ''
     end
 end
@@ -95,8 +95,8 @@ function zmqRemoteApi.handleQueue()
 end
 
 function zmqRemoteApi.publishStepCount()
-    if zmqRemoteApi.verbose()>1 then
-        print('publishing simulationTimeStepCount='..simulationTimeStepCount)
+    if zmqRemoteApi.verbose()>3 then
+        print('Publishing simulationTimeStepCount='..simulationTimeStepCount)
     end
     simZMQ.send(cntSocket,sim.packUInt32Table{simulationTimeStepCount},0)
 end
@@ -187,7 +187,7 @@ function sysCall_actuation()
 end
 
 function sysCall_afterSimulation()
-    steppingClients={} 
+    steppingClients={}
     steppedClients={}
 end
 
