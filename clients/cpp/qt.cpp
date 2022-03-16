@@ -15,11 +15,12 @@
 int main(int argc, char **argv)
 {
     RemoteAPIClient client;
+    auto sim = client.getObject().sim();
 
-    auto visionSensorHandle = client.call("sim.getObject", {"/VisionSensor"})[0];
+    auto visionSensorHandle = sim.getObject("/VisionSensor");
 
     client.setStepping(true);
-    client.call("sim.startSimulation");
+    sim.startSimulation();
 
     QApplication app(argc, argv);
     auto mainWindow = new QMainWindow();
@@ -33,10 +34,7 @@ int main(int argc, char **argv)
     vbox->addWidget(btnStep);
     QObject::connect(btnStep, &QPushButton::clicked, [&] {
         client.step();
-        auto ret = client.call("sim.getVisionSensorCharImage", {visionSensorHandle});
-        auto img = ret[0].as<std::vector<uint8_t>>();
-        auto resX = ret[1].as<int>();
-        auto resY = ret[2].as<int>();
+        auto [img, resX, resY] = sim.getVisionSensorCharImage(visionSensorHandle);
         QImage image(img.data(), resX, resY, QImage::Format_RGB888);
         label->setMinimumSize(resX, resY);
         label->setPixmap(QPixmap::fromImage(image.mirrored(), Qt::AutoColor));
@@ -45,7 +43,7 @@ int main(int argc, char **argv)
     btnStep->clicked();
     auto ret = app.exec();
 
-    client.call("sim.stopSimulation");
+    sim.stopSimulation();
 
     return ret;
 }

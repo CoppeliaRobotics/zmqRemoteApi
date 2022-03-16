@@ -16,11 +16,6 @@
 #include <opencv2/imgcodecs.hpp>
 #include <opencv2/highgui.hpp>
 
-json bin(const cv::Mat &mat)
-{
-    return bin(mat.data, mat.rows * mat.cols * mat.elemSize());
-}
-
 int edgeThresh = 12;
 cv::Mat image, gray, blurImage, edge, cedge;
 const char* window_name = "Press any key to step, q to quit";
@@ -39,21 +34,19 @@ static void onTrackbar(int value, void *data)
 int main()
 {
     RemoteAPIClient client;
+    auto sim = client.getObject().sim();
 
-    auto visionSensorHandle = client.call("sim.getObject", {"/VisionSensor"})[0];
-    auto passiveVisionSensorHandle = client.call("sim.getObject", {"/PassiveVisionSensor"})[0];
+    auto visionSensorHandle = sim.getObject("/VisionSensor");
+    auto passiveVisionSensorHandle = sim.getObject("/PassiveVisionSensor");
 
     client.setStepping(true);
-    client.call("sim.startSimulation");
+    sim.startSimulation();
 
     while(1)
     {
         client.step();
 
-        auto ret = client.call("sim.getVisionSensorCharImage", {visionSensorHandle});
-        auto img = ret[0].as<std::vector<uint8_t>>();
-        auto resX = ret[1].as<int>();
-        auto resY = ret[2].as<int>();
+        auto [img, resX, resY] = sim.getVisionSensorCharImage(visionSensorHandle);
 
         image = cv::Mat(resY, resX, CV_8UC3, img.data());
         // In CoppeliaSim images are left to right (x-axis), and bottom to top (y-axis)
@@ -75,13 +68,13 @@ int main()
         // Write displayed image back to CoppeliaSim:
         cv::cvtColor(cedge, cedge, cv::COLOR_BGR2RGB);
         cv::flip(cedge, cedge, 0);
-        client.call("sim.setVisionSensorCharImage", {passiveVisionSensorHandle, bin(cedge)});
+        sim.setVisionSensorCharImage(passiveVisionSensorHandle, std::vector<uint8_t>(cedge.data, cedge.data + cedge.total() * cedge.elemSize()));
 
         // Wait for a key stroke; the same function arranges events processing:
         auto key = cv::waitKey(0) & 0xFF;
         if(key == 'q' || key == 27) break;
     }
-    client.call("sim.stopSimulation");
+    sim.stopSimulation();
 
     return 0;
 }

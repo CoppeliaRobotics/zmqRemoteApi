@@ -5,16 +5,15 @@
 int main()
 {
     RemoteAPIClient client;
+    auto sim = client.getObject().sim();
     client.setStepping(true);
-    client.call("sim.startSimulation", nullptr);
-    float simTime=0.0f;
-    while (simTime<3.0f)
+    sim.startSimulation();
+    float simTime = 0.0f;
+    while((simTime = sim.getSimulationTime()) < 3)
     {
         std::cout << "Simulation time: " << std::setprecision(3) << simTime << " [s]" << std::endl;
         client.step();
-        simTime=client.call("sim.getSimulationTime")[0].as<float>();
-    }    
-    client.call("sim.stopSimulation", nullptr);
-
+    }
+    sim.stopSimulation();
     return 0;
 }
