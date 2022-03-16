@@ -1,17 +1,22 @@
 def cpp_type(arg):
-    if arg.type == 'array':
-        return f'std::vector<{cpp_type(type("", (), {"type": arg.item_type}))}>'
-    if arg.type == 'buffer':
-        return f'std::vector<uint8_t>'
-    if arg.type == 'string':
-        return 'std::string'
-    if arg.type == 'func':
-        return 'std::string'
-    if arg.type == 'map':
-        return 'std::map<std::string, json>'
-    if arg.type == 'any':
-        return 'json'
-    return arg.type
+    def _(t):
+        if t == 'array':
+            return f'std::vector<{_(arg.item_type)}>'
+        if t == 'buffer':
+            return 'std::vector<uint8_t>'
+        if t == 'string':
+            return 'std::string'
+        if t == 'func':
+            return 'std::string'
+        if t == 'map':
+            return 'json'
+        if t == 'any':
+            return 'json'
+        return t
+    if arg.is_optional():
+        return f'std::optional<{_(arg.type)}>'
+    else:
+        return _(arg.type)
 
 def cpp_types(args):
     return ', '.join(map(cpp_type, args))
@@ -21,6 +26,15 @@ def cpp_arg(arg):
 
 def cpp_args(args):
     return ', '.join(map(cpp_arg, args))
+
+def cpp_arg_d(arg):
+    if arg.is_optional():
+        return f'{cpp_type(arg)} {arg.name} = {{}}'
+    else:
+        return cpp_arg(arg)
+
+def cpp_args_d(args):
+    return ', '.join(map(cpp_arg_d, args))
 
 def cpp_rets(args):
     if len(args) == 0:
