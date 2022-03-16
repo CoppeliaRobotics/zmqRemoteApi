@@ -71,6 +71,9 @@ class Arg:
     name: str
     type: str
 
+    def is_optional(self) -> bool:
+        return False
+
 @dataclass
 class TableArg(Arg):
     item_type: str = None
@@ -81,9 +84,15 @@ class TableArg(Arg):
 class ArgDef(Arg):
     default: Any = None
 
+    def is_optional(self) -> bool:
+        return True
+
 @dataclass
 class TableArgDef(TableArg):
     default: Any = None
+
+    def is_optional(self) -> bool:
+        return True
 
 @dataclass
 class VarArgs:
