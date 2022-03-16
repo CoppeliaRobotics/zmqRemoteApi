@@ -193,3 +193,7 @@ json RemoteAPIClient::recv()
 
     return j;
 }
+
+#ifdef SIM_REMOTEAPICLIENT_OBJECTS
+#include "RemoteAPIObjects.cpp"
+#endif // SIM_REMOTEAPICLIENT_OBJECTS

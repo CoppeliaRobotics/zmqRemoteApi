@@ -14,6 +14,10 @@ json bin(const uint8_t *b, int size);
 json bin(const std::string &s);
 json bin(const std::vector<uint8_t> &v);
 
+#ifdef SIM_REMOTEAPICLIENT_OBJECTS
+#include "RemoteAPIObjects.h"
+#endif // SIM_REMOTEAPICLIENT_OBJECTS
+
 class RemoteAPIClient
 {
 public:
@@ -24,6 +28,10 @@ public:
     void setVerbose(int level = 1);
     void setStepping(bool enable = true);
     void step(bool wait = true);
+
+#ifdef SIM_REMOTEAPICLIENT_OBJECTS
+#include "RemoteAPIClientShortcuts.h"
+#endif // SIM_REMOTEAPICLIENT_OBJECTS
 
 protected:
     long getStepCount(bool wait);

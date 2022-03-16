@@ -3,9 +3,22 @@ project(zmqRemoteApi-client-cpp3)
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_MACOSX_RPATH 1)
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 17)
 
 find_package(Eigen3 REQUIRED)
+
+if(NOT LIBPLUGIN_DIR)
+    if(DEFINED ENV{COPPELIASIM_ROOT_DIR})
+        set(LIBPLUGIN_DIR $ENV{COPPELIASIM_ROOT_DIR}/programming/libPlugin)
+    else()
+        message(FATAL_ERROR "Environment variable COPPELIASIM_ROOT_DIR is not set")
+    endif()
+endif()
+list(APPEND CMAKE_MODULE_PATH
+    ${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules
+    ${LIBPLUGIN_DIR}/cmake)
+find_package(CoppeliaSim 4.1.0.0 REQUIRED)
+find_package(Python3 REQUIRED COMPONENTS Interpreter)
 
 include(FetchContent)
 
@@ -29,8 +42,23 @@ if(NOT cppzmq_POPULATED)
     add_subdirectory(${cppzmq_SOURCE_DIR} ${cppzmq_BINARY_DIR} EXCLUDE_FROM_ALL)
 endif()
 
+file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/generated)
+
+add_custom_command(OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/generated/calltips.json" COMMAND ${CMAKE_COMMAND} -E env PYTHONPATH="${CMAKE_CURRENT_SOURCE_DIR}/../python" ${Python3_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/../../tools/get_raw_calltips.py" "${CMAKE_CURRENT_BINARY_DIR}/generated/calltips.json")
+
+set(generatedFiles)
+file(GLOB templateFiles RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}/templates/ ${CMAKE_CURRENT_SOURCE_DIR}/templates/*)
+foreach(templateFile ${templateFiles})
+    add_custom_command(OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/generated/${templateFile}" COMMAND ${Python3_EXECUTABLE} "${LIBPLUGIN_DIR}/simStubsGen/external/pycpp/pycpp.py" -p "calltips_json=${CMAKE_CURRENT_BINARY_DIR}/generated/calltips.json" -i "${CMAKE_CURRENT_SOURCE_DIR}/templates/${templateFile}" -o "${CMAKE_CURRENT_BINARY_DIR}/generated/${templateFile}" -P "${CMAKE_CURRENT_SOURCE_DIR}/../../tools" -P "${CMAKE_CURRENT_SOURCE_DIR}" DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/templates/${templateFile}" "${CMAKE_CURRENT_BINARY_DIR}/generated/calltips.json" "${CMAKE_CURRENT_SOURCE_DIR}/cpp_utils.py")
+    list(APPEND generatedFiles "${CMAKE_CURRENT_BINARY_DIR}/generated/${templateFile}")
+endforeach()
+add_custom_target(generate_code DEPENDS ${generatedFiles} "${CMAKE_CURRENT_BINARY_DIR}/generated/calltips.json")
+
 add_library(RemoteAPIClient STATIC RemoteAPIClient.cpp)
+add_dependencies(RemoteAPIClient generate_code)
+target_compile_definitions(RemoteAPIClient PUBLIC -DSIM_REMOTEAPICLIENT_OBJECTS)
 target_include_directories(RemoteAPIClient PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/jsoncons/include)
+target_include_directories(RemoteAPIClient PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/generated)
 target_link_libraries(RemoteAPIClient PUBLIC cppzmq)
 
 add_executable(example example.cpp)
