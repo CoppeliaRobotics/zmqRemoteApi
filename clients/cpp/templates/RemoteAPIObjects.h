@@ -22,3 +22,14 @@ namespace RemoteAPIObject
 
 #py endfor
 };
+
+class RemoteAPIObjects
+{
+public:
+    RemoteAPIObjects(RemoteAPIClient *client);
+#py for obj, func_defs in FuncDef.from_calltips_json(pycpp.params['calltips_json']).items():
+    RemoteAPIObject::`obj` `obj`();
+#py endfor
+private:
+    RemoteAPIClient *client;
+};

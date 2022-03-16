@@ -30,7 +30,9 @@ public:
     void step(bool wait = true);
 
 #ifdef SIM_REMOTEAPICLIENT_OBJECTS
-#include "RemoteAPIClientShortcuts.h"
+    inline RemoteAPIObjects& getObject() { return remoteAPIObjects; }
+private:
+    RemoteAPIObjects remoteAPIObjects{this};
 #endif // SIM_REMOTEAPICLIENT_OBJECTS
 
 protected:

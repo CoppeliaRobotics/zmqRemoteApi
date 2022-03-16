@@ -40,3 +40,16 @@ namespace RemoteAPIObject
 #py endfor
 #py endfor
 };
+
+RemoteAPIObjects::RemoteAPIObjects(RemoteAPIClient *client)
+{
+    this->client = client;
+}
+
+#py for obj, func_defs in FuncDef.from_calltips_json(pycpp.params['calltips_json']).items():
+RemoteAPIObject::`obj` RemoteAPIObjects::`obj`()
+{
+    return RemoteAPIObject::`obj`(this->client);
+}
+
+#py endfor
