@@ -16,7 +16,7 @@ namespace RemoteAPIObject
 #py if func_def.in_args.is_variadic() or func_def.out_args.is_variadic():
 #py continue
 #py endif
-    `cpp_rets(func_def.out_args)` `func`(`cpp_args(func_def.in_args)`);
+    `cpp_rets(func_def.out_args)` `func`(`cpp_args_d(func_def.in_args)`);
 #py endfor
     };
 
