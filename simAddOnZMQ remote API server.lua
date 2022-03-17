@@ -48,7 +48,8 @@ function zmqRemoteApi.handleRequest(req)
         end
     elseif req['eval']~=nil and req['eval']~='' then
         local status,retvals=pcall(function()
-            local ret={loadstring('return '..req['eval'])()}
+            -- cannot prefix 'return ' here, otherwise non-trivial code breaks
+            local ret={loadstring(req['eval'])()}
             return ret
         end)
         resp[status and 'ret' or 'error']=retvals
