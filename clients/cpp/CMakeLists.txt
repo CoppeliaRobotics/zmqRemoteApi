@@ -45,11 +45,12 @@ endif()
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/generated)
 
 add_custom_command(OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/generated/calltips.json" COMMAND ${CMAKE_COMMAND} -E env PYTHONPATH="${CMAKE_CURRENT_SOURCE_DIR}/../python" ${Python3_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/../../tools/get_raw_calltips.py" "${CMAKE_CURRENT_BINARY_DIR}/generated/calltips.json")
+add_custom_command(OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/generated/constants.json" COMMAND ${CMAKE_COMMAND} -E env PYTHONPATH="${CMAKE_CURRENT_SOURCE_DIR}/../python" ${Python3_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/../../tools/get_constants.py" "${CMAKE_CURRENT_BINARY_DIR}/generated/constants.json")
 
 set(generatedFiles)
 file(GLOB templateFiles RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}/templates/ ${CMAKE_CURRENT_SOURCE_DIR}/templates/*)
 foreach(templateFile ${templateFiles})
-    add_custom_command(OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/generated/${templateFile}" COMMAND ${Python3_EXECUTABLE} "${LIBPLUGIN_DIR}/simStubsGen/external/pycpp/pycpp.py" -p "calltips_json=${CMAKE_CURRENT_BINARY_DIR}/generated/calltips.json" -i "${CMAKE_CURRENT_SOURCE_DIR}/templates/${templateFile}" -o "${CMAKE_CURRENT_BINARY_DIR}/generated/${templateFile}" -P "${CMAKE_CURRENT_SOURCE_DIR}/../../tools" -P "${CMAKE_CURRENT_SOURCE_DIR}" DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/templates/${templateFile}" "${CMAKE_CURRENT_BINARY_DIR}/generated/calltips.json" "${CMAKE_CURRENT_SOURCE_DIR}/cpp_utils.py")
+    add_custom_command(OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/generated/${templateFile}" COMMAND ${Python3_EXECUTABLE} "${LIBPLUGIN_DIR}/simStubsGen/external/pycpp/pycpp.py" -p "calltips_json=${CMAKE_CURRENT_BINARY_DIR}/generated/calltips.json" -p "constants_json=${CMAKE_CURRENT_BINARY_DIR}/generated/constants.json" -i "${CMAKE_CURRENT_SOURCE_DIR}/templates/${templateFile}" -o "${CMAKE_CURRENT_BINARY_DIR}/generated/${templateFile}" -P "${CMAKE_CURRENT_SOURCE_DIR}/../../tools" -P "${CMAKE_CURRENT_SOURCE_DIR}" DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/templates/${templateFile}" "${CMAKE_CURRENT_BINARY_DIR}/generated/calltips.json" "${CMAKE_CURRENT_BINARY_DIR}/generated/constants.json" "${CMAKE_CURRENT_SOURCE_DIR}/cpp_utils.py")
     list(APPEND generatedFiles "${CMAKE_CURRENT_BINARY_DIR}/generated/${templateFile}")
 endforeach()
 add_custom_target(generate_code DEPENDS ${generatedFiles} "${CMAKE_CURRENT_BINARY_DIR}/generated/calltips.json")
