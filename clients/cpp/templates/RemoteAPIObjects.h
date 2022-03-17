@@ -1,10 +1,11 @@
 #py from calltip import FuncDef
 #py from cpp_utils import *
+#py all_func_defs = FuncDef.from_calltips_json(pycpp.params['calltips_json'])
 class RemoteAPIClient;
 
 namespace RemoteAPIObject
 {
-#py for obj, func_defs in FuncDef.from_calltips_json(pycpp.params['calltips_json']).items():
+#py for obj, func_defs in all_func_defs.items():
     class `obj`
     {
     protected:
@@ -27,7 +28,7 @@ class RemoteAPIObjects
 {
 public:
     RemoteAPIObjects(RemoteAPIClient *client);
-#py for obj, func_defs in FuncDef.from_calltips_json(pycpp.params['calltips_json']).items():
+#py for obj, func_defs in all_func_defs.items():
     RemoteAPIObject::`obj` `obj`();
 #py endfor
 private:
