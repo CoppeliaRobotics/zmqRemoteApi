@@ -2,9 +2,7 @@
 
 ### Protocol
 
-Connect a [`REQ`](https://zeromq.org/socket-api/#req-socket) socket to the endpoint (by default the ZMQ remote API server will listen to `tcp://*:23000`), send a message (see [request](#request) below), and read the response (see [response](#response) below). The requests/responses are encoded/decoded using [CBOR](https://cbor.io) format.
-
-Example implementation for some languages are available in the [clients](tree/master/clients) directory.
+Connect a [`REQ`](https://zeromq.org/socket-api/#req-socket) socket to the endpoint (by default the ZMQ remote API server will listen to `tcp://*:23000`), send a message (see [request](#request) below), and read the response (see [response](#response) below). The requests/responses content is described in the next section using JSON notation, however the messages must be encoded/decoded using [CBOR](https://cbor.io).
 
 #### Request
 

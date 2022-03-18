@@ -90,9 +90,9 @@ Check out the examples in [`clients/python`](clients/python).
 int main()
 {
     RemoteAPIClient client;
+    auto sim = client.getObject().sim();
 
-    auto ret = client.call("sim.getObject", {"/Floor"});
-    int handle = ret[0];
+    int handle = sim.getObject("/Floor");
 
     return 0;
 }
@@ -115,7 +115,7 @@ Check out the examples in [`clients/java`](clients/java).
 ```octave
 client = RemoteAPIClient();
 sim = client.getObject('sim');
-ret = sim.getObject('/Floor')
+handle = sim.getObject('/Floor')
 ```
 
 Check out the examples in [`clients/octave`](clients/octave).
@@ -125,7 +125,7 @@ Check out the examples in [`clients/octave`](clients/octave).
 ```matlab
 client = RemoteAPIClient();
 sim = client.getObject('sim');
-ret = sim.getObject('/Floor')
+handle = sim.getObject('/Floor')
 ```
 
 Check out the examples in [`clients/matlab`](clients/matlab).
