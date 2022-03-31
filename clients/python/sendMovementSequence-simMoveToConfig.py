@@ -30,7 +30,7 @@ for i in range(6):
 # Set-up some movement variables:
 mVel = 100 * math.pi / 180
 mAccel = 150 * math.pi / 180
-mJerk = 80 * math.pi / 180
+mJerk = 100 * math.pi / 180
 maxVel=[mVel,mVel,mVel,mVel,mVel,mVel]
 maxAccel=[mAccel,mAccel,mAccel,mAccel,mAccel,mAccel]
 maxJerk=[mJerk,mJerk,mJerk,mJerk,mJerk,mJerk]
