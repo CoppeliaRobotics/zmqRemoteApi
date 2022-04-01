@@ -102,13 +102,9 @@ Check out the examples in [`clients/cpp`](clients/cpp).
 
 #### Java client
 
-```java
-RemoteAPIClient client = new RemoteAPIClient();
-JSONArray ret = client.call("sim.getObject", "/Floor");
-int handle = ret.get(0);
-```
+The Java client is still experimental.
 
-Check out the examples in [`clients/java`](clients/java).
+See [here](clients/java).
 
 #### Octave client
 
