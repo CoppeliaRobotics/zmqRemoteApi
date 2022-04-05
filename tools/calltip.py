@@ -35,7 +35,8 @@ class CallTipParser:
         def id(self, t):
             return '.'.join(x.value for x in t)
         def map(self, s):
-            return eval(s[0])
+            fs = [x for x in s if x is not None]
+            return dict((str(a), b) for a, b in zip(fs[::2], fs[1::2]))
         def array(self, s):
             return list(s)
         def type(self, t):
