@@ -142,7 +142,7 @@ class FuncDef:
             s = k.split('.')
             if len(s) == 2:
                 obj, func = s
-                if obj not in ('sim',):
+                if not obj.startswith('sim'):
                     continue
                 if obj == 'sim' and func in {'test', 'auxFunc', 'handleExtCalls'}:
                     continue
