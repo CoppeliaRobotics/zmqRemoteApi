@@ -14,26 +14,26 @@ namespace RemoteAPIObject
 #py endif
     `cpp_rets(func_def.out_args)` `obj`::`func`(`cpp_args(func_def.in_args)`)
     {
-        bool brk = false;
-        json args(json_array_arg);
+        bool _brk = false;
+        json _args(json_array_arg);
 #py for arg in func_def.in_args:
 #py wrap = (lambda x: f'bin({x})') if arg.type == 'buffer' else (lambda x: x)
 #py if arg.is_optional():
         if(`arg.name`)
         {
-            if(brk) throw std::runtime_error("no gaps allowed");
-            else args.push_back(`wrap(f'*{arg.name}')`);
+            if(_brk) throw std::runtime_error("no gaps allowed");
+            else _args.push_back(`wrap(f'*{arg.name}')`);
         }
-        else brk = true;
+        else _brk = true;
 #py else:
-        args.push_back(`wrap(arg.name)`);
+        _args.push_back(`wrap(arg.name)`);
 #py endif
 #py endfor
-        auto r = this->_client->call("`func_def.func_name`", args);
+        auto _ret = this->_client->call("`func_def.func_name`", _args);
 #py if len(func_def.out_args) == 1:
-        return r[0].as<`cpp_type(func_def.out_args[0])`>();
+        return _ret[0].as<`cpp_type(func_def.out_args[0])`>();
 #py elif len(func_def.out_args) > 1:
-        return std::make_tuple(`', '.join(f'r[{i}].as<{cpp_type(arg)}>()' for i, arg in enumerate(func_def.out_args))`);
+        return std::make_tuple(`', '.join(f'_ret[{i}].as<{cpp_type(arg)}>()' for i, arg in enumerate(func_def.out_args))`);
 #py endif
     }
 
