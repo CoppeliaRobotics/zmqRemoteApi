@@ -23,7 +23,10 @@ class CallTipParser:
         def varargs(self, _):
             return VarArgs()
         def number(self, n):
-            return float(n[0])
+            s = n[0]
+            if s.endswith('f'):
+                s = s[:-1]
+            return float(s)
         def string(self, s):
             return s[0][1:-1]
         def true(self, _):

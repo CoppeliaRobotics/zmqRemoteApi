@@ -36,6 +36,10 @@ ID: /[a-z_][a-z0-9_]*/i
 NUM: /[0-9]+/
 SINGLE_QUOTED_STRING  : /'[^']*'/
 
-%import common.SIGNED_NUMBER
+NUMBER: FLOAT ( "f" )? | INT
+SIGNED_NUMBER: ["+"|"-"] NUMBER
+
+%import common.FLOAT
+%import common.INT
 %import common.ESCAPED_STRING
 %ignore /[ \n\t\r]/x
