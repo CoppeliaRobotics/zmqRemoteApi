@@ -5,6 +5,9 @@
 #py f = open(pycpp.params['constants_json'], 'rt')
 #py all_constants = json.load(f)
 #py f.close()
+#py reservedNames = {'union'}
+#py fixReserved = lambda n: n + ('_' if n in reservedNames else '')
+
 class RemoteAPIClient;
 
 namespace RemoteAPIObject
@@ -28,12 +31,18 @@ namespace RemoteAPIObject
 #py if isinstance(v, dict):
         struct _`k` {
 #py for k1, v1 in sorted(v.items()):
-            const int `k1` = `v1`;
+#ifndef `k1`
+            const int `fixReserved(k1)` = `v1`;
+#endif
 #py endfor
         };
-        const _`k` `k`;
+#ifndef `k`
+        const _`k` `fixReserved(k)`;
+#endif
 #py else:
-        const int `k` = `v`;
+#ifndef `k`
+        const int `fixReserved(k)` = `v`;
+#endif
 #py endif
 #py endfor
     };
