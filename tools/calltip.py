@@ -150,5 +150,9 @@ class FuncDef:
                     continue
                 if obj not in ret:
                     ret[obj] = {}
-                ret[obj][func] = FuncDef.from_calltip(v.splitlines()[0])
+                try:
+                    ret[obj][func] = FuncDef.from_calltip(v.splitlines()[0])
+                except lark.exceptions.UnexpectedInput:
+                    print(f'error in {obj}')
+                    raise
         return ret
