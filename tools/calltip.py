@@ -142,9 +142,11 @@ class FuncDef:
             s = k.split('.')
             if len(s) == 2:
                 obj, func = s
-                if obj != 'sim':
+                if obj not in ('sim',):
                     continue
-                if func in {'test', 'auxFunc', 'handleExtCalls'}:
+                if obj == 'sim' and func in {'test', 'auxFunc', 'handleExtCalls'}:
+                    continue
+                if func[0] == '_':
                     continue
                 if obj not in ret:
                     ret[obj] = {}
