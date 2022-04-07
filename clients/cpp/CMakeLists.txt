@@ -20,6 +20,8 @@ list(APPEND CMAKE_MODULE_PATH
 find_package(CoppeliaSim 4.1.0.0 REQUIRED)
 find_package(Python3 REQUIRED COMPONENTS Interpreter)
 
+option(GENERATE "Generate wrappers for objects and methods (requires CoppeliaSim to be running)")
+
 include(FetchContent)
 
 FetchContent_Declare(jsoncons
@@ -95,7 +97,15 @@ endforeach()
 add_custom_target(generate_code DEPENDS ${generatedFiles})
 
 add_library(RemoteAPIClient STATIC RemoteAPIClient.cpp)
-add_dependencies(RemoteAPIClient generate_code)
+if(GENERATE)
+    add_dependencies(RemoteAPIClient generate_code)
+else()
+    foreach(templateFile ${templateFiles})
+        if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/${templateFile}")
+            message(FATAL_ERROR "File ${CMAKE_CURRENT_SOURCE_DIR}/${templateFile} is missing")
+        endif()
+    endforeach()
+endif()
 target_compile_definitions(RemoteAPIClient PUBLIC -DSIM_REMOTEAPICLIENT_OBJECTS)
 target_include_directories(RemoteAPIClient PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/jsoncons/include)
 target_include_directories(RemoteAPIClient BEFORE PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/generated)
