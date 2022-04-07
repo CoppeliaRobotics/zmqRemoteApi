@@ -98,7 +98,7 @@ add_library(RemoteAPIClient STATIC RemoteAPIClient.cpp)
 add_dependencies(RemoteAPIClient generate_code)
 target_compile_definitions(RemoteAPIClient PUBLIC -DSIM_REMOTEAPICLIENT_OBJECTS)
 target_include_directories(RemoteAPIClient PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/jsoncons/include)
-target_include_directories(RemoteAPIClient PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/generated)
+target_include_directories(RemoteAPIClient BEFORE PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/generated)
 target_link_libraries(RemoteAPIClient PUBLIC cppzmq)
 
 add_executable(example example.cpp)
