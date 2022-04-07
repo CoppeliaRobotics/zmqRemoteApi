@@ -142,7 +142,7 @@ class FuncDef:
             s = k.split('.')
             if len(s) == 2:
                 obj, func = s
-                if obj in ('simEigen', ):
+                if obj in ('simEigen', 'simB0', 'simRemoteApi'):
                     continue
                 if not obj.startswith('sim'):
                     continue
