@@ -92,7 +92,7 @@ foreach(templateFile ${templateFiles})
     )
     list(APPEND generatedFiles "${CMAKE_CURRENT_BINARY_DIR}/generated/${templateFile}")
 endforeach()
-add_custom_target(generate_code DEPENDS ${generatedFiles} "${CMAKE_CURRENT_BINARY_DIR}/generated/calltips.json")
+add_custom_target(generate_code DEPENDS ${generatedFiles})
 
 add_library(RemoteAPIClient STATIC RemoteAPIClient.cpp)
 add_dependencies(RemoteAPIClient generate_code)
