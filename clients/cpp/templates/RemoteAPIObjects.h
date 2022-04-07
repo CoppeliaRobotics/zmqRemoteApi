@@ -5,7 +5,7 @@
 #py f = open(pycpp.params['constants_json'], 'rt')
 #py all_constants = json.load(f)
 #py f.close()
-#py reservedNames = {'union'}
+#py reservedNames = {'union','auto'}
 #py fixReserved = lambda n: n + ('_' if n in reservedNames else '')
 
 class RemoteAPIClient;

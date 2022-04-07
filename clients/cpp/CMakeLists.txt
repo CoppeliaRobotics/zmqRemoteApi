@@ -117,6 +117,9 @@ target_link_libraries(example PRIVATE RemoteAPIClient)
 add_executable(synchronousImageTransmission synchronousImageTransmission.cpp)
 target_link_libraries(synchronousImageTransmission PRIVATE RemoteAPIClient)
 
+add_executable(bubbleRobclient bubbleRobClient.cpp)
+target_link_libraries(bubbleRobclient PRIVATE RemoteAPIClient)
+
 find_package(OpenCV COMPONENTS core imgproc highgui)
 if(OpenCV_FOUND)
     add_executable(opencv opencv.cpp)
