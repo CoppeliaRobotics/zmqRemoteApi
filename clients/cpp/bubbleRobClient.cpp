@@ -6,21 +6,19 @@ using namespace std::chrono_literals;
 
 int main(int argc,char* argv[])
 {
-    int portNb=0;
     int leftMotorHandle;
     int rightMotorHandle;
     int sensorHandle;
 
-    if (argc>=5)
+    if (argc>=4)
     {
-        portNb=atoi(argv[1]);
-        leftMotorHandle=atoi(argv[2]);
-        rightMotorHandle=atoi(argv[3]);
-        sensorHandle=atoi(argv[4]);
+        leftMotorHandle=atoi(argv[1]);
+        rightMotorHandle=atoi(argv[2]);
+        sensorHandle=atoi(argv[3]);
     }
     else
     {
-        printf("Indicate following arguments: 'portNumber leftMotorHandle rightMotorHandle sensorHandle'!\n");
+        printf("Indicate following arguments: 'leftMotorHandle rightMotorHandle sensorHandle'!\n");
         std::this_thread::sleep_for(5000ms);
         return 0;
     }
@@ -28,12 +26,13 @@ int main(int argc,char* argv[])
     RemoteAPIClient client;
     auto sim = client.getObject().sim();
 
-    int driveBackStartTime=-99000;
+    float driveBackStartTime=-5.0f;
     float motorSpeeds[2];
 
-    while (true)
+    while ( sim.isHandle(sensorHandle) && (sim.getSimulationState()!=0) )
     {
-        auto [res, dist, vect, h, n]=sim.readProximitySensor(sensorHandle);
+        printf(".");
+        auto [res, dist, detectPt, h, n]=sim.readProximitySensor(sensorHandle);
         float simulationTime=sim.getSimulationTime();
         if (simulationTime-driveBackStartTime<3.0f)
         { // driving backwards while slightly turning:
@@ -49,7 +48,6 @@ int main(int argc,char* argv[])
         }
         sim.setJointTargetVelocity(leftMotorHandle,motorSpeeds[0]);
         sim.setJointTargetVelocity(rightMotorHandle,motorSpeeds[1]);
-        std::this_thread::sleep_for(5ms);
     }
     return(0);
 }
