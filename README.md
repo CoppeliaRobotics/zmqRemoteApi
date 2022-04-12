@@ -32,7 +32,7 @@ $ cmake --install .
 
 #### Python client
 
-(Make sure to have directory `zmqRemoteApi` (from `clients/python`) somewhere in `sys.path`)
+(Make sure to have directory `zmqRemoteApi/clients/python` in `sys.path`/`$PYTHONPATH`)
 
 ```python
 import zmqRemoteApi
