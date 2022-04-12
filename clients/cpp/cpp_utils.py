@@ -4,6 +4,10 @@ def cpp_type(arg):
             return f'std::vector<{_(arg.item_type)}>'
         if t == 'buffer':
             return 'std::vector<uint8_t>'
+        if t == 'int':
+            return 'int64'
+        if t == 'float':
+            return 'double'
         if t == 'string':
             return 'std::string'
         if t == 'func':
