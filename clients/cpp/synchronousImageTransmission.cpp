@@ -24,8 +24,8 @@ int main()
     auto startTime = sim.getSimulationTime();
     while(sim.getSimulationTime() - startTime < 5)
     {
-        auto [img, resX, resY] = sim.getVisionSensorCharImage(visionSensorHandle);
-        sim.setVisionSensorCharImage(passiveVisionSensorHandle, img);
+        auto [img, res] = sim.getVisionSensorImg(visionSensorHandle);
+        sim.setVisionSensorImg(passiveVisionSensorHandle, img);
         client.step();
     }
     sim.stopSimulation();

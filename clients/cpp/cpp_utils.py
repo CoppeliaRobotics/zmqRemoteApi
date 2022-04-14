@@ -5,7 +5,7 @@ def cpp_type(arg):
         if t == 'buffer':
             return 'std::vector<uint8_t>'
         if t == 'int':
-            return 'int64'
+            return 'int64_t'
         if t == 'float':
             return 'double'
         if t == 'string':

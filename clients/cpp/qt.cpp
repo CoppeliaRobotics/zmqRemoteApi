@@ -34,9 +34,9 @@ int main(int argc, char **argv)
     vbox->addWidget(btnStep);
     QObject::connect(btnStep, &QPushButton::clicked, [&] {
         client.step();
-        auto [img, resX, resY] = sim.getVisionSensorCharImage(visionSensorHandle);
-        QImage image(img.data(), resX, resY, QImage::Format_RGB888);
-        label->setMinimumSize(resX, resY);
+        auto [img, res] = sim.getVisionSensorImg(visionSensorHandle);
+        QImage image(img.data(), res[0], res[1], QImage::Format_RGB888);
+        label->setMinimumSize(res[0], res[1]);
         label->setPixmap(QPixmap::fromImage(image.mirrored(), Qt::AutoColor));
     });
     mainWindow->show();

@@ -46,9 +46,9 @@ int main()
     {
         client.step();
 
-        auto [img, resX, resY] = sim.getVisionSensorCharImage(visionSensorHandle);
+        auto [img, res] = sim.getVisionSensorImg(visionSensorHandle);
 
-        image = cv::Mat(resY, resX, CV_8UC3, img.data());
+        image = cv::Mat(res[1], res[0], CV_8UC3, img.data());
         // In CoppeliaSim images are left to right (x-axis), and bottom to top (y-axis)
         // (consistent with the axes of vision sensors, pointing Z outwards, Y up)
         // and color format is RGB triplets, whereas OpenCV uses BGR:
@@ -68,7 +68,7 @@ int main()
         // Write displayed image back to CoppeliaSim:
         cv::cvtColor(cedge, cedge, cv::COLOR_BGR2RGB);
         cv::flip(cedge, cedge, 0);
-        sim.setVisionSensorCharImage(passiveVisionSensorHandle, std::vector<uint8_t>(cedge.data, cedge.data + cedge.total() * cedge.elemSize()));
+        sim.setVisionSensorImg(passiveVisionSensorHandle, std::vector<uint8_t>(cedge.data, cedge.data + cedge.total() * cedge.elemSize()));
 
         // Wait for a key stroke; the same function arranges events processing:
         auto key = cv::waitKey(0) & 0xFF;
