@@ -214,3 +214,13 @@ function step(uuid)
     end
     steppedClients[uuid]=true
 end
+
+-- via the remote API, we should always return a string:
+_S.readCustomDataBlock=sim.readCustomDataBlock
+function sim.readCustomDataBlock(obj,tag)
+    local retVal=_S.readCustomDataBlock(obj,tag)
+    if retVal==nil then
+        retVal=''
+    end
+    return retVal
+end
