@@ -1,11 +1,11 @@
-# MATLAB ZMQ Remote API
+# Octave ZMQ Remote API
 
 This library contains ZMQ Remote API client for MATLAB.
 
 ## Requirements
 
  - **Octave 6.4+**
- - **communication** octave pkg
+ - **communications** octave pkg
  - **zeromq** octave pkg
 
 Packages can be installed with:
