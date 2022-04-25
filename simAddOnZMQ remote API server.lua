@@ -152,7 +152,7 @@ function sysCall_addOnScriptSuspended()
 end
 
 function sysCall_nonSimulation()
-    zmqRemoteApi.publishStepCount() -- so that the last client.step(True) doesn't block
+  -- commented on 25.04.2022  zmqRemoteApi.publishStepCount() -- so that the last client.step(True) doesn't block
     zmqRemoteApi.handleQueue()
 end
 
@@ -192,6 +192,7 @@ function sysCall_actuation()
 end
 
 function sysCall_afterSimulation()
+    zmqRemoteApi.publishStepCount() -- so that the last client.step(True) doesn't block. Added on 25.04.2022
     steppingClients={}
     steppedClients={}
 end
