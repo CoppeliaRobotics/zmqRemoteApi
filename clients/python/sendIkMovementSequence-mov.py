@@ -14,6 +14,7 @@ sim = client.getObject('sim')
 executedMovId = 'notReady'
 targetArm = '/LBR4p'
 stringSignalName = targetArm + '_executedMovId'
+scriptHandle = sim.getScriptHandle(sim.scripttype_childscript,targetArm)
 
 
 def waitForMovementExecuted(id_):
@@ -34,9 +35,7 @@ sim.startSimulation()
 waitForMovementExecuted('ready')
 
 # Get initial pose:
-initialPose, initialConfig = sim.callScriptFunction(
-    'remoteApi_getPoseAndConfig' + '@' + targetArm,
-    sim.scripttype_childscript)
+initialPose, initialConfig = sim.callScriptFunction('remoteApi_getPoseAndConfig',scriptHandle)
 
 # Send first movement sequence:
 targetPose = [0, 0, 0.85, 0, 0, 0, 1]
@@ -47,16 +46,10 @@ movementData = {
     'maxVel': maxVel,
     'maxAccel': maxAccel
 }
-sim.callScriptFunction(
-    'remoteApi_movementDataFunction' + '@' + targetArm,
-    sim.scripttype_childscript,
-    movementData)
+sim.callScriptFunction('remoteApi_movementDataFunction',scriptHandle,movementData)
 
 # Execute first movement sequence:
-sim.callScriptFunction(
-    'remoteApi_executeMovement' + '@' + targetArm,
-    sim.scripttype_childscript,
-    'movSeq1')
+sim.callScriptFunction('remoteApi_executeMovement',scriptHandle,'movSeq1')
 
 # Wait until above movement sequence finished executing:
 waitForMovementExecuted('movSeq1')
@@ -74,10 +67,7 @@ movementData = {
     'maxVel': maxVel,
     'maxAccel': maxAccel
 }
-sim.callScriptFunction(
-    'remoteApi_movementDataFunction' + '@' + targetArm,
-    sim.scripttype_childscript,
-    movementData)
+sim.callScriptFunction('remoteApi_movementDataFunction',scriptHandle,movementData)
 movementData = {
     'id': 'movSeq3',
     'type': 'mov',
@@ -85,20 +75,11 @@ movementData = {
     'maxVel': maxVel,
     'maxAccel': maxAccel
 }
-sim.callScriptFunction(
-    'remoteApi_movementDataFunction' + '@' + targetArm,
-    sim.scripttype_childscript,
-    movementData)
+sim.callScriptFunction('remoteApi_movementDataFunction',scriptHandle,movementData)
 
 # Execute second and third movement sequence:
-sim.callScriptFunction(
-    'remoteApi_executeMovement' + '@' + targetArm,
-    sim.scripttype_childscript,
-    'movSeq2')
-sim.callScriptFunction(
-    'remoteApi_executeMovement' + '@' + targetArm,
-    sim.scripttype_childscript,
-    'movSeq3')
+sim.callScriptFunction('remoteApi_executeMovement',scriptHandle,'movSeq2')
+sim.callScriptFunction('remoteApi_executeMovement',scriptHandle,'movSeq3')
 
 # Wait until above 2 movement sequences finished executing:
 waitForMovementExecuted('movSeq3')

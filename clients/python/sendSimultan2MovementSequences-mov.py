@@ -22,6 +22,8 @@ targetArm2 = '/redArm'
 stringSignalName1 = targetArm1 + '_executedMovId'
 stringSignalName2 = targetArm2 + '_executedMovId'
 
+scriptHandle1 = sim.getScriptHandle(sim.scripttype_childscript,targetArm1)
+scriptHandle2 = sim.getScriptHandle(sim.scripttype_childscript,targetArm2)
 
 def waitForMovementExecuted1(id_):
     global executedMovId1
@@ -64,24 +66,12 @@ movementData = {
     'maxVel': maxVel,
     'maxAccel': maxAccel
 }
-sim.callScriptFunction(
-    'remoteApi_movementDataFunction' + '@' + targetArm1,
-    sim.scripttype_childscript,
-    movementData)
-sim.callScriptFunction(
-    'remoteApi_movementDataFunction' + '@' + targetArm2,
-    sim.scripttype_childscript,
-    movementData)
+sim.callScriptFunction('remoteApi_movementDataFunction',scriptHandle1,movementData)
+sim.callScriptFunction('remoteApi_movementDataFunction',scriptHandle2,movementData)
 
 # Execute first movement sequence:
-sim.callScriptFunction(
-    'remoteApi_executeMovement' + '@' + targetArm1,
-    sim.scripttype_childscript,
-    'movSeq1')
-sim.callScriptFunction(
-    'remoteApi_executeMovement' + '@' + targetArm2,
-    sim.scripttype_childscript,
-    'movSeq1')
+sim.callScriptFunction('remoteApi_executeMovement',scriptHandle1,'movSeq1')
+sim.callScriptFunction('remoteApi_executeMovement',scriptHandle2,'movSeq1')
 
 # Wait until above movement sequence finished executing:
 waitForMovementExecuted1('movSeq1')
@@ -102,14 +92,8 @@ movementData = {
     'maxVel': maxVel,
     'maxAccel': maxAccel
 }
-sim.callScriptFunction(
-    'remoteApi_movementDataFunction' + '@' + targetArm1,
-    sim.scripttype_childscript,
-    movementData)
-sim.callScriptFunction(
-    'remoteApi_movementDataFunction' + '@' + targetArm2,
-    sim.scripttype_childscript,
-    movementData)
+sim.callScriptFunction('remoteApi_movementDataFunction',scriptHandle1,movementData)
+sim.callScriptFunction('remoteApi_movementDataFunction',scriptHandle2,movementData)
 targetConfig = [0, 0, 0, 0, 0, 0]
 targetVel = [0, 0, 0, 0, 0, 0]
 movementData = {
@@ -120,32 +104,14 @@ movementData = {
     'maxVel': maxVel,
     'maxAccel': maxAccel
 }
-sim.callScriptFunction(
-    'remoteApi_movementDataFunction' + '@' + targetArm1,
-    sim.scripttype_childscript,
-    movementData)
-sim.callScriptFunction(
-    'remoteApi_movementDataFunction' + '@' + targetArm2,
-    sim.scripttype_childscript,
-    movementData)
+sim.callScriptFunction('remoteApi_movementDataFunction',scriptHandle1,movementData)
+sim.callScriptFunction('remoteApi_movementDataFunction',scriptHandle2,movementData)
 
 # Execute second and third movement sequence:
-sim.callScriptFunction(
-    'remoteApi_executeMovement' + '@' + targetArm1,
-    sim.scripttype_childscript,
-    'movSeq2')
-sim.callScriptFunction(
-    'remoteApi_executeMovement' + '@' + targetArm2,
-    sim.scripttype_childscript,
-    'movSeq2')
-sim.callScriptFunction(
-    'remoteApi_executeMovement' + '@' + targetArm1,
-    sim.scripttype_childscript,
-    'movSeq3')
-sim.callScriptFunction(
-    'remoteApi_executeMovement' + '@' + targetArm2,
-    sim.scripttype_childscript,
-    'movSeq3')
+sim.callScriptFunction('remoteApi_executeMovement',scriptHandle1,'movSeq2')
+sim.callScriptFunction('remoteApi_executeMovement',scriptHandle2,'movSeq2')
+sim.callScriptFunction('remoteApi_executeMovement',scriptHandle1,'movSeq3')
+sim.callScriptFunction('remoteApi_executeMovement',scriptHandle2,'movSeq3')
 
 # Wait until above 2 movement sequences finished executing:
 waitForMovementExecuted1('movSeq3')

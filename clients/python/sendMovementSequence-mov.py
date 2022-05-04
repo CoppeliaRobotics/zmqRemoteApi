@@ -19,6 +19,7 @@ targetArm = '/blueArm'
 # targetArm = '/redArm'
 
 stringSignalName = targetArm + '_executedMovId'
+scriptHandle = sim.getScriptHandle(sim.scripttype_childscript,targetArm)
 
 
 def waitForMovementExecuted(id_):
@@ -54,16 +55,10 @@ movementData = {
     'maxVel': maxVel,
     'maxAccel': maxAccel
 }
-sim.callScriptFunction(
-    'remoteApi_movementDataFunction' + '@' + targetArm,
-    sim.scripttype_childscript,
-    movementData)
+sim.callScriptFunction('remoteApi_movementDataFunction',scriptHandle,movementData)
 
 # Execute first movement sequence:
-sim.callScriptFunction(
-    'remoteApi_executeMovement' + '@' + targetArm,
-    sim.scripttype_childscript,
-    'movSeq1')
+sim.callScriptFunction('remoteApi_executeMovement',scriptHandle,'movSeq1')
 
 # Wait until above movement sequence finished executing:
 waitForMovementExecuted('movSeq1')
@@ -83,10 +78,7 @@ movementData = {
     'maxVel': maxVel,
     'maxAccel': maxAccel
 }
-sim.callScriptFunction(
-    'remoteApi_movementDataFunction' + '@' + targetArm,
-    sim.scripttype_childscript,
-    movementData)
+sim.callScriptFunction('remoteApi_movementDataFunction',scriptHandle,movementData)
 targetConfig = [0, 0, 0, 0, 0, 0]
 targetVel = [0, 0, 0, 0, 0, 0]
 movementData = {
@@ -97,20 +89,11 @@ movementData = {
     'maxVel': maxVel,
     'maxAccel': maxAccel
 }
-sim.callScriptFunction(
-    'remoteApi_movementDataFunction' + '@' + targetArm,
-    sim.scripttype_childscript,
-    movementData)
+sim.callScriptFunction('remoteApi_movementDataFunction',scriptHandle,movementData)
 
 # Execute second and third movement sequence:
-sim.callScriptFunction(
-    'remoteApi_executeMovement' + '@' + targetArm,
-    sim.scripttype_childscript,
-    'movSeq2')
-sim.callScriptFunction(
-    'remoteApi_executeMovement' + '@' + targetArm,
-    sim.scripttype_childscript,
-    'movSeq3')
+sim.callScriptFunction('remoteApi_executeMovement',scriptHandle,'movSeq2')
+sim.callScriptFunction('remoteApi_executeMovement',scriptHandle,'movSeq3')
 
 # Wait until above 2 movement sequences finished executing:
 waitForMovementExecuted('movSeq3')

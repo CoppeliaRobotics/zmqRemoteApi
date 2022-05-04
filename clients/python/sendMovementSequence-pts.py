@@ -17,7 +17,7 @@ targetArm = '/blueArm'
 # targetArm = '/redArm'
 
 stringSignalName = targetArm + '_executedMovId'
-
+scriptHandle = sim.getScriptHandle(sim.scripttype_childscript,targetArm)
 
 def waitForMovementExecuted(id_):
     global executedMovId, stringSignalName
@@ -48,16 +48,10 @@ movementData = {
     'times': times,
     'j1': j1, 'j2': j2, 'j3': j3, 'j4': j4, 'j5': j5, 'j6': j6
 }
-sim.callScriptFunction(
-    'remoteApi_movementDataFunction' + '@' + targetArm,
-    sim.scripttype_childscript,
-    movementData)
+sim.callScriptFunction('remoteApi_movementDataFunction',scriptHandle,movementData)
 
 # Execute movement sequence:
-sim.callScriptFunction(
-    'remoteApi_executeMovement' + '@' + targetArm,
-    sim.scripttype_childscript,
-    'movSeq1')
+sim.callScriptFunction('remoteApi_executeMovement',scriptHandle,'movSeq1')
 
 # Wait until above movement sequence finished executing:
 waitForMovementExecuted('movSeq1')
