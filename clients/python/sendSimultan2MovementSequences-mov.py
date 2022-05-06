@@ -22,8 +22,10 @@ targetArm2 = '/redArm'
 stringSignalName1 = targetArm1 + '_executedMovId'
 stringSignalName2 = targetArm2 + '_executedMovId'
 
-scriptHandle1 = sim.getScriptHandle(sim.scripttype_childscript,targetArm1)
-scriptHandle2 = sim.getScriptHandle(sim.scripttype_childscript,targetArm2)
+objHandle1 = sim.getObject(targetArm1)
+scriptHandle1 = sim.getScript(sim.scripttype_childscript,objHandle1)
+objHandle2 = sim.getObject(targetArm2)
+scriptHandle2 = sim.getScript(sim.scripttype_childscript,objHandle2)
 
 def waitForMovementExecuted1(id_):
     global executedMovId1

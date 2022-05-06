@@ -19,7 +19,8 @@ targetArm = '/blueArm'
 # targetArm = '/redArm'
 
 stringSignalName = targetArm + '_executedMovId'
-scriptHandle = sim.getScriptHandle(sim.scripttype_childscript,targetArm)
+objHandle = sim.getObject(targetArm)
+scriptHandle = sim.getScript(sim.scripttype_childscript,objHandle)
 
 
 def waitForMovementExecuted(id_):
