@@ -75,6 +75,7 @@ function zmqRemoteApi.handleRawMessage(rawReq)
 end
 
 function zmqRemoteApi.handleQueue()
+    local t=sim.getSystemTime()
     while true do
         local rc,revents=simZMQ.poll({rpcSocket},{simZMQ.POLLIN},0)
         if rc<=0 then break end
@@ -92,6 +93,7 @@ function zmqRemoteApi.handleQueue()
         end
 
         simZMQ.send(rpcSocket,resp,0)
+        if sim.getSystemTime()-t>maxTimeSlot then break end
     end
 end
 
@@ -114,6 +116,7 @@ function sysCall_init()
     simZMQ.__raiseErrors(true) -- so we don't need to check retval with every call
     rpcPort=tonumber(sim.getStringNamedParam('zmqRemoteApi.rpcPort') or '23000')
     cntPort=tonumber(sim.getStringNamedParam('zmqRemoteApi.cntPort') or (rpcPort+1))
+    maxTimeSlot=tonumber(sim.getStringNamedParam('zmqRemoteApi.maxTimeSlot') or '0.005')
     if zmqRemoteApi.verbose()>0 then
         sim.addLog(sim.verbosity_scriptinfos,string.format('ZeroMQ Remote API server starting (rpcPort=%d, cntPort=%d)...',rpcPort,cntPort))
     end
@@ -152,7 +155,6 @@ function sysCall_addOnScriptSuspended()
 end
 
 function sysCall_nonSimulation()
-  -- commented on 25.04.2022  zmqRemoteApi.publishStepCount() -- so that the last client.step(True) doesn't block
     zmqRemoteApi.handleQueue()
 end
 
@@ -192,7 +194,7 @@ function sysCall_actuation()
 end
 
 function sysCall_afterSimulation()
-    zmqRemoteApi.publishStepCount() -- so that the last client.step(True) doesn't block. Added on 25.04.2022
+    zmqRemoteApi.publishStepCount() -- so that the last client.step(True) doesn't block
     steppingClients={}
     steppedClients={}
 end
