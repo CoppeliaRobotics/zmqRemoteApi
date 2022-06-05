@@ -10,6 +10,17 @@ namespace RemoteAPIObject
     public:
         sim(RemoteAPIClient *client);
 
+        // DEPRECATED START
+        double getJointMaxForce(int64_t jointHandle);
+        void setJointMaxForce(int64_t objectHandle, double forceOrTorque);
+        int64_t createPureShape(int64_t primitiveType, int64_t options, std::vector<double> sizes, double mass, std::optional<std::vector<int64_t>> precision = {});
+        void removeObject(int64_t objectHandle);
+        std::tuple<std::vector<uint8_t>, std::vector<int64_t>> getVisionSensorDepthBuffer(int64_t sensorHandle, std::optional<std::vector<int64_t>> pos = {}, std::optional<std::vector<int64_t>> size = {});
+        std::tuple<std::vector<uint8_t>, std::vector<int64_t>> getVisionSensorCharImage(int64_t sensorHandle, std::optional<std::vector<int64_t>> pos = {}, std::optional<std::vector<int64_t>> size = {});
+        void setVisionSensorCharImage(int64_t sensorHandle, std::vector<uint8_t> image);
+        // DEPRECATED END
+
+
         int64_t addDrawingObject(int64_t objectType, double size, double duplicateTolerance, int64_t parentObjectHandle, int64_t maxItemCount, std::optional<std::vector<double>> ambient_diffuse = {}, std::optional<std::vector<double>> reserved = {}, std::optional<std::vector<double>> specular = {}, std::optional<std::vector<double>> emission = {});
         int64_t addDrawingObjectItem(int64_t drawingObjectHandle, std::vector<double> itemData);
         void addForce(int64_t shapeHandle, std::vector<double> position, std::vector<double> force);
@@ -65,7 +76,6 @@ namespace RemoteAPIObject
         int64_t createPath(std::vector<double> ctrlPts, std::optional<int64_t> options = {}, std::optional<int64_t> subdiv = {}, std::optional<double> smoothness = {}, std::optional<int64_t> orientationMode = {}, std::optional<std::vector<double>> upVector = {});
         int64_t createPointCloud(double maxVoxelSize, int64_t maxPtCntPerVoxel, int64_t options, double pointSize);
         int64_t createProximitySensor(int64_t sensorType, int64_t subType, int64_t options, std::vector<int64_t> intParams, std::vector<double> floatParams);
-        int64_t createPureShape(int64_t primitiveType, int64_t options, std::vector<double> sizes, double mass, std::optional<std::vector<int64_t>> precision = {});
         std::tuple<int64_t, int64_t, std::vector<int64_t>> createTexture(std::string fileName, int64_t options, std::optional<std::vector<double>> planeSizes = {}, std::optional<std::vector<double>> scalingUV = {}, std::optional<std::vector<double>> xy_g = {}, std::optional<int64_t> fixedResolution = {}, std::optional<std::vector<int64_t>> resolution = {});
         int64_t createVisionSensor(int64_t options, std::vector<int64_t> intParams, std::vector<double> floatParams);
         void destroyCollection(int64_t collectionHandle);

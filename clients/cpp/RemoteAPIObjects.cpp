@@ -5,6 +5,98 @@ namespace RemoteAPIObject
     {
     }
 
+    // DEPRECATED START
+    double sim::getJointMaxForce(int64_t jointHandle)
+    {
+        bool _brk = false;
+        json _args(json_array_arg);
+        _args.push_back(jointHandle);
+        auto _ret = this->_client->call("sim.getJointMaxForce", _args);
+        return _ret[0].as<double>();
+    }
+    void sim::setJointMaxForce(int64_t objectHandle, double forceOrTorque)
+    {
+        json _args(json_array_arg);
+        _args.push_back(objectHandle);
+        _args.push_back(forceOrTorque);
+        auto _ret = this->_client->call("sim.setJointMaxForce", _args);
+    }
+    int64_t sim::createPureShape(int64_t primitiveType, int64_t options, std::vector<double> sizes, double mass, std::optional<std::vector<int64_t>> precision)
+    {
+        bool _brk = false;
+        json _args(json_array_arg);
+        _args.push_back(primitiveType);
+        _args.push_back(options);
+        _args.push_back(sizes);
+        _args.push_back(mass);
+        if(precision)
+        {
+            if(_brk) throw std::runtime_error("no gaps allowed");
+            else _args.push_back(*precision);
+        }
+        else _brk = true;
+        auto _ret = this->_client->call("sim.createPureShape", _args);
+        return _ret[0].as<int64_t>();
+    }
+    void sim::removeObject(int64_t objectHandle)
+    {
+        bool _brk = false;
+        json _args(json_array_arg);
+        _args.push_back(objectHandle);
+        auto _ret = this->_client->call("sim.removeObject", _args);
+    }
+    std::tuple<std::vector<uint8_t>, std::vector<int64_t>> sim::getVisionSensorDepthBuffer(int64_t sensorHandle, std::optional<std::vector<int64_t>> pos, std::optional<std::vector<int64_t>> size)
+    {
+        bool _brk = false;
+        json _args(json_array_arg);
+        _args.push_back(sensorHandle);
+        if(pos)
+        {
+            if(_brk) throw std::runtime_error("no gaps allowed");
+            else _args.push_back(*pos);
+        }
+        else _brk = true;
+        if(size)
+        {
+            if(_brk) throw std::runtime_error("no gaps allowed");
+            else _args.push_back(*size);
+        }
+        else _brk = true;
+        auto _ret = this->_client->call("sim.getVisionSensorDepthBuffer", _args);
+        return std::make_tuple(_ret[0].as<std::vector<uint8_t>>(), _ret[1].as<std::vector<int64_t>>());
+    }
+    std::tuple<std::vector<uint8_t>, std::vector<int64_t>> sim::getVisionSensorCharImage(int64_t sensorHandle, std::optional<std::vector<int64_t>> pos, std::optional<std::vector<int64_t>> size)
+    {
+        bool _brk = false;
+        json _args(json_array_arg);
+        _args.push_back(sensorHandle);
+        if(pos)
+        {
+            if(_brk) throw std::runtime_error("no gaps allowed");
+            else _args.push_back(*pos);
+        }
+        else _brk = true;
+        if(size)
+        {
+            if(_brk) throw std::runtime_error("no gaps allowed");
+            else _args.push_back(*size);
+        }
+        else _brk = true;
+        auto _ret = this->_client->call("sim.getVisionSensorCharImage", _args);
+        return std::make_tuple(_ret[0].as<std::vector<uint8_t>>(), _ret[1].as<std::vector<int64_t>>());
+    }
+    void sim::setVisionSensorCharImage(int64_t sensorHandle, std::vector<uint8_t> image)
+    {
+        json _args(json_array_arg);
+        _args.push_back(sensorHandle);
+        _args.push_back(bin(image));
+        auto _ret = this->_client->call("sim.setVisionSensorCharImage", _args);
+    }
+    // DEPRECATED END
+
+
+
+
     int64_t sim::addDrawingObject(int64_t objectType, double size, double duplicateTolerance, int64_t parentObjectHandle, int64_t maxItemCount, std::optional<std::vector<double>> ambient_diffuse, std::optional<std::vector<double>> reserved, std::optional<std::vector<double>> specular, std::optional<std::vector<double>> emission)
     {
         bool _brk = false;
@@ -781,24 +873,6 @@ namespace RemoteAPIObject
         _args.push_back(intParams);
         _args.push_back(floatParams);
         auto _ret = this->_client->call("sim.createProximitySensor", _args);
-        return _ret[0].as<int64_t>();
-    }
-
-    int64_t sim::createPureShape(int64_t primitiveType, int64_t options, std::vector<double> sizes, double mass, std::optional<std::vector<int64_t>> precision)
-    {
-        bool _brk = false;
-        json _args(json_array_arg);
-        _args.push_back(primitiveType);
-        _args.push_back(options);
-        _args.push_back(sizes);
-        _args.push_back(mass);
-        if(precision)
-        {
-            if(_brk) throw std::runtime_error("no gaps allowed");
-            else _args.push_back(*precision);
-        }
-        else _brk = true;
-        auto _ret = this->_client->call("sim.createPureShape", _args);
         return _ret[0].as<int64_t>();
     }
 
