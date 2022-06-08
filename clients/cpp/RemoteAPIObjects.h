@@ -40,11 +40,12 @@ namespace RemoteAPIObject
         int64_t auxiliaryConsoleOpen(std::string title, int64_t maxLines, int64_t mode, std::optional<std::vector<int64_t>> position = {}, std::optional<std::vector<int64_t>> size = {}, std::optional<std::vector<double>> textColor = {}, std::optional<std::vector<double>> backgroundColor = {});
         int64_t auxiliaryConsolePrint(int64_t consoleHandle, std::string text);
         int64_t auxiliaryConsoleShow(int64_t consoleHandle, bool showState);
+        void broadcastMsg(json message, std::optional<int64_t> options = {});
         std::vector<double> buildIdentityMatrix();
         std::vector<double> buildMatrix(std::vector<double> position, std::vector<double> eulerAngles);
         std::vector<double> buildMatrixQ(std::vector<double> position, std::vector<double> quaternion);
         std::vector<double> buildPose(std::vector<double> position, std::vector<double> eulerAnglesOrAxis, std::optional<int64_t> mode = {}, std::optional<std::vector<double>> axis2 = {});
-        json callScriptFunction(std::string functionNameAtScriptPath, int64_t scriptHandleOrType, std::optional<json> inArg = {});
+        json callScriptFunction(std::string functionName, int64_t scriptHandle, std::optional<json> inArg = {});
         int64_t cameraFitToView(int64_t viewHandleOrIndex, std::optional<std::vector<int64_t>> objectHandles = {}, std::optional<int64_t> options = {}, std::optional<double> scaling = {});
         std::vector<json> changeEntityColor(int64_t entityHandle, std::vector<double> newColor, std::optional<int64_t> colorComponent = {});
         std::tuple<int64_t, std::vector<int64_t>> checkCollision(int64_t entity1Handle, int64_t entity2Handle);
@@ -64,9 +65,9 @@ namespace RemoteAPIObject
         std::vector<uint8_t> combineRgbImages(std::vector<uint8_t> img1, std::vector<int64_t> img1Res, std::vector<uint8_t> img2, std::vector<int64_t> img2Res, int64_t operation);
         int64_t computeMassAndInertia(int64_t shapeHandle, double density);
         int64_t convexDecompose(int64_t shapeHandle, int64_t options, std::vector<int64_t> intParams, std::vector<double> floatParams);
-        std::vector<int64_t> copyPasteObjects(std::vector<int64_t> objectHandles, int64_t options);
+        std::vector<int64_t> copyPasteObjects(std::vector<int64_t> objectHandles, std::optional<int64_t> options = {});
         std::vector<json> copyTable(std::vector<json> original);
-        int64_t createCollection(int64_t options);
+        int64_t createCollection(std::optional<int64_t> options = {});
         int64_t createDummy(double size);
         int64_t createForceSensor(int64_t options, std::vector<int64_t> intParams, std::vector<double> floatParams);
         int64_t createHeightfieldShape(int64_t options, double shadingAngle, int64_t xPointCount, int64_t yPointCount, double xSize, std::vector<double> heights);
@@ -75,6 +76,7 @@ namespace RemoteAPIObject
         int64_t createOctree(double voxelSize, int64_t options, double pointSize);
         int64_t createPath(std::vector<double> ctrlPts, std::optional<int64_t> options = {}, std::optional<int64_t> subdiv = {}, std::optional<double> smoothness = {}, std::optional<int64_t> orientationMode = {}, std::optional<std::vector<double>> upVector = {});
         int64_t createPointCloud(double maxVoxelSize, int64_t maxPtCntPerVoxel, int64_t options, double pointSize);
+        int64_t createPrimitiveShape(int64_t primitiveType, std::vector<double> sizes, std::optional<int64_t> options = {});
         int64_t createProximitySensor(int64_t sensorType, int64_t subType, int64_t options, std::vector<int64_t> intParams, std::vector<double> floatParams);
         std::tuple<int64_t, int64_t, std::vector<int64_t>> createTexture(std::string fileName, int64_t options, std::optional<std::vector<double>> planeSizes = {}, std::optional<std::vector<double>> scalingUV = {}, std::optional<std::vector<double>> xy_g = {}, std::optional<int64_t> fixedResolution = {}, std::optional<std::vector<int64_t>> resolution = {});
         int64_t createVisionSensor(int64_t options, std::vector<int64_t> intParams, std::vector<double> floatParams);
@@ -168,7 +170,7 @@ namespace RemoteAPIObject
         std::vector<int64_t> getReferencedHandles(int64_t objectHandle);
         std::tuple<std::vector<double>, double> getRotationAxis(std::vector<double> matrixStart, std::vector<double> matrixGoal);
         std::tuple<std::vector<uint8_t>, std::vector<int64_t>> getScaledImage(std::vector<uint8_t> imageIn, std::vector<int64_t> resolutionIn, std::vector<int64_t> desiredResolutionOut, int64_t options);
-        int64_t getScriptHandle(int64_t scriptType, std::optional<std::string> scriptName = {});
+        int64_t getScript(int64_t scriptType, std::optional<int64_t> objectHandle = {}, std::optional<std::string> scriptName = {});
         int64_t getScriptInt32Param(int64_t scriptHandle, int64_t parameterID);
         std::vector<uint8_t> getScriptStringParam(int64_t scriptHandle, int64_t parameterID);
         std::vector<double> getShapeBB(int64_t shapeHandle);
@@ -204,6 +206,7 @@ namespace RemoteAPIObject
         int64_t handleCustomizationScripts(int64_t callType);
         int64_t handleDynamics(double deltaTime);
         void handleGraph(int64_t objectHandle, double simulationTime);
+        void handleJointMotion();
         std::tuple<int64_t, double, std::vector<double>, int64_t, std::vector<double>> handleProximitySensor(int64_t sensorHandle);
         void handleSandboxScript(int64_t callType);
         void handleSensingStart();
@@ -231,7 +234,7 @@ namespace RemoteAPIObject
         std::tuple<std::vector<double>, std::vector<double>, std::vector<double>, double> moveToConfig(int64_t flags, std::vector<double> currentPos, std::vector<double> currentVel, std::vector<double> currentAccel, std::vector<double> maxVel, std::vector<double> maxAccel, std::vector<double> maxJerk, std::vector<double> targetPos, std::vector<double> targetVel, std::string callback, std::optional<json> auxData = {}, std::optional<std::vector<bool>> cyclicJoints = {}, std::optional<double> timeStep = {});
         std::tuple<std::vector<double>, double> moveToPose(int64_t flags, std::vector<double> currentPose, std::vector<double> maxVel, std::vector<double> maxAccel, std::vector<double> maxJerk, std::vector<double> targetPose, std::string callback, std::optional<json> auxData = {}, std::optional<std::vector<double>> metric = {}, std::optional<double> timeStep = {});
         std::vector<double> multiplyMatrices(std::vector<double> matrixIn1, std::vector<double> matrixIn2);
-        std::vector<double> multiplyVector(std::vector<double> pose, std::vector<double> inVectors);
+        std::vector<double> multiplyVector(std::vector<double> matrix, std::vector<double> inVectors);
         std::vector<uint8_t> packDoubleTable(std::vector<double> doubleNumbers, std::optional<int64_t> startDoubleIndex = {}, std::optional<int64_t> doubleCount = {});
         std::vector<uint8_t> packFloatTable(std::vector<double> floatNumbers, std::optional<int64_t> startFloatIndex = {}, std::optional<int64_t> floatCount = {});
         std::vector<uint8_t> packInt32Table(std::vector<int64_t> int32Numbers, std::optional<int64_t> startInt32Index = {}, std::optional<int64_t> int32Count = {});
@@ -270,10 +273,10 @@ namespace RemoteAPIObject
         void resetVisionSensor(int64_t sensorHandle);
         void restoreEntityColor(std::vector<json> originalColorData);
         std::vector<double> rotateAroundAxis(std::vector<double> matrixIn, std::vector<double> axis, std::vector<double> axisPos, double angle);
-        int64_t ruckigPos(int64_t dofs, double smallestTimeStep, int64_t flags, std::vector<double> currentPosVelAccel, std::vector<double> maxVelAccelJerk, std::vector<int64_t> selection, std::vector<double> targetPosVel);
+        int64_t ruckigPos(int64_t dofs, double baseCycleTime, int64_t flags, std::vector<double> currentPosVelAccel, std::vector<double> maxVelAccelJerk, std::vector<int64_t> selection, std::vector<double> targetPosVel);
         void ruckigRemove(int64_t handle);
-        std::tuple<int64_t, std::vector<double>, double> ruckigStep(int64_t handle, double timeStep);
-        int64_t ruckigVel(int64_t dofs, double smallestTimeStep, int64_t flags, std::vector<double> currentPosVelAccel, std::vector<double> maxAccelJerk, std::vector<int64_t> selection, std::vector<double> targetVel);
+        std::tuple<int64_t, std::vector<double>, double> ruckigStep(int64_t handle, double cycleTime);
+        int64_t ruckigVel(int64_t dofs, double baseCycleTime, int64_t flags, std::vector<double> currentPosVelAccel, std::vector<double> maxAccelJerk, std::vector<int64_t> selection, std::vector<double> targetVel);
         std::vector<uint8_t> saveImage(std::vector<uint8_t> image, std::vector<int64_t> resolution, int64_t options, std::string filename, int64_t quality);
         void saveModel(int64_t modelBaseHandle, std::string filename);
         void saveScene(std::string filename);
@@ -302,8 +305,8 @@ namespace RemoteAPIObject
         void setJointMode(int64_t jointHandle, int64_t jointMode, int64_t options);
         void setJointPosition(int64_t objectHandle, double position);
         void setJointTargetForce(int64_t objectHandle, double forceOrTorque, std::optional<bool> signedValue = {});
-        void setJointTargetPosition(int64_t objectHandle, double targetPosition);
-        void setJointTargetVelocity(int64_t objectHandle, double targetVelocity);
+        void setJointTargetPosition(int64_t objectHandle, double targetPosition, std::optional<std::vector<double>> maxVelAccelJerk = {});
+        void setJointTargetVelocity(int64_t objectHandle, double targetVelocity, std::optional<std::vector<double>> maxAccelJerk = {}, std::optional<double> initVelocity = {});
         void setLightParameters(int64_t lightHandle, int64_t state, std::vector<double> reserved, std::vector<double> diffusePart, std::vector<double> specularPart);
         void setLinkDummy(int64_t dummyHandle, int64_t linkDummyHandle);
         void setModelProperty(int64_t objectHandle, int64_t property);
@@ -317,7 +320,7 @@ namespace RemoteAPIObject
         void setObjectInt32Param(int64_t objectHandle, int64_t parameterID, int64_t parameter);
         void setObjectMatrix(int64_t objectHandle, int64_t relativeToObjectHandle, std::vector<double> matrix);
         void setObjectOrientation(int64_t objectHandle, int64_t relativeToObjectHandle, std::vector<double> eulerAngles);
-        void setObjectParent(int64_t objectHandle, int64_t parentObjectHandle, bool keepInPlace);
+        void setObjectParent(int64_t objectHandle, int64_t parentObjectHandle, std::optional<bool> keepInPlace = {});
         void setObjectPose(int64_t objectHandle, int64_t relativeToObjectHandle, std::vector<double> pose);
         void setObjectPosition(int64_t objectHandle, int64_t relativeToObjectHandle, std::vector<double> position);
         void setObjectProperty(int64_t objectHandle, int64_t property);
@@ -447,6 +450,12 @@ namespace RemoteAPIObject
 #ifndef arrayparam_random_euler
         const int arrayparam_random_euler = 6;
 #endif
+#ifndef arrayparam_raydirection
+        const int arrayparam_raydirection = 8;
+#endif
+#ifndef arrayparam_rayorigin
+        const int arrayparam_rayorigin = 7;
+#endif
 #ifndef banner_backfaceculling
         const int banner_backfaceculling = 512;
 #endif
@@ -575,6 +584,9 @@ namespace RemoteAPIObject
 #endif
 #ifndef boolparam_proximity_sensor_handling_enabled
         const int boolparam_proximity_sensor_handling_enabled = 9;
+#endif
+#ifndef boolparam_rayvalid
+        const int boolparam_rayvalid = 56;
 #endif
 #ifndef boolparam_realtime_simulation
         const int boolparam_realtime_simulation = 25;
@@ -1584,6 +1596,12 @@ namespace RemoteAPIObject
 #ifndef intparam_mouse_y
         const int intparam_mouse_y = 23;
 #endif
+#ifndef intparam_mouseclickcounterdown
+        const int intparam_mouseclickcounterdown = 46;
+#endif
+#ifndef intparam_mouseclickcounterup
+        const int intparam_mouseclickcounterup = 47;
+#endif
 #ifndef intparam_platform
         const int intparam_platform = 19;
 #endif
@@ -1659,6 +1677,24 @@ namespace RemoteAPIObject
 #ifndef joint_spherical_subtype
         const int joint_spherical_subtype = 12;
 #endif
+#ifndef jointdynctrl_callback
+        const int jointdynctrl_callback = 16;
+#endif
+#ifndef jointdynctrl_force
+        const int jointdynctrl_force = 1;
+#endif
+#ifndef jointdynctrl_free
+        const int jointdynctrl_free = 0;
+#endif
+#ifndef jointdynctrl_position
+        const int jointdynctrl_position = 8;
+#endif
+#ifndef jointdynctrl_spring
+        const int jointdynctrl_spring = 12;
+#endif
+#ifndef jointdynctrl_velocity
+        const int jointdynctrl_velocity = 4;
+#endif
 #ifndef jointfloatparam_error_a
         const int jointfloatparam_error_a = 2025;
 #endif
@@ -1713,6 +1749,15 @@ namespace RemoteAPIObject
 #ifndef jointfloatparam_kc_k
         const int jointfloatparam_kc_k = 2018;
 #endif
+#ifndef jointfloatparam_maxaccel
+        const int jointfloatparam_maxaccel = 2037;
+#endif
+#ifndef jointfloatparam_maxjerk
+        const int jointfloatparam_maxjerk = 2038;
+#endif
+#ifndef jointfloatparam_maxvel
+        const int jointfloatparam_maxvel = 2036;
+#endif
 #ifndef jointfloatparam_pid_d
         const int jointfloatparam_pid_d = 2004;
 #endif
@@ -1755,6 +1800,9 @@ namespace RemoteAPIObject
 #ifndef jointintparam_ctrl_enabled
         const int jointintparam_ctrl_enabled = 2001;
 #endif
+#ifndef jointintparam_dynctrlmode
+        const int jointintparam_dynctrlmode = 2039;
+#endif
 #ifndef jointintparam_motor_enabled
         const int jointintparam_motor_enabled = 2000;
 #endif
@@ -1767,6 +1815,9 @@ namespace RemoteAPIObject
 #ifndef jointmode_dependent
         const int jointmode_dependent = 4;
 #endif
+#ifndef jointmode_dynamic
+        const int jointmode_dynamic = 5;
+#endif
 #ifndef jointmode_force
         const int jointmode_force = 5;
 #endif
@@ -1775,6 +1826,9 @@ namespace RemoteAPIObject
 #endif
 #ifndef jointmode_ikdependent
         const int jointmode_ikdependent = 3;
+#endif
+#ifndef jointmode_kinematic
+        const int jointmode_kinematic = 0;
 #endif
 #ifndef jointmode_passive
         const int jointmode_passive = 0;
@@ -2127,6 +2181,9 @@ namespace RemoteAPIObject
 #ifndef objectproperty_hierarchyhiddenmodelchild
         const int objectproperty_hierarchyhiddenmodelchild = 32768;
 #endif
+#ifndef objectproperty_ignoreviewfitting
+        const int objectproperty_ignoreviewfitting = 1;
+#endif
 #ifndef objectproperty_selectable
         const int objectproperty_selectable = 32;
 #endif
@@ -2399,6 +2456,33 @@ namespace RemoteAPIObject
 #endif
 #ifndef physics_vortex
         const int physics_vortex = 2;
+#endif
+#ifndef primitiveshape_capsule
+        const int primitiveshape_capsule = 8;
+#endif
+#ifndef primitiveshape_cone
+        const int primitiveshape_cone = 6;
+#endif
+#ifndef primitiveshape_cuboid
+        const int primitiveshape_cuboid = 3;
+#endif
+#ifndef primitiveshape_cylinder
+        const int primitiveshape_cylinder = 5;
+#endif
+#ifndef primitiveshape_disc
+        const int primitiveshape_disc = 2;
+#endif
+#ifndef primitiveshape_heightfield
+        const int primitiveshape_heightfield = 7;
+#endif
+#ifndef primitiveshape_none
+        const int primitiveshape_none = 0;
+#endif
+#ifndef primitiveshape_plane
+        const int primitiveshape_plane = 1;
+#endif
+#ifndef primitiveshape_spheroid
+        const int primitiveshape_spheroid = 4;
 #endif
 #ifndef proximitysensor_cone_subtype
         const int proximitysensor_cone_subtype = 33;
@@ -3596,6 +3680,9 @@ namespace RemoteAPIObject
 #endif
 #ifndef handle_parent
         const int handle_parent = -11;
+#endif
+#ifndef handle_world
+        const int handle_world = -1;
 #endif
 #ifndef handleflag_tipdummy
         const int handleflag_tipdummy = 4194304;
