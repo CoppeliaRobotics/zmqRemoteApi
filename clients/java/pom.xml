@@ -13,7 +13,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
-        <exec.mainClass>com.coppeliarobotics.remoteapi.zmq.Example</exec.mainClass>
+        <exec.mainClass>Example</exec.mainClass>
     </properties>
 
     <dependencies>
@@ -34,4 +34,75 @@
             <version>0.5.2</version>
         </dependency>
     </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>3.0.0</version>
+                <groupId>org.codehaus.mojo</groupId>
+                <executions>
+                    <execution>
+                        <id>Extract calltips.json</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <configuration>
+                            <skip>${haveCalltips}</skip>
+                            <environmentVariables>
+                                <PYTHONPATH>${basedir}/../python</PYTHONPATH>
+                            </environmentVariables>
+                            <executable>python3</executable>
+                            <commandlineArgs>
+                                ${basedir}/../../tools/get_raw_calltips.py
+                                ${basedir}/calltips.json
+                            </commandlineArgs>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>Extract constants.json</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <configuration>
+                            <skip>${haveConstants}</skip>
+                            <environmentVariables>
+                                <PYTHONPATH>${basedir}/../python</PYTHONPATH>
+                            </environmentVariables>
+                            <executable>python3</executable>
+                            <commandlineArgs>
+                                ${basedir}/../../tools/get_constants.py
+                                ${basedir}/constants.json
+                            </commandlineArgs>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>Generate Remote API Objects</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <configuration>
+                            <environmentVariables>
+                                <PYTHONPATH>${basedir}/../python</PYTHONPATH>
+                            </environmentVariables>
+                            <executable>python3</executable>
+                            <commandlineArgs>
+                                ${env.COPPELIASIM_ROOT_DIR}/programming/libPlugin/simStubsGen/external/pycpp/pycpp.py
+                                -i ${basedir}/templates/RemoteAPIObjects.java
+                                -o src/main/java/com/coppeliarobotics/remoteapi/zmq/RemoteAPIObjects.java
+                                -P ${basedir}
+                                -p calltips_json=${basedir}/calltips.json
+                                -p constants_json=${basedir}/constants.json
+                                -P ${basedir}/../../tools
+                                -P ${basedir}
+                            </commandlineArgs>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
 </project>

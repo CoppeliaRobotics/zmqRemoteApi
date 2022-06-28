@@ -1,3 +1,6 @@
 *.class
 *.jar
 target/
+calltips.json
+constants.json
+src/main/java/com/coppeliarobotics/remoteapi/zmq/RemoteAPIObjects.java
