@@ -33,6 +33,11 @@
             <artifactId>jeromq</artifactId>
             <version>0.5.2</version>
         </dependency>
+        <dependency>
+            <groupId>org.openpnp</groupId>
+            <artifactId>opencv</artifactId>
+            <version>3.4.2-0</version>
+        </dependency>
     </dependencies>
 
     <build>

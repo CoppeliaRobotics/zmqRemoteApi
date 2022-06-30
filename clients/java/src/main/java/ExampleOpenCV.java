@@ -1,0 +1,101 @@
+import java.util.List;
+import java.util.Arrays;
+
+import java.awt.FlowLayout;
+import java.awt.Image;
+import java.awt.image.BufferedImage;
+import java.awt.image.DataBufferByte;
+
+import org.opencv.core.Core;
+import org.opencv.core.Mat;
+import org.opencv.core.Scalar;
+import org.opencv.core.Size;
+import org.opencv.core.CvType;
+import org.opencv.imgcodecs.Imgcodecs;
+import org.opencv.imgproc.Imgproc;
+
+import javax.imageio.ImageIO;
+import javax.swing.ImageIcon;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+
+import com.coppeliarobotics.remoteapi.zmq.*;
+
+public class ExampleOpenCV
+{
+    /*
+     * Make sure to have the add-on "ZMQ remote API" running in
+     * CoppeliaSim and have following scene loaded:
+     *
+     * scenes/messaging/synchronousImageTransmissionViaRemoteApi.ttt
+     *
+     * Do not launch simulation, but run this script
+     */
+
+    public static void main(String[] _args) throws java.io.IOException, co.nstant.in.cbor.CborException
+    {
+        nu.pattern.OpenCV.loadShared();
+
+        JFrame frame = new JFrame();
+        frame.setLayout(new FlowLayout());
+        frame.setSize(400, 400);
+        JLabel lbl = new JLabel();
+        frame.add(lbl);
+        frame.setVisible(true);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+        RemoteAPIClient client = new RemoteAPIClient();
+        RemoteAPIObjects._sim sim = client.getObject().sim();
+
+        Long visionSensorHandle = sim.getObject("/VisionSensor");
+        Long passiveVisionSensorHandle = sim.getObject("/PassiveVisionSensor");
+
+        client.setStepping(true);
+        sim.startSimulation();
+
+        float startTime = sim.getSimulationTime();
+        int skip = 2;
+        while(sim.getSimulationTime() - startTime < 5)
+        {
+            Object[] r = sim.getVisionSensorImg(visionSensorHandle);
+            byte[] imgData = (byte[])r[0];
+            List<Long> res = (List<Long>)r[1];
+            int width = res.get(0).intValue();
+            int height = res.get(1).intValue();
+
+            // OpenCV processing:
+            Mat src = new Mat(width, height, CvType.CV_8UC3);
+            src.put(0, 0, imgData);
+            Core.flip(src, src, -1);
+            Mat gray = new Mat(src.rows(), src.cols(), src.type());
+            Mat edges = new Mat(src.rows(), src.cols(), src.type());
+            Mat dst = new Mat(src.rows(), src.cols(), src.type(), new Scalar(0));
+            Imgproc.cvtColor(src, gray, Imgproc.COLOR_RGB2GRAY);
+            Imgproc.blur(gray, edges, new Size(3, 3));
+            Imgproc.Canny(edges, edges, 100, 100 * 3);
+            src.copyTo(dst, edges);
+
+            // image display:
+            Image img = toBufferedImage(dst);
+            ImageIcon icon = new ImageIcon(img);
+            lbl.setIcon(icon);
+
+            client.step();
+        }
+        sim.stopSimulation();
+    }
+
+    public static Image toBufferedImage(Mat m)
+    {
+        int type = BufferedImage.TYPE_BYTE_GRAY;
+        if(m.channels() > 1)
+            type = BufferedImage.TYPE_3BYTE_BGR;
+        int bufferSize = m.channels() * m.cols() * m.rows();
+        byte[] b = new byte[bufferSize];
+        m.get(0, 0, b);
+        BufferedImage image = new BufferedImage(m.cols(), m.rows(), type);
+        final byte[] targetPixels = ((DataBufferByte)image.getRaster().getDataBuffer()).getData();
+        System.arraycopy(b, 0, targetPixels, 0, b.length);
+        return image;
+    }
+}
