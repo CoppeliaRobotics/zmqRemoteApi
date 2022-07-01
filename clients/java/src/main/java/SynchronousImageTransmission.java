@@ -16,11 +16,11 @@ public class SynchronousImageTransmission
 
     public static void main(String[] _args) throws java.io.IOException, co.nstant.in.cbor.CborException
     {
-        RemoteAPIClient client = new RemoteAPIClient();
-        RemoteAPIObjects._sim sim = client.getObject().sim();
+        var client = new RemoteAPIClient();
+        var sim = client.getObject().sim();
 
-        Long visionSensorHandle = sim.getObject("/VisionSensor");
-        Long passiveVisionSensorHandle = sim.getObject("/PassiveVisionSensor");
+        var visionSensorHandle = sim.getObject("/VisionSensor");
+        var passiveVisionSensorHandle = sim.getObject("/PassiveVisionSensor");
 
         client.setStepping(true);
         sim.startSimulation();

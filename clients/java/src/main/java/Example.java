@@ -7,8 +7,8 @@ public class Example
 {
     public static void main(String[] _args) throws java.io.IOException, co.nstant.in.cbor.CborException
     {
-        RemoteAPIClient client = new RemoteAPIClient();
-        RemoteAPIObjects._sim sim = client.getObject().sim();
+        var client = new RemoteAPIClient();
+        var sim = client.getObject().sim();
 
         client.setStepping(true);
         sim.startSimulation();

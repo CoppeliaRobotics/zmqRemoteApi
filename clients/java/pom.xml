@@ -6,13 +6,10 @@
     <packaging>jar</packaging>
     <version>1.0-SNAPSHOT</version>
     <name>coppeliaSim-zmqRemoteApi-java</name>
-    <url>http://maven.apache.org</url>
 
     <properties>
         <!-- https://maven.apache.org/general.html#encoding-warning -->
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.compiler.source>1.8</maven.compiler.source>
-        <maven.compiler.target>1.8</maven.compiler.target>
         <exec.mainClass>Example</exec.mainClass>
     </properties>
 
@@ -42,6 +39,14 @@
 
     <build>
         <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.8.0</version>
+                <configuration>
+                    <release>10</release>
+                </configuration>
+            </plugin>
             <plugin>
                 <artifactId>exec-maven-plugin</artifactId>
                 <version>3.0.0</version>
