@@ -19,9 +19,8 @@ namespace RemoteAPIObject
         std::tuple<std::vector<uint8_t>, std::vector<int64_t>> getVisionSensorCharImage(int64_t sensorHandle, std::optional<std::vector<int64_t>> pos = {}, std::optional<std::vector<int64_t>> size = {});
         void setVisionSensorCharImage(int64_t sensorHandle, std::vector<uint8_t> image);
         // DEPRECATED END
-
-
-        int64_t addDrawingObject(int64_t objectType, double size, double duplicateTolerance, int64_t parentObjectHandle, int64_t maxItemCount, std::optional<std::vector<double>> ambient_diffuse = {}, std::optional<std::vector<double>> reserved = {}, std::optional<std::vector<double>> specular = {}, std::optional<std::vector<double>> emission = {});
+        
+        int64_t addDrawingObject(int64_t objectType, double size, double duplicateTolerance, int64_t parentObjectHandle, int64_t maxItemCount, std::optional<std::vector<double>> color = {});
         int64_t addDrawingObjectItem(int64_t drawingObjectHandle, std::vector<double> itemData);
         void addForce(int64_t shapeHandle, std::vector<double> position, std::vector<double> force);
         void addForceAndTorque(int64_t shapeHandle, std::optional<std::vector<double>> force = {}, std::optional<std::vector<double>> torque = {});
@@ -29,8 +28,8 @@ namespace RemoteAPIObject
         int64_t addGraphStream(int64_t graphHandle, std::string streamName, std::string unit, std::optional<int64_t> options = {}, std::optional<std::vector<double>> color = {}, std::optional<double> cyclicRange = {});
         void addItemToCollection(int64_t collectionHandle, int64_t what, int64_t objectHandle, int64_t options);
         void addLog(int64_t verbosityLevel, std::string logMessage);
-        int64_t addParticleObject(int64_t objectType, double size, double density, std::vector<double> params, double lifeTime, int64_t maxItemCount, std::optional<std::vector<double>> ambient_diffuse = {}, std::optional<std::vector<double>> reserved = {}, std::optional<std::vector<double>> specular = {}, std::optional<std::vector<double>> emission = {});
-        void addParticleObjectItem(int64_t particleObjectHandle, std::vector<double> itemData);
+        int64_t addParticleObject(int64_t objectType, double size, double density, std::vector<double> params, double lifeTime, int64_t maxItemCount, std::optional<std::vector<double>> color = {});
+        void addParticleObjectItem(int64_t objectHandle, std::vector<double> itemData);
         int64_t addScript(int64_t scriptType);
         int64_t adjustView(int64_t viewHandleOrIndex, int64_t associatedViewableObjectHandle, int64_t options, std::optional<std::string> viewLabel = {});
         std::tuple<double, double, double> alphaBetaGammaToYawPitchRoll(double alphaAngle, double betaAngle, double gammaAngle);
@@ -114,6 +113,7 @@ namespace RemoteAPIObject
         std::tuple<int64_t, std::vector<double>, std::vector<double>, int64_t> getGraphInfo(int64_t graphHandle);
         int64_t getInt32Param(int64_t parameter);
         int64_t getInt32Signal(std::string signalName);
+        int64_t getIsRealTimeSimulation();
         std::tuple<int64_t, double, double> getJointDependency(int64_t jointHandle);
         double getJointForce(int64_t jointHandle);
         std::tuple<bool, std::vector<double>> getJointInterval(int64_t objectHandle);
@@ -130,6 +130,9 @@ namespace RemoteAPIObject
         int64_t getModelProperty(int64_t objectHandle);
         std::string getModuleInfo(std::string moduleName, int64_t infoType);
         std::tuple<std::string, int64_t> getModuleName(int64_t index);
+        bool getNamedBoolParam(std::string name);
+        double getNamedFloatParam(std::string name);
+        int64_t getNamedInt32Param(std::string name);
         std::vector<uint8_t> getNamedStringParam(std::string paramName);
         int64_t getNavigationMode();
         int64_t getObject(std::string path, std::optional<json> options = {});
@@ -166,13 +169,16 @@ namespace RemoteAPIObject
         std::tuple<std::vector<double>, std::vector<int64_t>> getQHull(std::vector<double> verticesIn);
         std::vector<double> getQuaternionFromMatrix(std::vector<double> matrix);
         double getRandom(std::optional<int64_t> seed = {});
-        int64_t getRealTimeSimulation();
         std::vector<int64_t> getReferencedHandles(int64_t objectHandle);
         std::tuple<std::vector<double>, double> getRotationAxis(std::vector<double> matrixStart, std::vector<double> matrixGoal);
         std::tuple<std::vector<uint8_t>, std::vector<int64_t>> getScaledImage(std::vector<uint8_t> imageIn, std::vector<int64_t> resolutionIn, std::vector<int64_t> desiredResolutionOut, int64_t options);
         int64_t getScript(int64_t scriptType, std::optional<int64_t> objectHandle = {}, std::optional<std::string> scriptName = {});
         int64_t getScriptInt32Param(int64_t scriptHandle, int64_t parameterID);
         std::vector<uint8_t> getScriptStringParam(int64_t scriptHandle, int64_t parameterID);
+        bool getSettingBool(std::string key);
+        double getSettingFloat(std::string key);
+        int64_t getSettingInt32(std::string key);
+        std::string getSettingString(std::string key);
         std::vector<double> getShapeBB(int64_t shapeHandle);
         std::tuple<int64_t, std::vector<double>> getShapeColor(int64_t shapeHandle, std::string colorName, int64_t colorComponent);
         std::tuple<int64_t, int64_t, std::vector<double>> getShapeGeomInfo(int64_t shapeHandle);
@@ -203,8 +209,8 @@ namespace RemoteAPIObject
         int64_t groupShapes(std::vector<int64_t> shapeHandles, std::optional<bool> merge = {});
         int64_t handleAddOnScripts(int64_t callType);
         int64_t handleChildScripts(int64_t callType);
-        int64_t handleCustomizationScripts(int64_t callType);
         int64_t handleDynamics(double deltaTime);
+        int64_t handleEmbeddedScripts(int64_t callType);
         void handleGraph(int64_t objectHandle, double simulationTime);
         void handleJointMotion();
         std::tuple<int64_t, double, std::vector<double>, int64_t, std::vector<double>> handleProximitySensor(int64_t sensorHandle);
@@ -220,8 +226,10 @@ namespace RemoteAPIObject
         int64_t insertPointsIntoPointCloud(int64_t pointCloudHandle, int64_t options, std::vector<double> points, std::optional<std::vector<double>> color = {}, std::optional<double> duplicateTolerance = {});
         int64_t insertVoxelsIntoOctree(int64_t octreeHandle, int64_t options, std::vector<double> points, std::optional<std::vector<double>> color = {}, std::optional<std::vector<int64_t>> tag = {});
         std::vector<double> interpolateMatrices(std::vector<double> matrixIn1, std::vector<double> matrixIn2, double interpolFactor);
+        std::vector<double> interpolatePoses(std::vector<double> poseIn1, std::vector<double> poseIn2, double interpolFactor);
         int64_t intersectPointsWithPointCloud(int64_t pointCloudHandle, int64_t options, std::vector<double> points, double tolerance);
         void invertMatrix(std::vector<double> matrix);
+        void invertPose(std::vector<double> pose);
         int64_t isDeprecated(std::string funcOrConst);
         bool isDynamicallyEnabled(int64_t objectHandle);
         bool isHandle(int64_t objectHandle);
@@ -230,10 +238,12 @@ namespace RemoteAPIObject
         int64_t loadModel(std::string filename);
         int64_t loadModule(std::string filenameAndPath, std::string pluginName);
         void loadScene(std::string filename);
+        std::vector<double> matrixToPose(std::vector<double> matrix);
         int64_t moduleEntry(int64_t handle, std::optional<std::string> label = {}, std::optional<int64_t> state = {});
         std::tuple<std::vector<double>, std::vector<double>, std::vector<double>, double> moveToConfig(int64_t flags, std::vector<double> currentPos, std::vector<double> currentVel, std::vector<double> currentAccel, std::vector<double> maxVel, std::vector<double> maxAccel, std::vector<double> maxJerk, std::vector<double> targetPos, std::vector<double> targetVel, std::string callback, std::optional<json> auxData = {}, std::optional<std::vector<bool>> cyclicJoints = {}, std::optional<double> timeStep = {});
         std::tuple<std::vector<double>, double> moveToPose(int64_t flags, std::vector<double> currentPose, std::vector<double> maxVel, std::vector<double> maxAccel, std::vector<double> maxJerk, std::vector<double> targetPose, std::string callback, std::optional<json> auxData = {}, std::optional<std::vector<double>> metric = {}, std::optional<double> timeStep = {});
         std::vector<double> multiplyMatrices(std::vector<double> matrixIn1, std::vector<double> matrixIn2);
+        std::vector<double> multiplyPoses(std::vector<double> poseIn1, std::vector<double> poseIn2);
         std::vector<double> multiplyVector(std::vector<double> matrix, std::vector<double> inVectors);
         std::vector<uint8_t> packDoubleTable(std::vector<double> doubleNumbers, std::optional<int64_t> startDoubleIndex = {}, std::optional<int64_t> doubleCount = {});
         std::vector<uint8_t> packFloatTable(std::vector<double> floatNumbers, std::optional<int64_t> startFloatIndex = {}, std::optional<int64_t> floatCount = {});
@@ -245,11 +255,13 @@ namespace RemoteAPIObject
         int64_t pauseSimulation();
         std::vector<uint8_t> persistentDataRead(std::string dataTag);
         void persistentDataWrite(std::string dataTag, std::vector<uint8_t> dataValue, std::optional<int64_t> options = {});
+        std::vector<double> poseToMatrix(std::vector<double> pose);
         void pushUserEvent(std::string event, int64_t handle, int64_t uid, json eventData, std::optional<int64_t> options = {});
         void quitSimulator();
         std::vector<uint8_t> readCustomDataBlock(int64_t objectHandle, std::string tagName);
+        void readCustomDataBlockEx(int64_t handle, std::string tagName, std::optional<json> options = {});
         std::vector<std::string> readCustomDataBlockTags(int64_t objectHandle);
-        json readCustomTableData(int64_t objectHandle, std::string tagName);
+        void readCustomTableData(int64_t handle, std::string tagName, std::string data, std::optional<json> options = {});
         std::tuple<int64_t, std::vector<double>, std::vector<double>> readForceSensor(int64_t objectHandle);
         std::tuple<int64_t, double, std::vector<double>, int64_t, std::vector<double>> readProximitySensor(int64_t sensorHandle);
         std::vector<uint8_t> readTexture(int64_t textureId, int64_t options, std::optional<int64_t> posX = {}, std::optional<int64_t> posY = {}, std::optional<int64_t> sizeX = {}, std::optional<int64_t> sizeY = {});
@@ -305,12 +317,15 @@ namespace RemoteAPIObject
         void setJointMode(int64_t jointHandle, int64_t jointMode, int64_t options);
         void setJointPosition(int64_t objectHandle, double position);
         void setJointTargetForce(int64_t objectHandle, double forceOrTorque, std::optional<bool> signedValue = {});
-        void setJointTargetPosition(int64_t objectHandle, double targetPosition, std::optional<std::vector<double>> maxVelAccelJerk = {});
-        void setJointTargetVelocity(int64_t objectHandle, double targetVelocity, std::optional<std::vector<double>> maxAccelJerk = {}, std::optional<double> initVelocity = {});
+        void setJointTargetPosition(int64_t objectHandle, double targetPosition, std::optional<std::vector<double>> motionParams = {});
+        void setJointTargetVelocity(int64_t objectHandle, double targetVelocity, std::optional<std::vector<double>> motionParams = {});
         void setLightParameters(int64_t lightHandle, int64_t state, std::vector<double> reserved, std::vector<double> diffusePart, std::vector<double> specularPart);
         void setLinkDummy(int64_t dummyHandle, int64_t linkDummyHandle);
         void setModelProperty(int64_t objectHandle, int64_t property);
         void setModuleInfo(std::string moduleName, int64_t infoType, std::string info);
+        void setNamedBoolParam(std::string name, bool value);
+        void setNamedFloatParam(std::string name, double value);
+        void setNamedInt32Param(std::string name, int64_t value);
         void setNamedStringParam(std::string paramName, std::vector<uint8_t> stringParam);
         void setNavigationMode(int64_t navigationMode);
         void setObjectAlias(int64_t objectHandle, std::string objectAlias);
@@ -368,7 +383,8 @@ namespace RemoteAPIObject
         double wait(double dt, std::optional<bool> simulationTime = {});
         json waitForSignal(std::string sigName);
         void writeCustomDataBlock(int64_t objectHandle, std::string tagName, std::vector<uint8_t> data);
-        void writeCustomTableData(int64_t objectHandle, std::string tagName, std::vector<json> data);
+        void writeCustomDataBlockEx(int64_t handle, std::string tagName, std::string data, std::optional<json> options = {});
+        void writeCustomTableData(int64_t handle, std::string tagName, json theTable, std::optional<json> options = {});
         void writeTexture(int64_t textureId, int64_t options, std::vector<uint8_t> textureData, std::optional<int64_t> posX = {}, std::optional<int64_t> posY = {}, std::optional<int64_t> sizeX = {}, std::optional<int64_t> sizeY = {}, std::optional<double> interpol = {});
         std::tuple<double, double, double> yawPitchRollToAlphaBetaGamma(double yawAngle, double pitchAngle, double rollAngle);
 
@@ -735,6 +751,9 @@ namespace RemoteAPIObject
 #ifndef bullet_global_collisionmarginfactor
         const int bullet_global_collisionmarginfactor = 3;
 #endif
+#ifndef bullet_global_computeinertias
+        const int bullet_global_computeinertias = 2002;
+#endif
 #ifndef bullet_global_constraintsolvertype
         const int bullet_global_constraintsolvertype = 1003;
 #endif
@@ -752,6 +771,15 @@ namespace RemoteAPIObject
 #endif
 #ifndef bullet_joint_normalcfm
         const int bullet_joint_normalcfm = 3003;
+#endif
+#ifndef bullet_joint_pospid1
+        const int bullet_joint_pospid1 = 3006;
+#endif
+#ifndef bullet_joint_pospid2
+        const int bullet_joint_pospid2 = 3007;
+#endif
+#ifndef bullet_joint_pospid3
+        const int bullet_joint_pospid3 = 3008;
 #endif
 #ifndef bullet_joint_stopcfm
         const int bullet_joint_stopcfm = 3002;
@@ -1197,6 +1225,12 @@ namespace RemoteAPIObject
 #ifndef dummyintparam_link_type
         const int dummyintparam_link_type = 10000;
 #endif
+#ifndef dummylink_dynloopclosure
+        const int dummylink_dynloopclosure = 0;
+#endif
+#ifndef dummylink_dyntendon
+        const int dummylink_dyntendon = 7;
+#endif
 #ifndef dynmat_default
         const int dynmat_default = 2310013;
 #endif
@@ -1359,6 +1393,9 @@ namespace RemoteAPIObject
 #ifndef floatparam_mouse_wheel_zoom_factor
         const int floatparam_mouse_wheel_zoom_factor = 4;
 #endif
+#ifndef floatparam_physicstimestep
+        const int floatparam_physicstimestep = 5;
+#endif
 #ifndef floatparam_rand
         const int floatparam_rand = 0;
 #endif
@@ -1440,6 +1477,9 @@ namespace RemoteAPIObject
 #ifndef handleflag_abscoords
         const int handleflag_abscoords = 8388608;
 #endif
+#ifndef handleflag_addmultiple
+        const int handleflag_addmultiple = 16777216;
+#endif
 #ifndef handleflag_altname
         const int handleflag_altname = 4194304;
 #endif
@@ -1497,8 +1537,8 @@ namespace RemoteAPIObject
 #ifndef handleflag_togglevisibility
         const int handleflag_togglevisibility = 4194304;
 #endif
-#ifndef handleflag_wxyzquaternion
-        const int handleflag_wxyzquaternion = 4194304;
+#ifndef handleflag_wxyzquat
+        const int handleflag_wxyzquat = 16777216;
 #endif
 #ifndef ik_alpha_beta_constraint
         const int ik_alpha_beta_constraint = 8;
@@ -1578,6 +1618,9 @@ namespace RemoteAPIObject
 #ifndef intparam_flymode_camera_handle
         const int intparam_flymode_camera_handle = 6;
 #endif
+#ifndef intparam_hierarchychangecounter
+        const int intparam_hierarchychangecounter = 50;
+#endif
 #ifndef intparam_idle_fps
         const int intparam_idle_fps = 26;
 #endif
@@ -1601,6 +1644,12 @@ namespace RemoteAPIObject
 #endif
 #ifndef intparam_mouseclickcounterup
         const int intparam_mouseclickcounterup = 47;
+#endif
+#ifndef intparam_objectcreationcounter
+        const int intparam_objectcreationcounter = 48;
+#endif
+#ifndef intparam_objectdestructioncounter
+        const int intparam_objectdestructioncounter = 49;
 #endif
 #ifndef intparam_platform
         const int intparam_platform = 19;
@@ -1802,6 +1851,12 @@ namespace RemoteAPIObject
 #endif
 #ifndef jointintparam_dynctrlmode
         const int jointintparam_dynctrlmode = 2039;
+#endif
+#ifndef jointintparam_dynposctrltype
+        const int jointintparam_dynposctrltype = 2041;
+#endif
+#ifndef jointintparam_dynvelctrltype
+        const int jointintparam_dynvelctrltype = 2040;
 #endif
 #ifndef jointintparam_motor_enabled
         const int jointintparam_motor_enabled = 2000;
@@ -2010,6 +2065,288 @@ namespace RemoteAPIObject
 #ifndef msgbox_type_warning
         const int msgbox_type_warning = 2;
 #endif
+#ifndef mujoco_body_condim
+        const int mujoco_body_condim = 44001;
+#endif
+#ifndef mujoco_body_friction1
+        const int mujoco_body_friction1 = 43001;
+#endif
+#ifndef mujoco_body_friction2
+        const int mujoco_body_friction2 = 43002;
+#endif
+#ifndef mujoco_body_friction3
+        const int mujoco_body_friction3 = 43003;
+#endif
+#ifndef mujoco_body_margin
+        const int mujoco_body_margin = 43012;
+#endif
+#ifndef mujoco_body_priority
+        const int mujoco_body_priority = 44002;
+#endif
+#ifndef mujoco_body_solimp1
+        const int mujoco_body_solimp1 = 43006;
+#endif
+#ifndef mujoco_body_solimp2
+        const int mujoco_body_solimp2 = 43007;
+#endif
+#ifndef mujoco_body_solimp3
+        const int mujoco_body_solimp3 = 43008;
+#endif
+#ifndef mujoco_body_solimp4
+        const int mujoco_body_solimp4 = 43009;
+#endif
+#ifndef mujoco_body_solimp5
+        const int mujoco_body_solimp5 = 43010;
+#endif
+#ifndef mujoco_body_solmix
+        const int mujoco_body_solmix = 43011;
+#endif
+#ifndef mujoco_body_solref1
+        const int mujoco_body_solref1 = 43004;
+#endif
+#ifndef mujoco_body_solref2
+        const int mujoco_body_solref2 = 43005;
+#endif
+#ifndef mujoco_dummy_bitcoded
+        const int mujoco_dummy_bitcoded = 47001;
+#endif
+#ifndef mujoco_dummy_damping
+        const int mujoco_dummy_damping = 46013;
+#endif
+#ifndef mujoco_dummy_limited
+        const int mujoco_dummy_limited = 48001;
+#endif
+#ifndef mujoco_dummy_margin
+        const int mujoco_dummy_margin = 46010;
+#endif
+#ifndef mujoco_dummy_proxyjointid
+        const int mujoco_dummy_proxyjointid = 47002;
+#endif
+#ifndef mujoco_dummy_range1
+        const int mujoco_dummy_range1 = 46001;
+#endif
+#ifndef mujoco_dummy_range2
+        const int mujoco_dummy_range2 = 46002;
+#endif
+#ifndef mujoco_dummy_solimplimit1
+        const int mujoco_dummy_solimplimit1 = 46005;
+#endif
+#ifndef mujoco_dummy_solimplimit2
+        const int mujoco_dummy_solimplimit2 = 46006;
+#endif
+#ifndef mujoco_dummy_solimplimit3
+        const int mujoco_dummy_solimplimit3 = 46007;
+#endif
+#ifndef mujoco_dummy_solimplimit4
+        const int mujoco_dummy_solimplimit4 = 46008;
+#endif
+#ifndef mujoco_dummy_solimplimit5
+        const int mujoco_dummy_solimplimit5 = 46009;
+#endif
+#ifndef mujoco_dummy_solreflimit1
+        const int mujoco_dummy_solreflimit1 = 46003;
+#endif
+#ifndef mujoco_dummy_solreflimit2
+        const int mujoco_dummy_solreflimit2 = 46004;
+#endif
+#ifndef mujoco_dummy_springlength
+        const int mujoco_dummy_springlength = 46011;
+#endif
+#ifndef mujoco_dummy_stiffness
+        const int mujoco_dummy_stiffness = 46012;
+#endif
+#ifndef mujoco_global_balanceinertias
+        const int mujoco_global_balanceinertias = 39004;
+#endif
+#ifndef mujoco_global_bitcoded
+        const int mujoco_global_bitcoded = 38001;
+#endif
+#ifndef mujoco_global_boundinertia
+        const int mujoco_global_boundinertia = 37009;
+#endif
+#ifndef mujoco_global_boundmass
+        const int mujoco_global_boundmass = 37008;
+#endif
+#ifndef mujoco_global_computeinertias
+        const int mujoco_global_computeinertias = 39001;
+#endif
+#ifndef mujoco_global_cone
+        const int mujoco_global_cone = 38007;
+#endif
+#ifndef mujoco_global_density
+        const int mujoco_global_density = 37006;
+#endif
+#ifndef mujoco_global_impratio
+        const int mujoco_global_impratio = 37002;
+#endif
+#ifndef mujoco_global_integrator
+        const int mujoco_global_integrator = 38003;
+#endif
+#ifndef mujoco_global_iterations
+        const int mujoco_global_iterations = 38002;
+#endif
+#ifndef mujoco_global_kininertia
+        const int mujoco_global_kininertia = 37019;
+#endif
+#ifndef mujoco_global_kinmass
+        const int mujoco_global_kinmass = 37018;
+#endif
+#ifndef mujoco_global_multiccd
+        const int mujoco_global_multiccd = 39003;
+#endif
+#ifndef mujoco_global_multithreaded
+        const int mujoco_global_multithreaded = 39002;
+#endif
+#ifndef mujoco_global_nconmax
+        const int mujoco_global_nconmax = 38006;
+#endif
+#ifndef mujoco_global_njmax
+        const int mujoco_global_njmax = 38005;
+#endif
+#ifndef mujoco_global_nstack
+        const int mujoco_global_nstack = 38009;
+#endif
+#ifndef mujoco_global_overridecontacts
+        const int mujoco_global_overridecontacts = 39005;
+#endif
+#ifndef mujoco_global_overridekin
+        const int mujoco_global_overridekin = 38008;
+#endif
+#ifndef mujoco_global_overridemargin
+        const int mujoco_global_overridemargin = 37010;
+#endif
+#ifndef mujoco_global_overridesolimp1
+        const int mujoco_global_overridesolimp1 = 37013;
+#endif
+#ifndef mujoco_global_overridesolimp2
+        const int mujoco_global_overridesolimp2 = 37014;
+#endif
+#ifndef mujoco_global_overridesolimp3
+        const int mujoco_global_overridesolimp3 = 37015;
+#endif
+#ifndef mujoco_global_overridesolimp4
+        const int mujoco_global_overridesolimp4 = 37016;
+#endif
+#ifndef mujoco_global_overridesolimp5
+        const int mujoco_global_overridesolimp5 = 37017;
+#endif
+#ifndef mujoco_global_overridesolref1
+        const int mujoco_global_overridesolref1 = 37011;
+#endif
+#ifndef mujoco_global_overridesolref2
+        const int mujoco_global_overridesolref2 = 37012;
+#endif
+#ifndef mujoco_global_rebuildtrigger
+        const int mujoco_global_rebuildtrigger = 38010;
+#endif
+#ifndef mujoco_global_solver
+        const int mujoco_global_solver = 38004;
+#endif
+#ifndef mujoco_global_viscosity
+        const int mujoco_global_viscosity = 37007;
+#endif
+#ifndef mujoco_global_wind1
+        const int mujoco_global_wind1 = 37003;
+#endif
+#ifndef mujoco_global_wind2
+        const int mujoco_global_wind2 = 37004;
+#endif
+#ifndef mujoco_global_wind3
+        const int mujoco_global_wind3 = 37005;
+#endif
+#ifndef mujoco_joint_armature
+        const int mujoco_joint_armature = 40021;
+#endif
+#ifndef mujoco_joint_damping
+        const int mujoco_joint_damping = 40017;
+#endif
+#ifndef mujoco_joint_dependentobjectid
+        const int mujoco_joint_dependentobjectid = 41002;
+#endif
+#ifndef mujoco_joint_frictionloss
+        const int mujoco_joint_frictionloss = 40008;
+#endif
+#ifndef mujoco_joint_margin
+        const int mujoco_joint_margin = 40022;
+#endif
+#ifndef mujoco_joint_polycoef1
+        const int mujoco_joint_polycoef1 = 40023;
+#endif
+#ifndef mujoco_joint_polycoef2
+        const int mujoco_joint_polycoef2 = 40024;
+#endif
+#ifndef mujoco_joint_polycoef3
+        const int mujoco_joint_polycoef3 = 40025;
+#endif
+#ifndef mujoco_joint_polycoef4
+        const int mujoco_joint_polycoef4 = 40026;
+#endif
+#ifndef mujoco_joint_polycoef5
+        const int mujoco_joint_polycoef5 = 40027;
+#endif
+#ifndef mujoco_joint_pospid1
+        const int mujoco_joint_pospid1 = 40028;
+#endif
+#ifndef mujoco_joint_pospid2
+        const int mujoco_joint_pospid2 = 40029;
+#endif
+#ifndef mujoco_joint_pospid3
+        const int mujoco_joint_pospid3 = 40030;
+#endif
+#ifndef mujoco_joint_solimpfriction1
+        const int mujoco_joint_solimpfriction1 = 40011;
+#endif
+#ifndef mujoco_joint_solimpfriction2
+        const int mujoco_joint_solimpfriction2 = 40012;
+#endif
+#ifndef mujoco_joint_solimpfriction3
+        const int mujoco_joint_solimpfriction3 = 40013;
+#endif
+#ifndef mujoco_joint_solimpfriction4
+        const int mujoco_joint_solimpfriction4 = 40014;
+#endif
+#ifndef mujoco_joint_solimpfriction5
+        const int mujoco_joint_solimpfriction5 = 40015;
+#endif
+#ifndef mujoco_joint_solimplimit1
+        const int mujoco_joint_solimplimit1 = 40003;
+#endif
+#ifndef mujoco_joint_solimplimit2
+        const int mujoco_joint_solimplimit2 = 40004;
+#endif
+#ifndef mujoco_joint_solimplimit3
+        const int mujoco_joint_solimplimit3 = 40005;
+#endif
+#ifndef mujoco_joint_solimplimit4
+        const int mujoco_joint_solimplimit4 = 40006;
+#endif
+#ifndef mujoco_joint_solimplimit5
+        const int mujoco_joint_solimplimit5 = 40007;
+#endif
+#ifndef mujoco_joint_solreffriction1
+        const int mujoco_joint_solreffriction1 = 40009;
+#endif
+#ifndef mujoco_joint_solreffriction2
+        const int mujoco_joint_solreffriction2 = 40010;
+#endif
+#ifndef mujoco_joint_solreflimit1
+        const int mujoco_joint_solreflimit1 = 40001;
+#endif
+#ifndef mujoco_joint_solreflimit2
+        const int mujoco_joint_solreflimit2 = 40002;
+#endif
+#ifndef mujoco_joint_springdamper1
+        const int mujoco_joint_springdamper1 = 40019;
+#endif
+#ifndef mujoco_joint_springdamper2
+        const int mujoco_joint_springdamper2 = 40020;
+#endif
+#ifndef mujoco_joint_springref
+        const int mujoco_joint_springref = 40018;
+#endif
+#ifndef mujoco_joint_stiffness
+        const int mujoco_joint_stiffness = 40016;
+#endif
 #ifndef navigation_cameraangle
         const int navigation_cameraangle = 5;
 #endif
@@ -2082,6 +2419,9 @@ namespace RemoteAPIObject
 #ifndef newton_global_bitcoded
         const int newton_global_bitcoded = 28002;
 #endif
+#ifndef newton_global_computeinertias
+        const int newton_global_computeinertias = 29004;
+#endif
 #ifndef newton_global_constraintsolvingiterations
         const int newton_global_constraintsolvingiterations = 28001;
 #endif
@@ -2111,6 +2451,15 @@ namespace RemoteAPIObject
 #endif
 #ifndef newton_joint_objectid
         const int newton_joint_objectid = 31001;
+#endif
+#ifndef newton_joint_pospid1
+        const int newton_joint_pospid1 = 30003;
+#endif
+#ifndef newton_joint_pospid2
+        const int newton_joint_pospid2 = 30004;
+#endif
+#ifndef newton_joint_pospid3
+        const int newton_joint_pospid3 = 30005;
 #endif
 #ifndef object_camera_type
         const int object_camera_type = 3;
@@ -2334,6 +2683,9 @@ namespace RemoteAPIObject
 #ifndef ode_global_cfm
         const int ode_global_cfm = 9003;
 #endif
+#ifndef ode_global_computeinertias
+        const int ode_global_computeinertias = 11003;
+#endif
 #ifndef ode_global_constraintsolvingiterations
         const int ode_global_constraintsolvingiterations = 10001;
 #endif
@@ -2363,6 +2715,15 @@ namespace RemoteAPIObject
 #endif
 #ifndef ode_joint_normalcfm
         const int ode_joint_normalcfm = 12005;
+#endif
+#ifndef ode_joint_pospid1
+        const int ode_joint_pospid1 = 12006;
+#endif
+#ifndef ode_joint_pospid2
+        const int ode_joint_pospid2 = 12007;
+#endif
+#ifndef ode_joint_pospid3
+        const int ode_joint_pospid3 = 12008;
 #endif
 #ifndef ode_joint_stopcfm
         const int ode_joint_stopcfm = 12002;
@@ -2790,11 +3151,17 @@ namespace RemoteAPIObject
 #ifndef shapeintparam_edge_visibility
         const int shapeintparam_edge_visibility = 3024;
 #endif
+#ifndef shapeintparam_kinematic
+        const int shapeintparam_kinematic = 3030;
+#endif
 #ifndef shapeintparam_respondable
         const int shapeintparam_respondable = 3004;
 #endif
 #ifndef shapeintparam_respondable_mask
         const int shapeintparam_respondable_mask = 3019;
+#endif
+#ifndef shapeintparam_respondablesuspendcnt
+        const int shapeintparam_respondablesuspendcnt = 3031;
 #endif
 #ifndef shapeintparam_sleepmodestart
         const int shapeintparam_sleepmodestart = 3029;
@@ -2910,11 +3277,17 @@ namespace RemoteAPIObject
 #ifndef stringparam_modeldefaultdir
         const int stringparam_modeldefaultdir = 133;
 #endif
+#ifndef stringparam_mujocodir
+        const int stringparam_mujocodir = 138;
+#endif
 #ifndef stringparam_pythondir
         const int stringparam_pythondir = 137;
 #endif
 #ifndef stringparam_remoteapi_temp_file_dir
         const int stringparam_remoteapi_temp_file_dir = 16;
+#endif
+#ifndef stringparam_resourcesdir
+        const int stringparam_resourcesdir = 141;
 #endif
 #ifndef stringparam_scene_name
         const int stringparam_scene_name = 15;
@@ -2934,6 +3307,9 @@ namespace RemoteAPIObject
 #ifndef stringparam_statusbarverbosity
         const int stringparam_statusbarverbosity = 122;
 #endif
+#ifndef stringparam_systemdir
+        const int stringparam_systemdir = 140;
+#endif
 #ifndef stringparam_tempdir
         const int stringparam_tempdir = 127;
 #endif
@@ -2942,6 +3318,9 @@ namespace RemoteAPIObject
 #endif
 #ifndef stringparam_uniqueid
         const int stringparam_uniqueid = 126;
+#endif
+#ifndef stringparam_usersettingsdir
+        const int stringparam_usersettingsdir = 139;
 #endif
 #ifndef stringparam_verbosity
         const int stringparam_verbosity = 121;
@@ -2994,6 +3373,9 @@ namespace RemoteAPIObject
 #ifndef syscb_cleanup
         const int syscb_cleanup = 1;
 #endif
+#ifndef syscb_contact
+        const int syscb_contact = 41;
+#endif
 #ifndef syscb_contactcallback
         const int syscb_contactcallback = 19;
 #endif
@@ -3009,11 +3391,17 @@ namespace RemoteAPIObject
 #ifndef syscb_customcallback4
         const int syscb_customcallback4 = 23;
 #endif
+#ifndef syscb_dyn
+        const int syscb_dyn = 40;
+#endif
 #ifndef syscb_dyncallback
         const int syscb_dyncallback = 28;
 #endif
 #ifndef syscb_init
         const int syscb_init = 2;
+#endif
+#ifndef syscb_joint
+        const int syscb_joint = 42;
 #endif
 #ifndef syscb_jointcallback
         const int syscb_jointcallback = 18;
@@ -3080,6 +3468,9 @@ namespace RemoteAPIObject
 #endif
 #ifndef verbosity_none
         const int verbosity_none = 100;
+#endif
+#ifndef verbosity_onlyterminal
+        const int verbosity_onlyterminal = 65536;
 #endif
 #ifndef verbosity_questions
         const int verbosity_questions = 410;
@@ -3240,6 +3631,9 @@ namespace RemoteAPIObject
 #ifndef vortex_body_normalangularaxisfriction
         const int vortex_body_normalangularaxisfriction = 24005;
 #endif
+#ifndef vortex_body_normalangularaxisfrictionmodel
+        const int vortex_body_normalangularaxisfrictionmodel = 25005;
+#endif
 #ifndef vortex_body_normalangularaxisslide
         const int vortex_body_normalangularaxisslide = 24022;
 #endif
@@ -3312,6 +3706,9 @@ namespace RemoteAPIObject
 #ifndef vortex_body_secangularaxisfriction
         const int vortex_body_secangularaxisfriction = 24004;
 #endif
+#ifndef vortex_body_secangularaxisfrictionmodel
+        const int vortex_body_secangularaxisfrictionmodel = 25004;
+#endif
 #ifndef vortex_body_secangularaxisslide
         const int vortex_body_secangularaxisslide = 24021;
 #endif
@@ -3371,6 +3768,9 @@ namespace RemoteAPIObject
 #endif
 #ifndef vortex_global_bitcoded
         const int vortex_global_bitcoded = 19001;
+#endif
+#ifndef vortex_global_computeinertias
+        const int vortex_global_computeinertias = 20005;
 #endif
 #ifndef vortex_global_constraintangularcompliance
         const int vortex_global_constraintangularcompliance = 18007;
@@ -3554,6 +3954,15 @@ namespace RemoteAPIObject
 #endif
 #ifndef vortex_joint_p2stiffness
         const int vortex_joint_p2stiffness = 21025;
+#endif
+#ifndef vortex_joint_pospid1
+        const int vortex_joint_pospid1 = 21052;
+#endif
+#ifndef vortex_joint_pospid2
+        const int vortex_joint_pospid2 = 21053;
+#endif
+#ifndef vortex_joint_pospid3
+        const int vortex_joint_pospid3 = 21054;
 #endif
 #ifndef vortex_joint_proportionalmotorfriction
         const int vortex_joint_proportionalmotorfriction = 23002;
