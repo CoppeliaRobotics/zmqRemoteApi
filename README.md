@@ -12,6 +12,7 @@ The ZMQ Remote API requires the [ZMQ plugin](https://github.com/CoppeliaRobotics
      - [Java](#java-client)
      - [Octave](#octave-client)
      - [MATLAB](#matlab-client)
+     - [Rust](#rust-client)
      - [HTML/JavaScript](#htmljavascript-web-browser-client)
 
 
@@ -125,6 +126,12 @@ handle = sim.getObject('/Floor')
 ```
 
 Check out the examples in [`clients/matlab`](clients/matlab).
+
+#### Rust client
+
+The Rust client is made available by [Samuel Cavalcanti](https://github.com/samuel-cavalcanti).
+
+See [here](https://github.com/samuel-cavalcanti/rust_zmqRemoteApi).
 
 #### HTML/JavaScript (web browser) client
 
