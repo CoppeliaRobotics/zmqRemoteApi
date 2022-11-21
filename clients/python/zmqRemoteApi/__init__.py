@@ -93,14 +93,14 @@ class RemoteAPIClient:
         return ret
 
     def setStepping(self, enable=True):
+        ret = None
         if self.threadLocLevel > 0:
-            if enable == False:
-                self.threadLocLevel = 0
-                return self.call('setStepping', [enable,self.uuid])
-        else:
-            if enable == True:
-                self.threadLocLevel = 1
-                return self.call('setStepping', [enable,self.uuid])
+            self.threadLocLevel = 0
+            ret = self.call('setStepping', [False,self.uuid])
+        if enable == True:
+            self.threadLocLevel = 1
+            ret = self.call('setStepping', [enable,self.uuid])
+        return ret
 
     def step(self, *, wait=True):
         if self.threadLocLevel > 0:
