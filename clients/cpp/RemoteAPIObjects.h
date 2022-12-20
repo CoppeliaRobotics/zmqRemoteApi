@@ -18,6 +18,8 @@ namespace RemoteAPIObject
         std::tuple<std::vector<uint8_t>, std::vector<int64_t>> getVisionSensorDepthBuffer(int64_t sensorHandle, std::optional<std::vector<int64_t>> pos = {}, std::optional<std::vector<int64_t>> size = {});
         std::tuple<std::vector<uint8_t>, std::vector<int64_t>> getVisionSensorCharImage(int64_t sensorHandle, std::optional<std::vector<int64_t>> pos = {}, std::optional<std::vector<int64_t>> size = {});
         void setVisionSensorCharImage(int64_t sensorHandle, std::vector<uint8_t> image);
+        std::vector<int64_t> getObjectSelection();
+        void setObjectSelection(std::vector<double> objectHandles);
         // DEPRECATED END
         
         int64_t addDrawingObject(int64_t objectType, double size, double duplicateTolerance, int64_t parentObjectHandle, int64_t maxItemCount, std::optional<std::vector<double>> color = {});
@@ -30,6 +32,7 @@ namespace RemoteAPIObject
         void addLog(int64_t verbosityLevel, std::string logMessage);
         int64_t addParticleObject(int64_t objectType, double size, double density, std::vector<double> params, double lifeTime, int64_t maxItemCount, std::optional<std::vector<double>> color = {});
         void addParticleObjectItem(int64_t objectHandle, std::vector<double> itemData);
+        void addReferencedHandle(int64_t objectHandle, int64_t referencedHandle);
         int64_t addScript(int64_t scriptType);
         int64_t adjustView(int64_t viewHandleOrIndex, int64_t associatedViewableObjectHandle, int64_t options, std::optional<std::string> viewLabel = {});
         std::tuple<double, double, double> alphaBetaGammaToYawPitchRoll(double alphaAngle, double betaAngle, double gammaAngle);
@@ -56,7 +59,6 @@ namespace RemoteAPIObject
         std::tuple<int64_t, double, std::vector<double>, std::vector<double>> checkProximitySensorEx2(int64_t sensorHandle, std::vector<double> vertices, int64_t itemType, int64_t itemCount, int64_t mode, double threshold, double maxAngle);
         std::tuple<int64_t, std::vector<double>, std::vector<double>> checkVisionSensor(int64_t sensorHandle, int64_t entityHandle);
         std::vector<double> checkVisionSensorEx(int64_t sensorHandle, int64_t entityHandle, bool returnImage);
-        void clearDoubleSignal(std::string signalName);
         void clearFloatSignal(std::string signalName);
         void clearInt32Signal(std::string signalName);
         void clearStringSignal(std::string signalName);
@@ -99,7 +101,6 @@ namespace RemoteAPIObject
         double getConfigDistance(std::vector<double> configA, std::vector<double> configB, std::optional<std::vector<double>> metric = {}, std::optional<std::vector<int64_t>> types = {});
         std::tuple<std::vector<int64_t>, std::vector<double>, std::vector<double>, std::vector<double>> getContactInfo(int64_t dynamicPass, int64_t objectHandle, int64_t index);
         std::tuple<std::vector<double>, std::vector<int64_t>> getDecimatedMesh(std::vector<double> verticesIn, std::vector<int64_t> indicesIn, double decimationPercentage);
-        double getDoubleSignal(std::string signalName);
         bool getEngineBoolParam(int64_t paramId, int64_t objectHandle);
         double getEngineFloatParam(int64_t paramId, int64_t objectHandle);
         int64_t getEngineInt32Param(int64_t paramId, int64_t objectHandle);
@@ -137,9 +138,11 @@ namespace RemoteAPIObject
         int64_t getNavigationMode();
         int64_t getObject(std::string path, std::optional<json> options = {});
         std::string getObjectAlias(int64_t objectHandle, std::optional<int64_t> options = {});
+        std::string getObjectAliasRelative(int64_t handle, int64_t baseHandle, std::optional<int64_t> options = {});
         int64_t getObjectChild(int64_t objectHandle, int64_t index);
         std::vector<double> getObjectChildPose(int64_t objectHandle);
         std::vector<double> getObjectColor(int64_t objectHandle, int64_t index, int64_t colorComponent);
+        std::vector<double> getObjectFloatArrayParam(int64_t objectHandle, int64_t parameterID);
         double getObjectFloatParam(int64_t objectHandle, int64_t parameterID);
         void getObjectFromUid(int64_t uid, std::optional<json> options = {});
         int64_t getObjectInt32Param(int64_t objectHandle, int64_t parameterID);
@@ -150,7 +153,7 @@ namespace RemoteAPIObject
         std::vector<double> getObjectPosition(int64_t objectHandle, int64_t relativeToObjectHandle);
         int64_t getObjectProperty(int64_t objectHandle);
         std::vector<double> getObjectQuaternion(int64_t objectHandle, int64_t relativeToObjectHandle);
-        std::vector<int64_t> getObjectSelection();
+        std::vector<int64_t> getObjectSel();
         double getObjectSizeFactor(int64_t ObjectHandle);
         int64_t getObjectSpecialProperty(int64_t objectHandle);
         std::vector<uint8_t> getObjectStringParam(int64_t objectHandle, int64_t parameterID);
@@ -173,6 +176,7 @@ namespace RemoteAPIObject
         std::tuple<std::vector<double>, double> getRotationAxis(std::vector<double> matrixStart, std::vector<double> matrixGoal);
         std::tuple<std::vector<uint8_t>, std::vector<int64_t>> getScaledImage(std::vector<uint8_t> imageIn, std::vector<int64_t> resolutionIn, std::vector<int64_t> desiredResolutionOut, int64_t options);
         int64_t getScript(int64_t scriptType, std::optional<int64_t> objectHandle = {}, std::optional<std::string> scriptName = {});
+        json getScriptFunctions(int64_t scriptHandle);
         int64_t getScriptInt32Param(int64_t scriptHandle, int64_t parameterID);
         std::vector<uint8_t> getScriptStringParam(int64_t scriptHandle, int64_t parameterID);
         bool getSettingBool(std::string key);
@@ -206,6 +210,7 @@ namespace RemoteAPIObject
         std::tuple<std::vector<double>, std::vector<double>> getVelocity(int64_t shapeHandle);
         std::tuple<std::vector<uint8_t>, std::vector<int64_t>> getVisionSensorDepth(int64_t sensorHandle, std::optional<int64_t> options = {}, std::optional<std::vector<int64_t>> pos = {}, std::optional<std::vector<int64_t>> size = {});
         std::tuple<std::vector<uint8_t>, std::vector<int64_t>> getVisionSensorImg(int64_t sensorHandle, std::optional<int64_t> options = {}, std::optional<double> rgbaCutOff = {}, std::optional<std::vector<int64_t>> pos = {}, std::optional<std::vector<int64_t>> size = {});
+        void getVisionSensorRes(int64_t sensorHandle);
         int64_t groupShapes(std::vector<int64_t> shapeHandles, std::optional<bool> merge = {});
         int64_t handleAddOnScripts(int64_t callType);
         int64_t handleChildScripts(int64_t callType);
@@ -261,7 +266,7 @@ namespace RemoteAPIObject
         std::vector<uint8_t> readCustomDataBlock(int64_t objectHandle, std::string tagName);
         void readCustomDataBlockEx(int64_t handle, std::string tagName, std::optional<json> options = {});
         std::vector<std::string> readCustomDataBlockTags(int64_t objectHandle);
-        void readCustomTableData(int64_t handle, std::string tagName, std::string data, std::optional<json> options = {});
+        void readCustomTableData(int64_t handle, std::string tagName, std::optional<json> options = {});
         std::tuple<int64_t, std::vector<double>, std::vector<double>> readForceSensor(int64_t objectHandle);
         std::tuple<int64_t, double, std::vector<double>, int64_t, std::vector<double>> readProximitySensor(int64_t sensorHandle);
         std::vector<uint8_t> readTexture(int64_t textureId, int64_t options, std::optional<int64_t> posX = {}, std::optional<int64_t> posY = {}, std::optional<int64_t> sizeX = {}, std::optional<int64_t> sizeY = {});
@@ -275,6 +280,7 @@ namespace RemoteAPIObject
         void removeObjects(std::vector<int64_t> objectHandles);
         void removeParticleObject(int64_t particleObjectHandle);
         int64_t removePointsFromPointCloud(int64_t pointCloudHandle, int64_t options, std::vector<double> points, double tolerance);
+        void removeReferencedObjects(int64_t objectHandle);
         void removeScript(int64_t scriptHandle);
         int64_t removeVoxelsFromOctree(int64_t octreeHandle, int64_t options, std::vector<double> points);
         int64_t reorientShapeBoundingBox(int64_t shapeHandle, int64_t relativeToHandle);
@@ -301,7 +307,6 @@ namespace RemoteAPIObject
         int64_t serialSend(int64_t portHandle, std::vector<uint8_t> data);
         void setArrayParam(int64_t parameter, std::vector<double> arrayOfValues);
         void setBoolParam(int64_t parameter, bool boolState);
-        void setDoubleSignal(std::string signalName, double signalValue);
         void setEngineBoolParam(int64_t paramId, int64_t objectHandle, bool boolParam);
         void setEngineFloatParam(int64_t paramId, int64_t objectHandle, double floatParam);
         void setEngineInt32Param(int64_t paramId, int64_t objectHandle, int64_t int32Param);
@@ -331,6 +336,7 @@ namespace RemoteAPIObject
         void setObjectAlias(int64_t objectHandle, std::string objectAlias);
         void setObjectChildPose(int64_t objectHandle, std::vector<double> pose);
         bool setObjectColor(int64_t objectHandle, int64_t index, int64_t colorComponent, std::vector<double> rgbData);
+        void setObjectFloatArrayParam(int64_t objectHandle, int64_t parameterID, std::vector<double> params);
         void setObjectFloatParam(int64_t objectHandle, int64_t parameterID, double parameter);
         void setObjectInt32Param(int64_t objectHandle, int64_t parameterID, int64_t parameter);
         void setObjectMatrix(int64_t objectHandle, int64_t relativeToObjectHandle, std::vector<double> matrix);
@@ -340,7 +346,7 @@ namespace RemoteAPIObject
         void setObjectPosition(int64_t objectHandle, int64_t relativeToObjectHandle, std::vector<double> position);
         void setObjectProperty(int64_t objectHandle, int64_t property);
         void setObjectQuaternion(int64_t objectHandle, int64_t relativeToObjectHandle, std::vector<double> quaternion);
-        void setObjectSelection(std::vector<double> objectHandles);
+        void setObjectSel(std::vector<int64_t> objectHandles);
         void setObjectSpecialProperty(int64_t objectHandle, int64_t property);
         void setObjectStringParam(int64_t objectHandle, int64_t parameterID, std::vector<uint8_t> parameter);
         void setPage(int64_t pageIndex);
@@ -843,6 +849,9 @@ namespace RemoteAPIObject
 #endif
 #ifndef callbackid_userdefined
         const int callbackid_userdefined = 1000;
+#endif
+#ifndef camerafarrayparam_viewfrustum
+        const int camerafarrayparam_viewfrustum = 9013;
 #endif
 #ifndef camerafloatparam_far_clipping
         const int camerafloatparam_far_clipping = 9009;
@@ -2894,10 +2903,10 @@ namespace RemoteAPIObject
         const int pure_primitive_spheroid = 4;
 #endif
 #ifndef rml_disable_extremum_motion_states_calc
-        const int rml_disable_extremum_motion_states_calc = 8;
+        const int rml_disable_extremum_motion_states_calc = 0;
 #endif
 #ifndef rml_keep_current_vel_if_fallback_strategy
-        const int rml_keep_current_vel_if_fallback_strategy = 16;
+        const int rml_keep_current_vel_if_fallback_strategy = 0;
 #endif
 #ifndef rml_keep_target_vel
         const int rml_keep_target_vel = 0;
@@ -2906,7 +2915,7 @@ namespace RemoteAPIObject
         const int rml_no_sync = 3;
 #endif
 #ifndef rml_only_phase_sync
-        const int rml_only_phase_sync = 2;
+        const int rml_only_phase_sync = 1;
 #endif
 #ifndef rml_only_time_sync
         const int rml_only_time_sync = 1;
@@ -2915,7 +2924,7 @@ namespace RemoteAPIObject
         const int rml_phase_sync_if_possible = 0;
 #endif
 #ifndef rml_recompute_trajectory
-        const int rml_recompute_trajectory = 4;
+        const int rml_recompute_trajectory = 0;
 #endif
 #ifndef ruckig_minaccel
         const int ruckig_minaccel = 512;
@@ -3502,6 +3511,9 @@ namespace RemoteAPIObject
 #ifndef verbosity_warnings
         const int verbosity_warnings = 300;
 #endif
+#ifndef visionfarrayparam_viewfrustum
+        const int visionfarrayparam_viewfrustum = 1019;
+#endif
 #ifndef visionfloatparam_far_clipping
         const int visionfloatparam_far_clipping = 1001;
 #endif
@@ -3991,16 +4003,15 @@ namespace RemoteAPIObject
     public:
         simIK(RemoteAPIClient *client);
 
-        int64_t addIkElement(int64_t environmentHandle, int64_t ikGroupHandle, int64_t tipDummyHandle);
-        std::tuple<int64_t, json> addIkElementFromScene(int64_t environmentHandle, int64_t ikGroup, int64_t baseHandle, int64_t tipHandle, int64_t targetHandle, int64_t constraints);
-        int64_t applyIkEnvironmentToScene(int64_t environmentHandle, int64_t ikGroup, std::optional<bool> applyOnlyWhenSuccessful = {});
-        void applySceneToIkEnvironment(int64_t environmentHandle, int64_t ikGroup);
-        bool computeJacobian(int64_t environmentHandle, int64_t ikGroupHandle, int64_t options);
+        int64_t addElement(int64_t environmentHandle, int64_t ikGroupHandle, int64_t tipDummyHandle);
+        std::tuple<int64_t, json, json> addElementFromScene(int64_t environmentHandle, int64_t ikGroup, int64_t baseHandle, int64_t tipHandle, int64_t targetHandle, int64_t constraints);
+        std::tuple<std::vector<double>, std::vector<double>> computeGroupJacobian(int64_t environmentHandle, int64_t ikGroupHandle);
+        std::tuple<std::vector<double>, std::vector<double>> computeJacobian(int64_t environmentHandle, int64_t baseObject, int64_t lastJoint, int64_t constraints, std::vector<double> tipMatrix, std::optional<std::vector<double>> targetMatrix = {}, std::optional<std::vector<double>> constrBaseMatrix = {});
         int64_t createDummy(int64_t environmentHandle, std::optional<std::string> dummyName = {});
-        int64_t createEnvironment();
-        int64_t createIkGroup(int64_t environmentHandle, std::optional<std::string> ikGroupName = {});
+        int64_t createEnvironment(std::optional<int64_t> flags = {});
+        int64_t createGroup(int64_t environmentHandle, std::optional<std::string> ikGroupName = {});
         int64_t createJoint(int64_t environmentHandle, int64_t jointType, std::optional<std::string> jointName = {});
-        bool doesIkGroupExist(int64_t environmentHandle, std::string ikGroupName);
+        bool doesGroupExist(int64_t environmentHandle, std::string ikGroupName);
         bool doesObjectExist(int64_t environmentHandle, std::string objectName);
         int64_t duplicateEnvironment(int64_t environmentHandle);
         void eraseEnvironment(int64_t environmentHandle);
@@ -4008,18 +4019,20 @@ namespace RemoteAPIObject
         std::vector<double> findConfig(int64_t environmentHandle, int64_t ikGroupHandle, std::vector<int64_t> jointHandles, std::optional<double> thresholdDist = {}, std::optional<double> maxTime = {}, std::optional<std::vector<double>> metric = {}, std::optional<std::string> validationCallback = {}, std::optional<json> auxData = {});
         std::vector<double> generatePath(int64_t environmentHandle, int64_t ikGroupHandle, std::vector<int64_t> jointHandles, int64_t tipHandle, int64_t pathPointCount, std::optional<std::string> validationCallback = {}, std::optional<json> auxData = {});
         std::vector<double> getAlternateConfigs(int64_t environmentHandle, std::vector<int64_t> jointHandles, std::optional<std::vector<double>> lowLimits = {}, std::optional<std::vector<double>> ranges = {});
-        std::tuple<int64_t, int64_t> getIkElementBase(int64_t environmentHandle, int64_t ikGroupHandle, int64_t elementHandle);
-        int64_t getIkElementConstraints(int64_t environmentHandle, int64_t ikGroupHandle, int64_t elementHandle);
-        int64_t getIkElementFlags(int64_t environmentHandle, int64_t ikGroupHandle, int64_t elementHandle);
-        std::vector<double> getIkElementPrecision(int64_t environmentHandle, int64_t ikGroupHandle, int64_t elementHandle);
-        std::vector<double> getIkElementWeights(int64_t environmentHandle, int64_t ikGroupHandle, int64_t elementHandle);
-        std::tuple<int64_t, double, int64_t> getIkGroupCalculation(int64_t environmentHandle, int64_t ikGroupHandle);
-        int64_t getIkGroupFlags(int64_t environmentHandle, int64_t ikGroupHandle);
-        int64_t getIkGroupHandle(int64_t environmentHandle, std::string ikGroupName);
-        std::tuple<std::vector<double>, std::vector<int64_t>> getJacobian(int64_t environmentHandle, int64_t ikGroupHandle);
+        std::tuple<int64_t, int64_t> getElementBase(int64_t environmentHandle, int64_t ikGroupHandle, int64_t elementHandle);
+        int64_t getElementConstraints(int64_t environmentHandle, int64_t ikGroupHandle, int64_t elementHandle);
+        int64_t getElementFlags(int64_t environmentHandle, int64_t ikGroupHandle, int64_t elementHandle);
+        std::vector<double> getElementPrecision(int64_t environmentHandle, int64_t ikGroupHandle, int64_t elementHandle);
+        std::vector<double> getElementWeights(int64_t environmentHandle, int64_t ikGroupHandle, int64_t elementHandle);
+        std::string getFailureDescription(int64_t reason);
+        std::tuple<int64_t, double, int64_t> getGroupCalculation(int64_t environmentHandle, int64_t ikGroupHandle);
+        int64_t getGroupFlags(int64_t environmentHandle, int64_t ikGroupHandle);
+        int64_t getGroupHandle(int64_t environmentHandle, std::string ikGroupName);
+        std::tuple<std::vector<int64_t>, std::vector<double>> getGroupJointLimitHits(int64_t environmentHandle, int64_t ikGroupHandle);
+        std::vector<int64_t> getGroupJoints(int64_t environmentHandle, int64_t ikGroupHandle);
         std::tuple<int64_t, double, double> getJointDependency(int64_t environmentHandle, int64_t jointHandle);
-        double getJointIkWeight(int64_t environmentHandle, int64_t jointHandle);
         std::tuple<bool, std::vector<double>> getJointInterval(int64_t environmentHandle, int64_t jointHandle);
+        double getJointLimitMargin(int64_t environmentHandle, int64_t jointHandle);
         std::vector<double> getJointMatrix(int64_t environmentHandle, int64_t jointHandle);
         double getJointMaxStepSize(int64_t environmentHandle, int64_t jointHandle);
         int64_t getJointMode(int64_t environmentHandle, int64_t jointHandle);
@@ -4027,39 +4040,58 @@ namespace RemoteAPIObject
         double getJointScrewPitch(int64_t environmentHandle, int64_t jointHandle);
         std::tuple<std::vector<double>, std::vector<double>, std::vector<double>> getJointTransformation(int64_t environmentHandle, int64_t jointHandle);
         int64_t getJointType(int64_t environmentHandle, int64_t jointHandle);
-        int64_t getLinkedDummy(int64_t environmentHandle, int64_t dummyHandle);
-        double getManipulability(int64_t environmentHandle, int64_t ikGroupHandle);
+        double getJointWeight(int64_t environmentHandle, int64_t jointHandle);
         int64_t getObjectHandle(int64_t environmentHandle, std::string objectName);
         std::vector<double> getObjectMatrix(int64_t environmentHandle, int64_t objectHandle, int64_t relativeToObjectHandle);
         int64_t getObjectParent(int64_t environmentHandle, int64_t objectHandle);
         std::vector<double> getObjectPose(int64_t environmentHandle, int64_t objectHandle, int64_t relativeToObjectHandle);
         std::tuple<std::vector<double>, std::vector<double>, std::vector<double>> getObjectTransformation(int64_t environmentHandle, int64_t objectHandle, int64_t relativeToObjectHandle);
         std::tuple<int64_t, std::string, bool, int64_t> getObjects(int64_t environmentHandle, int64_t index);
-        int64_t handleIkGroup(int64_t environmentHandle, std::optional<int64_t> ikGroupHandle = {});
+        int64_t getTargetDummy(int64_t environmentHandle, int64_t dummyHandle);
+        std::tuple<int64_t, int64_t, std::vector<double>> handleGroup(int64_t environmentHandle, int64_t ikGroup, std::optional<json> options = {});
+        std::tuple<int64_t, int64_t, std::vector<double>> handleGroups(int64_t environmentHandle, std::vector<int64_t> ikGroups, std::optional<json> options = {});
         void load(int64_t environmentHandle, std::string data);
         std::string save(int64_t environmentHandle);
-        void setIkElementBase(int64_t environmentHandle, int64_t ikGroupHandle, int64_t elementHandle, int64_t baseHandle, std::optional<int64_t> constraintsBaseHandle = {});
-        void setIkElementConstraints(int64_t environmentHandle, int64_t ikGroupHandle, int64_t elementHandle, int64_t constraints);
-        void setIkElementFlags(int64_t environmentHandle, int64_t ikGroupHandle, int64_t elementHandle, int64_t flags);
-        void setIkElementPrecision(int64_t environmentHandle, int64_t ikGroupHandle, int64_t elementHandle, std::vector<double> precision);
-        void setIkElementWeights(int64_t environmentHandle, int64_t ikGroupHandle, int64_t elementHandle, std::vector<double> weights);
-        void setIkGroupCalculation(int64_t environmentHandle, int64_t ikGroupHandle, int64_t method, double damping, int64_t maxIterations);
-        void setIkGroupFlags(int64_t environmentHandle, int64_t ikGroupHandle, int64_t flags);
-        void setJointDependency(int64_t environmentHandle, int64_t jointHandle, int64_t depJointHandle, std::optional<double> offset = {}, std::optional<double> mult = {});
-        void setJointIkWeight(int64_t environmentHandle, int64_t jointHandle, double weight);
+        void setElementBase(int64_t environmentHandle, int64_t ikGroupHandle, int64_t elementHandle, int64_t baseHandle, std::optional<int64_t> constraintsBaseHandle = {});
+        void setElementConstraints(int64_t environmentHandle, int64_t ikGroupHandle, int64_t elementHandle, int64_t constraints);
+        void setElementFlags(int64_t environmentHandle, int64_t ikGroupHandle, int64_t elementHandle, int64_t flags);
+        void setElementPrecision(int64_t environmentHandle, int64_t ikGroupHandle, int64_t elementHandle, std::vector<double> precision);
+        void setElementWeights(int64_t environmentHandle, int64_t ikGroupHandle, int64_t elementHandle, std::vector<double> weights);
+        void setGroupCalculation(int64_t environmentHandle, int64_t ikGroupHandle, int64_t method, double damping, int64_t maxIterations);
+        void setGroupFlags(int64_t environmentHandle, int64_t ikGroupHandle, int64_t flags);
+        void setJointDependency(int64_t environmentHandle, int64_t jointHandle, int64_t masterJointHandle, std::optional<double> offset = {}, std::optional<double> mult = {}, std::optional<std::string> callback = {});
         void setJointInterval(int64_t environmentHandle, int64_t jointHandle, bool cyclic, std::optional<std::vector<double>> interval = {});
+        void setJointLimitMargin(int64_t environmentHandle, int64_t jointHandle, double margin);
         void setJointMaxStepSize(int64_t environmentHandle, int64_t jointHandle, double stepSize);
         void setJointMode(int64_t environmentHandle, int64_t jointHandle, int64_t jointMode);
         void setJointPosition(int64_t environmentHandle, int64_t jointHandle, double position);
         void setJointScrewPitch(int64_t environmentHandle, int64_t jointHandle, double pitch);
-        void setLinkedDummy(int64_t environmentHandle, int64_t dummyHandle, int64_t linkedDummyHandle);
+        void setJointWeight(int64_t environmentHandle, int64_t jointHandle, double weight);
         void setObjectMatrix(int64_t environmentHandle, int64_t objectHandle, int64_t relativeToObjectHandle, std::vector<double> matrix);
         void setObjectParent(int64_t environmentHandle, int64_t objectHandle, int64_t parentObjectHandle, std::optional<bool> keepInPlace = {});
         void setObjectPose(int64_t environmentHandle, int64_t objectHandle, int64_t relativeToObjectHandle, std::vector<double> pose);
         void setObjectTransformation(int64_t environmentHandle, int64_t objectHandle, int64_t relativeToObjectHandle, std::vector<double> position, std::vector<double> eulerOrQuaternion);
         void setSphericalJointMatrix(int64_t environmentHandle, int64_t jointHandle, std::vector<double> matrix);
         void setSphericalJointRotation(int64_t environmentHandle, int64_t jointHandle, std::vector<double> eulerOrQuaternion);
+        void setTargetDummy(int64_t environmentHandle, int64_t dummyHandle, int64_t targetDummyHandle);
+        void syncFromIkWorld(int64_t environmentHandle, std::vector<int64_t> ikGroups);
+        void syncToIkWorld(int64_t environmentHandle, std::vector<int64_t> ikGroups);
 
+#ifndef calc_cannotinvert
+        const int calc_cannotinvert = 2;
+#endif
+#ifndef calc_limithit
+        const int calc_limithit = 64;
+#endif
+#ifndef calc_notperformed
+        const int calc_notperformed = 1;
+#endif
+#ifndef calc_notwithintolerance
+        const int calc_notwithintolerance = 16;
+#endif
+#ifndef calc_stepstoobig
+        const int calc_stepstoobig = 32;
+#endif
 #ifndef constraint_alpha_beta
         const int constraint_alpha_beta = 8;
 #endif
@@ -4084,6 +4116,24 @@ namespace RemoteAPIObject
 #ifndef constraint_z
         const int constraint_z = 4;
 #endif
+#ifndef group_avoidlimits
+        const int group_avoidlimits = 64;
+#endif
+#ifndef group_enabled
+        const int group_enabled = 1;
+#endif
+#ifndef group_ignoremaxsteps
+        const int group_ignoremaxsteps = 2;
+#endif
+#ifndef group_restoreonbadangtol
+        const int group_restoreonbadangtol = 8;
+#endif
+#ifndef group_restoreonbadlintol
+        const int group_restoreonbadlintol = 4;
+#endif
+#ifndef group_stoponlimithit
+        const int group_stoponlimithit = 16;
+#endif
 #ifndef handle_all
         const int handle_all = -2;
 #endif
@@ -4095,12 +4145,6 @@ namespace RemoteAPIObject
 #endif
 #ifndef handleflag_tipdummy
         const int handleflag_tipdummy = 4194304;
-#endif
-#ifndef jointmode_dependent
-        const int jointmode_dependent = 4;
-#endif
-#ifndef jointmode_force
-        const int jointmode_force = 5;
 #endif
 #ifndef jointmode_ik
         const int jointmode_ik = 2;

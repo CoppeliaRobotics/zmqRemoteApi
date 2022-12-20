@@ -92,10 +92,22 @@ namespace RemoteAPIObject
         _args.push_back(bin(image));
         auto _ret = this->_client->call("sim.setVisionSensorCharImage", _args);
     }
+    std::vector<int64_t> sim::getObjectSelection()
+    {
+        bool _brk = false;
+        json _args(json_array_arg);
+        auto _ret = this->_client->call("sim.getObjectSelection", _args);
+        return _ret[0].as<std::vector<int64_t>>();
+    }
+    void sim::setObjectSelection(std::vector<double> objectHandles)
+    {
+        bool _brk = false;
+        json _args(json_array_arg);
+        _args.push_back(objectHandles);
+        auto _ret = this->_client->call("sim.setObjectSelection", _args);
+    }
+
     // DEPRECATED END
-
-
-
 
     int64_t sim::addDrawingObject(int64_t objectType, double size, double duplicateTolerance, int64_t parentObjectHandle, int64_t maxItemCount, std::optional<std::vector<double>> color)
     {
@@ -264,6 +276,15 @@ namespace RemoteAPIObject
         _args.push_back(objectHandle);
         _args.push_back(itemData);
         auto _ret = this->_client->call("sim.addParticleObjectItem", _args);
+    }
+
+    void sim::addReferencedHandle(int64_t objectHandle, int64_t referencedHandle)
+    {
+        bool _brk = false;
+        json _args(json_array_arg);
+        _args.push_back(objectHandle);
+        _args.push_back(referencedHandle);
+        auto _ret = this->_client->call("sim.addReferencedHandle", _args);
     }
 
     int64_t sim::addScript(int64_t scriptType)
@@ -611,14 +632,6 @@ namespace RemoteAPIObject
         _args.push_back(returnImage);
         auto _ret = this->_client->call("sim.checkVisionSensorEx", _args);
         return _ret[0].as<std::vector<double>>();
-    }
-
-    void sim::clearDoubleSignal(std::string signalName)
-    {
-        bool _brk = false;
-        json _args(json_array_arg);
-        _args.push_back(signalName);
-        auto _ret = this->_client->call("clearDoubleSignal", _args);
     }
 
     void sim::clearFloatSignal(std::string signalName)
@@ -1224,15 +1237,6 @@ namespace RemoteAPIObject
         return std::make_tuple(_ret[0].as<std::vector<double>>(), _ret[1].as<std::vector<int64_t>>());
     }
 
-    double sim::getDoubleSignal(std::string signalName)
-    {
-        bool _brk = false;
-        json _args(json_array_arg);
-        _args.push_back(signalName);
-        auto _ret = this->_client->call("sim.getDoubleSignal", _args);
-        return _ret[0].as<double>();
-    }
-
     bool sim::getEngineBoolParam(int64_t paramId, int64_t objectHandle)
     {
         bool _brk = false;
@@ -1588,6 +1592,22 @@ namespace RemoteAPIObject
         return _ret[0].as<std::string>();
     }
 
+    std::string sim::getObjectAliasRelative(int64_t handle, int64_t baseHandle, std::optional<int64_t> options)
+    {
+        bool _brk = false;
+        json _args(json_array_arg);
+        _args.push_back(handle);
+        _args.push_back(baseHandle);
+        if(options)
+        {
+            if(_brk) throw std::runtime_error("no gaps allowed");
+            else _args.push_back(*options);
+        }
+        else _brk = true;
+        auto _ret = this->_client->call("sim.getObjectAliasRelative", _args);
+        return _ret[0].as<std::string>();
+    }
+
     int64_t sim::getObjectChild(int64_t objectHandle, int64_t index)
     {
         bool _brk = false;
@@ -1615,6 +1635,16 @@ namespace RemoteAPIObject
         _args.push_back(index);
         _args.push_back(colorComponent);
         auto _ret = this->_client->call("sim.getObjectColor", _args);
+        return _ret[0].as<std::vector<double>>();
+    }
+
+    std::vector<double> sim::getObjectFloatArrayParam(int64_t objectHandle, int64_t parameterID)
+    {
+        bool _brk = false;
+        json _args(json_array_arg);
+        _args.push_back(objectHandle);
+        _args.push_back(parameterID);
+        auto _ret = this->_client->call("sim.getObjectFloatArrayParam", _args);
         return _ret[0].as<std::vector<double>>();
     }
 
@@ -1720,11 +1750,11 @@ namespace RemoteAPIObject
         return _ret[0].as<std::vector<double>>();
     }
 
-    std::vector<int64_t> sim::getObjectSelection()
+    std::vector<int64_t> sim::getObjectSel()
     {
         bool _brk = false;
         json _args(json_array_arg);
-        auto _ret = this->_client->call("sim.getObjectSelection", _args);
+        auto _ret = this->_client->call("sim.getObjectSel", _args);
         return _ret[0].as<std::vector<int64_t>>();
     }
 
@@ -1978,6 +2008,15 @@ namespace RemoteAPIObject
         else _brk = true;
         auto _ret = this->_client->call("sim.getScript", _args);
         return _ret[0].as<int64_t>();
+    }
+
+    json sim::getScriptFunctions(int64_t scriptHandle)
+    {
+        bool _brk = false;
+        json _args(json_array_arg);
+        _args.push_back(scriptHandle);
+        auto _ret = this->_client->call("sim.getScriptFunctions", _args);
+        return _ret[0].as<json>();
     }
 
     int64_t sim::getScriptInt32Param(int64_t scriptHandle, int64_t parameterID)
@@ -2317,6 +2356,14 @@ namespace RemoteAPIObject
         else _brk = true;
         auto _ret = this->_client->call("sim.getVisionSensorImg", _args);
         return std::make_tuple(_ret[0].as<std::vector<uint8_t>>(), _ret[1].as<std::vector<int64_t>>());
+    }
+
+    void sim::getVisionSensorRes(int64_t sensorHandle)
+    {
+        bool _brk = false;
+        json _args(json_array_arg);
+        _args.push_back(sensorHandle);
+        auto _ret = this->_client->call("sim.getVisionSensorRes", _args);
     }
 
     int64_t sim::groupShapes(std::vector<int64_t> shapeHandles, std::optional<bool> merge)
@@ -3057,13 +3104,12 @@ namespace RemoteAPIObject
         return _ret[0].as<std::vector<std::string>>();
     }
 
-    void sim::readCustomTableData(int64_t handle, std::string tagName, std::string data, std::optional<json> options)
+    void sim::readCustomTableData(int64_t handle, std::string tagName, std::optional<json> options)
     {
         bool _brk = false;
         json _args(json_array_arg);
         _args.push_back(handle);
         _args.push_back(tagName);
-        _args.push_back(data);
         if(options)
         {
             if(_brk) throw std::runtime_error("no gaps allowed");
@@ -3216,6 +3262,14 @@ namespace RemoteAPIObject
         _args.push_back(tolerance);
         auto _ret = this->_client->call("sim.removePointsFromPointCloud", _args);
         return _ret[0].as<int64_t>();
+    }
+
+    void sim::removeReferencedObjects(int64_t objectHandle)
+    {
+        bool _brk = false;
+        json _args(json_array_arg);
+        _args.push_back(objectHandle);
+        auto _ret = this->_client->call("sim.removeReferencedObjects", _args);
     }
 
     void sim::removeScript(int64_t scriptHandle)
@@ -3503,15 +3557,6 @@ namespace RemoteAPIObject
         _args.push_back(parameter);
         _args.push_back(boolState);
         auto _ret = this->_client->call("sim.setBoolParam", _args);
-    }
-
-    void sim::setDoubleSignal(std::string signalName, double signalValue)
-    {
-        bool _brk = false;
-        json _args(json_array_arg);
-        _args.push_back(signalName);
-        _args.push_back(signalValue);
-        auto _ret = this->_client->call("sim.setDoubleSignal", _args);
     }
 
     void sim::setEngineBoolParam(int64_t paramId, int64_t objectHandle, bool boolParam)
@@ -3826,6 +3871,16 @@ namespace RemoteAPIObject
         return _ret[0].as<bool>();
     }
 
+    void sim::setObjectFloatArrayParam(int64_t objectHandle, int64_t parameterID, std::vector<double> params)
+    {
+        bool _brk = false;
+        json _args(json_array_arg);
+        _args.push_back(objectHandle);
+        _args.push_back(parameterID);
+        _args.push_back(params);
+        auto _ret = this->_client->call("sim.setObjectFloatArrayParam", _args);
+    }
+
     void sim::setObjectFloatParam(int64_t objectHandle, int64_t parameterID, double parameter)
     {
         bool _brk = false;
@@ -3920,12 +3975,12 @@ namespace RemoteAPIObject
         auto _ret = this->_client->call("sim.setObjectQuaternion", _args);
     }
 
-    void sim::setObjectSelection(std::vector<double> objectHandles)
+    void sim::setObjectSel(std::vector<int64_t> objectHandles)
     {
         bool _brk = false;
         json _args(json_array_arg);
         _args.push_back(objectHandles);
-        auto _ret = this->_client->call("sim.setObjectSelection", _args);
+        auto _ret = this->_client->call("sim.setObjectSel", _args);
     }
 
     void sim::setObjectSpecialProperty(int64_t objectHandle, int64_t property)
@@ -4550,18 +4605,18 @@ namespace RemoteAPIObject
     {
     }
 
-    int64_t simIK::addIkElement(int64_t environmentHandle, int64_t ikGroupHandle, int64_t tipDummyHandle)
+    int64_t simIK::addElement(int64_t environmentHandle, int64_t ikGroupHandle, int64_t tipDummyHandle)
     {
         bool _brk = false;
         json _args(json_array_arg);
         _args.push_back(environmentHandle);
         _args.push_back(ikGroupHandle);
         _args.push_back(tipDummyHandle);
-        auto _ret = this->_client->call("simIK.addIkElement", _args);
+        auto _ret = this->_client->call("simIK.addElement", _args);
         return _ret[0].as<int64_t>();
     }
 
-    std::tuple<int64_t, json> simIK::addIkElementFromScene(int64_t environmentHandle, int64_t ikGroup, int64_t baseHandle, int64_t tipHandle, int64_t targetHandle, int64_t constraints)
+    std::tuple<int64_t, json, json> simIK::addElementFromScene(int64_t environmentHandle, int64_t ikGroup, int64_t baseHandle, int64_t tipHandle, int64_t targetHandle, int64_t constraints)
     {
         bool _brk = false;
         json _args(json_array_arg);
@@ -4571,44 +4626,43 @@ namespace RemoteAPIObject
         _args.push_back(tipHandle);
         _args.push_back(targetHandle);
         _args.push_back(constraints);
-        auto _ret = this->_client->call("simIK.addIkElementFromScene", _args);
-        return std::make_tuple(_ret[0].as<int64_t>(), _ret[1].as<json>());
+        auto _ret = this->_client->call("simIK.addElementFromScene", _args);
+        return std::make_tuple(_ret[0].as<int64_t>(), _ret[1].as<json>(), _ret[2].as<json>());
     }
 
-    int64_t simIK::applyIkEnvironmentToScene(int64_t environmentHandle, int64_t ikGroup, std::optional<bool> applyOnlyWhenSuccessful)
-    {
-        bool _brk = false;
-        json _args(json_array_arg);
-        _args.push_back(environmentHandle);
-        _args.push_back(ikGroup);
-        if(applyOnlyWhenSuccessful)
-        {
-            if(_brk) throw std::runtime_error("no gaps allowed");
-            else _args.push_back(*applyOnlyWhenSuccessful);
-        }
-        else _brk = true;
-        auto _ret = this->_client->call("simIK.applyIkEnvironmentToScene", _args);
-        return _ret[0].as<int64_t>();
-    }
-
-    void simIK::applySceneToIkEnvironment(int64_t environmentHandle, int64_t ikGroup)
-    {
-        bool _brk = false;
-        json _args(json_array_arg);
-        _args.push_back(environmentHandle);
-        _args.push_back(ikGroup);
-        auto _ret = this->_client->call("simIK.applySceneToIkEnvironment", _args);
-    }
-
-    bool simIK::computeJacobian(int64_t environmentHandle, int64_t ikGroupHandle, int64_t options)
+    std::tuple<std::vector<double>, std::vector<double>> simIK::computeGroupJacobian(int64_t environmentHandle, int64_t ikGroupHandle)
     {
         bool _brk = false;
         json _args(json_array_arg);
         _args.push_back(environmentHandle);
         _args.push_back(ikGroupHandle);
-        _args.push_back(options);
+        auto _ret = this->_client->call("simIK.computeGroupJacobian", _args);
+        return std::make_tuple(_ret[0].as<std::vector<double>>(), _ret[1].as<std::vector<double>>());
+    }
+
+    std::tuple<std::vector<double>, std::vector<double>> simIK::computeJacobian(int64_t environmentHandle, int64_t baseObject, int64_t lastJoint, int64_t constraints, std::vector<double> tipMatrix, std::optional<std::vector<double>> targetMatrix, std::optional<std::vector<double>> constrBaseMatrix)
+    {
+        bool _brk = false;
+        json _args(json_array_arg);
+        _args.push_back(environmentHandle);
+        _args.push_back(baseObject);
+        _args.push_back(lastJoint);
+        _args.push_back(constraints);
+        _args.push_back(tipMatrix);
+        if(targetMatrix)
+        {
+            if(_brk) throw std::runtime_error("no gaps allowed");
+            else _args.push_back(*targetMatrix);
+        }
+        else _brk = true;
+        if(constrBaseMatrix)
+        {
+            if(_brk) throw std::runtime_error("no gaps allowed");
+            else _args.push_back(*constrBaseMatrix);
+        }
+        else _brk = true;
         auto _ret = this->_client->call("simIK.computeJacobian", _args);
-        return _ret[0].as<bool>();
+        return std::make_tuple(_ret[0].as<std::vector<double>>(), _ret[1].as<std::vector<double>>());
     }
 
     int64_t simIK::createDummy(int64_t environmentHandle, std::optional<std::string> dummyName)
@@ -4626,15 +4680,21 @@ namespace RemoteAPIObject
         return _ret[0].as<int64_t>();
     }
 
-    int64_t simIK::createEnvironment()
+    int64_t simIK::createEnvironment(std::optional<int64_t> flags)
     {
         bool _brk = false;
         json _args(json_array_arg);
+        if(flags)
+        {
+            if(_brk) throw std::runtime_error("no gaps allowed");
+            else _args.push_back(*flags);
+        }
+        else _brk = true;
         auto _ret = this->_client->call("simIK.createEnvironment", _args);
         return _ret[0].as<int64_t>();
     }
 
-    int64_t simIK::createIkGroup(int64_t environmentHandle, std::optional<std::string> ikGroupName)
+    int64_t simIK::createGroup(int64_t environmentHandle, std::optional<std::string> ikGroupName)
     {
         bool _brk = false;
         json _args(json_array_arg);
@@ -4645,7 +4705,7 @@ namespace RemoteAPIObject
             else _args.push_back(*ikGroupName);
         }
         else _brk = true;
-        auto _ret = this->_client->call("simIK.createIkGroup", _args);
+        auto _ret = this->_client->call("simIK.createGroup", _args);
         return _ret[0].as<int64_t>();
     }
 
@@ -4665,13 +4725,13 @@ namespace RemoteAPIObject
         return _ret[0].as<int64_t>();
     }
 
-    bool simIK::doesIkGroupExist(int64_t environmentHandle, std::string ikGroupName)
+    bool simIK::doesGroupExist(int64_t environmentHandle, std::string ikGroupName)
     {
         bool _brk = false;
         json _args(json_array_arg);
         _args.push_back(environmentHandle);
         _args.push_back(ikGroupName);
-        auto _ret = this->_client->call("simIK.doesIkGroupExist", _args);
+        auto _ret = this->_client->call("simIK.doesGroupExist", _args);
         return _ret[0].as<bool>();
     }
 
@@ -4799,99 +4859,118 @@ namespace RemoteAPIObject
         return _ret[0].as<std::vector<double>>();
     }
 
-    std::tuple<int64_t, int64_t> simIK::getIkElementBase(int64_t environmentHandle, int64_t ikGroupHandle, int64_t elementHandle)
+    std::tuple<int64_t, int64_t> simIK::getElementBase(int64_t environmentHandle, int64_t ikGroupHandle, int64_t elementHandle)
     {
         bool _brk = false;
         json _args(json_array_arg);
         _args.push_back(environmentHandle);
         _args.push_back(ikGroupHandle);
         _args.push_back(elementHandle);
-        auto _ret = this->_client->call("simIK.getIkElementBase", _args);
+        auto _ret = this->_client->call("simIK.getElementBase", _args);
         return std::make_tuple(_ret[0].as<int64_t>(), _ret[1].as<int64_t>());
     }
 
-    int64_t simIK::getIkElementConstraints(int64_t environmentHandle, int64_t ikGroupHandle, int64_t elementHandle)
+    int64_t simIK::getElementConstraints(int64_t environmentHandle, int64_t ikGroupHandle, int64_t elementHandle)
     {
         bool _brk = false;
         json _args(json_array_arg);
         _args.push_back(environmentHandle);
         _args.push_back(ikGroupHandle);
         _args.push_back(elementHandle);
-        auto _ret = this->_client->call("simIK.getIkElementConstraints", _args);
+        auto _ret = this->_client->call("simIK.getElementConstraints", _args);
         return _ret[0].as<int64_t>();
     }
 
-    int64_t simIK::getIkElementFlags(int64_t environmentHandle, int64_t ikGroupHandle, int64_t elementHandle)
+    int64_t simIK::getElementFlags(int64_t environmentHandle, int64_t ikGroupHandle, int64_t elementHandle)
     {
         bool _brk = false;
         json _args(json_array_arg);
         _args.push_back(environmentHandle);
         _args.push_back(ikGroupHandle);
         _args.push_back(elementHandle);
-        auto _ret = this->_client->call("simIK.getIkElementFlags", _args);
+        auto _ret = this->_client->call("simIK.getElementFlags", _args);
         return _ret[0].as<int64_t>();
     }
 
-    std::vector<double> simIK::getIkElementPrecision(int64_t environmentHandle, int64_t ikGroupHandle, int64_t elementHandle)
+    std::vector<double> simIK::getElementPrecision(int64_t environmentHandle, int64_t ikGroupHandle, int64_t elementHandle)
     {
         bool _brk = false;
         json _args(json_array_arg);
         _args.push_back(environmentHandle);
         _args.push_back(ikGroupHandle);
         _args.push_back(elementHandle);
-        auto _ret = this->_client->call("simIK.getIkElementPrecision", _args);
+        auto _ret = this->_client->call("simIK.getElementPrecision", _args);
         return _ret[0].as<std::vector<double>>();
     }
 
-    std::vector<double> simIK::getIkElementWeights(int64_t environmentHandle, int64_t ikGroupHandle, int64_t elementHandle)
+    std::vector<double> simIK::getElementWeights(int64_t environmentHandle, int64_t ikGroupHandle, int64_t elementHandle)
     {
         bool _brk = false;
         json _args(json_array_arg);
         _args.push_back(environmentHandle);
         _args.push_back(ikGroupHandle);
         _args.push_back(elementHandle);
-        auto _ret = this->_client->call("simIK.getIkElementWeights", _args);
+        auto _ret = this->_client->call("simIK.getElementWeights", _args);
         return _ret[0].as<std::vector<double>>();
     }
 
-    std::tuple<int64_t, double, int64_t> simIK::getIkGroupCalculation(int64_t environmentHandle, int64_t ikGroupHandle)
+    std::string simIK::getFailureDescription(int64_t reason)
+    {
+        bool _brk = false;
+        json _args(json_array_arg);
+        _args.push_back(reason);
+        auto _ret = this->_client->call("simIK.getFailureDescription", _args);
+        return _ret[0].as<std::string>();
+    }
+
+    std::tuple<int64_t, double, int64_t> simIK::getGroupCalculation(int64_t environmentHandle, int64_t ikGroupHandle)
     {
         bool _brk = false;
         json _args(json_array_arg);
         _args.push_back(environmentHandle);
         _args.push_back(ikGroupHandle);
-        auto _ret = this->_client->call("simIK.getIkGroupCalculation", _args);
+        auto _ret = this->_client->call("simIK.getGroupCalculation", _args);
         return std::make_tuple(_ret[0].as<int64_t>(), _ret[1].as<double>(), _ret[2].as<int64_t>());
     }
 
-    int64_t simIK::getIkGroupFlags(int64_t environmentHandle, int64_t ikGroupHandle)
+    int64_t simIK::getGroupFlags(int64_t environmentHandle, int64_t ikGroupHandle)
     {
         bool _brk = false;
         json _args(json_array_arg);
         _args.push_back(environmentHandle);
         _args.push_back(ikGroupHandle);
-        auto _ret = this->_client->call("simIK.getIkGroupFlags", _args);
+        auto _ret = this->_client->call("simIK.getGroupFlags", _args);
         return _ret[0].as<int64_t>();
     }
 
-    int64_t simIK::getIkGroupHandle(int64_t environmentHandle, std::string ikGroupName)
+    int64_t simIK::getGroupHandle(int64_t environmentHandle, std::string ikGroupName)
     {
         bool _brk = false;
         json _args(json_array_arg);
         _args.push_back(environmentHandle);
         _args.push_back(ikGroupName);
-        auto _ret = this->_client->call("simIK.getIkGroupHandle", _args);
+        auto _ret = this->_client->call("simIK.getGroupHandle", _args);
         return _ret[0].as<int64_t>();
     }
 
-    std::tuple<std::vector<double>, std::vector<int64_t>> simIK::getJacobian(int64_t environmentHandle, int64_t ikGroupHandle)
+    std::tuple<std::vector<int64_t>, std::vector<double>> simIK::getGroupJointLimitHits(int64_t environmentHandle, int64_t ikGroupHandle)
     {
         bool _brk = false;
         json _args(json_array_arg);
         _args.push_back(environmentHandle);
         _args.push_back(ikGroupHandle);
-        auto _ret = this->_client->call("simIK.getJacobian", _args);
-        return std::make_tuple(_ret[0].as<std::vector<double>>(), _ret[1].as<std::vector<int64_t>>());
+        auto _ret = this->_client->call("simIK.getGroupJointLimitHits", _args);
+        return std::make_tuple(_ret[0].as<std::vector<int64_t>>(), _ret[1].as<std::vector<double>>());
+    }
+
+    std::vector<int64_t> simIK::getGroupJoints(int64_t environmentHandle, int64_t ikGroupHandle)
+    {
+        bool _brk = false;
+        json _args(json_array_arg);
+        _args.push_back(environmentHandle);
+        _args.push_back(ikGroupHandle);
+        auto _ret = this->_client->call("simIK.getGroupJoints", _args);
+        return _ret[0].as<std::vector<int64_t>>();
     }
 
     std::tuple<int64_t, double, double> simIK::getJointDependency(int64_t environmentHandle, int64_t jointHandle)
@@ -4904,16 +4983,6 @@ namespace RemoteAPIObject
         return std::make_tuple(_ret[0].as<int64_t>(), _ret[1].as<double>(), _ret[2].as<double>());
     }
 
-    double simIK::getJointIkWeight(int64_t environmentHandle, int64_t jointHandle)
-    {
-        bool _brk = false;
-        json _args(json_array_arg);
-        _args.push_back(environmentHandle);
-        _args.push_back(jointHandle);
-        auto _ret = this->_client->call("simIK.getJointIkWeight", _args);
-        return _ret[0].as<double>();
-    }
-
     std::tuple<bool, std::vector<double>> simIK::getJointInterval(int64_t environmentHandle, int64_t jointHandle)
     {
         bool _brk = false;
@@ -4922,6 +4991,16 @@ namespace RemoteAPIObject
         _args.push_back(jointHandle);
         auto _ret = this->_client->call("simIK.getJointInterval", _args);
         return std::make_tuple(_ret[0].as<bool>(), _ret[1].as<std::vector<double>>());
+    }
+
+    double simIK::getJointLimitMargin(int64_t environmentHandle, int64_t jointHandle)
+    {
+        bool _brk = false;
+        json _args(json_array_arg);
+        _args.push_back(environmentHandle);
+        _args.push_back(jointHandle);
+        auto _ret = this->_client->call("simIK.getJointLimitMargin", _args);
+        return _ret[0].as<double>();
     }
 
     std::vector<double> simIK::getJointMatrix(int64_t environmentHandle, int64_t jointHandle)
@@ -4994,23 +5073,13 @@ namespace RemoteAPIObject
         return _ret[0].as<int64_t>();
     }
 
-    int64_t simIK::getLinkedDummy(int64_t environmentHandle, int64_t dummyHandle)
+    double simIK::getJointWeight(int64_t environmentHandle, int64_t jointHandle)
     {
         bool _brk = false;
         json _args(json_array_arg);
         _args.push_back(environmentHandle);
-        _args.push_back(dummyHandle);
-        auto _ret = this->_client->call("simIK.getLinkedDummy", _args);
-        return _ret[0].as<int64_t>();
-    }
-
-    double simIK::getManipulability(int64_t environmentHandle, int64_t ikGroupHandle)
-    {
-        bool _brk = false;
-        json _args(json_array_arg);
-        _args.push_back(environmentHandle);
-        _args.push_back(ikGroupHandle);
-        auto _ret = this->_client->call("simIK.getManipulability", _args);
+        _args.push_back(jointHandle);
+        auto _ret = this->_client->call("simIK.getJointWeight", _args);
         return _ret[0].as<double>();
     }
 
@@ -5077,19 +5146,46 @@ namespace RemoteAPIObject
         return std::make_tuple(_ret[0].as<int64_t>(), _ret[1].as<std::string>(), _ret[2].as<bool>(), _ret[3].as<int64_t>());
     }
 
-    int64_t simIK::handleIkGroup(int64_t environmentHandle, std::optional<int64_t> ikGroupHandle)
+    int64_t simIK::getTargetDummy(int64_t environmentHandle, int64_t dummyHandle)
     {
         bool _brk = false;
         json _args(json_array_arg);
         _args.push_back(environmentHandle);
-        if(ikGroupHandle)
+        _args.push_back(dummyHandle);
+        auto _ret = this->_client->call("simIK.getTargetDummy", _args);
+        return _ret[0].as<int64_t>();
+    }
+
+    std::tuple<int64_t, int64_t, std::vector<double>> simIK::handleGroup(int64_t environmentHandle, int64_t ikGroup, std::optional<json> options)
+    {
+        bool _brk = false;
+        json _args(json_array_arg);
+        _args.push_back(environmentHandle);
+        _args.push_back(ikGroup);
+        if(options)
         {
             if(_brk) throw std::runtime_error("no gaps allowed");
-            else _args.push_back(*ikGroupHandle);
+            else _args.push_back(*options);
         }
         else _brk = true;
-        auto _ret = this->_client->call("simIK.handleIkGroup", _args);
-        return _ret[0].as<int64_t>();
+        auto _ret = this->_client->call("simIK.handleGroup", _args);
+        return std::make_tuple(_ret[0].as<int64_t>(), _ret[1].as<int64_t>(), _ret[2].as<std::vector<double>>());
+    }
+
+    std::tuple<int64_t, int64_t, std::vector<double>> simIK::handleGroups(int64_t environmentHandle, std::vector<int64_t> ikGroups, std::optional<json> options)
+    {
+        bool _brk = false;
+        json _args(json_array_arg);
+        _args.push_back(environmentHandle);
+        _args.push_back(ikGroups);
+        if(options)
+        {
+            if(_brk) throw std::runtime_error("no gaps allowed");
+            else _args.push_back(*options);
+        }
+        else _brk = true;
+        auto _ret = this->_client->call("simIK.handleGroups", _args);
+        return std::make_tuple(_ret[0].as<int64_t>(), _ret[1].as<int64_t>(), _ret[2].as<std::vector<double>>());
     }
 
     void simIK::load(int64_t environmentHandle, std::string data)
@@ -5110,7 +5206,7 @@ namespace RemoteAPIObject
         return _ret[0].as<std::string>();
     }
 
-    void simIK::setIkElementBase(int64_t environmentHandle, int64_t ikGroupHandle, int64_t elementHandle, int64_t baseHandle, std::optional<int64_t> constraintsBaseHandle)
+    void simIK::setElementBase(int64_t environmentHandle, int64_t ikGroupHandle, int64_t elementHandle, int64_t baseHandle, std::optional<int64_t> constraintsBaseHandle)
     {
         bool _brk = false;
         json _args(json_array_arg);
@@ -5124,10 +5220,10 @@ namespace RemoteAPIObject
             else _args.push_back(*constraintsBaseHandle);
         }
         else _brk = true;
-        auto _ret = this->_client->call("simIK.setIkElementBase", _args);
+        auto _ret = this->_client->call("simIK.setElementBase", _args);
     }
 
-    void simIK::setIkElementConstraints(int64_t environmentHandle, int64_t ikGroupHandle, int64_t elementHandle, int64_t constraints)
+    void simIK::setElementConstraints(int64_t environmentHandle, int64_t ikGroupHandle, int64_t elementHandle, int64_t constraints)
     {
         bool _brk = false;
         json _args(json_array_arg);
@@ -5135,10 +5231,10 @@ namespace RemoteAPIObject
         _args.push_back(ikGroupHandle);
         _args.push_back(elementHandle);
         _args.push_back(constraints);
-        auto _ret = this->_client->call("simIK.setIkElementConstraints", _args);
+        auto _ret = this->_client->call("simIK.setElementConstraints", _args);
     }
 
-    void simIK::setIkElementFlags(int64_t environmentHandle, int64_t ikGroupHandle, int64_t elementHandle, int64_t flags)
+    void simIK::setElementFlags(int64_t environmentHandle, int64_t ikGroupHandle, int64_t elementHandle, int64_t flags)
     {
         bool _brk = false;
         json _args(json_array_arg);
@@ -5146,10 +5242,10 @@ namespace RemoteAPIObject
         _args.push_back(ikGroupHandle);
         _args.push_back(elementHandle);
         _args.push_back(flags);
-        auto _ret = this->_client->call("simIK.setIkElementFlags", _args);
+        auto _ret = this->_client->call("simIK.setElementFlags", _args);
     }
 
-    void simIK::setIkElementPrecision(int64_t environmentHandle, int64_t ikGroupHandle, int64_t elementHandle, std::vector<double> precision)
+    void simIK::setElementPrecision(int64_t environmentHandle, int64_t ikGroupHandle, int64_t elementHandle, std::vector<double> precision)
     {
         bool _brk = false;
         json _args(json_array_arg);
@@ -5157,10 +5253,10 @@ namespace RemoteAPIObject
         _args.push_back(ikGroupHandle);
         _args.push_back(elementHandle);
         _args.push_back(precision);
-        auto _ret = this->_client->call("simIK.setIkElementPrecision", _args);
+        auto _ret = this->_client->call("simIK.setElementPrecision", _args);
     }
 
-    void simIK::setIkElementWeights(int64_t environmentHandle, int64_t ikGroupHandle, int64_t elementHandle, std::vector<double> weights)
+    void simIK::setElementWeights(int64_t environmentHandle, int64_t ikGroupHandle, int64_t elementHandle, std::vector<double> weights)
     {
         bool _brk = false;
         json _args(json_array_arg);
@@ -5168,10 +5264,10 @@ namespace RemoteAPIObject
         _args.push_back(ikGroupHandle);
         _args.push_back(elementHandle);
         _args.push_back(weights);
-        auto _ret = this->_client->call("simIK.setIkElementWeights", _args);
+        auto _ret = this->_client->call("simIK.setElementWeights", _args);
     }
 
-    void simIK::setIkGroupCalculation(int64_t environmentHandle, int64_t ikGroupHandle, int64_t method, double damping, int64_t maxIterations)
+    void simIK::setGroupCalculation(int64_t environmentHandle, int64_t ikGroupHandle, int64_t method, double damping, int64_t maxIterations)
     {
         bool _brk = false;
         json _args(json_array_arg);
@@ -5180,26 +5276,26 @@ namespace RemoteAPIObject
         _args.push_back(method);
         _args.push_back(damping);
         _args.push_back(maxIterations);
-        auto _ret = this->_client->call("simIK.setIkGroupCalculation", _args);
+        auto _ret = this->_client->call("simIK.setGroupCalculation", _args);
     }
 
-    void simIK::setIkGroupFlags(int64_t environmentHandle, int64_t ikGroupHandle, int64_t flags)
+    void simIK::setGroupFlags(int64_t environmentHandle, int64_t ikGroupHandle, int64_t flags)
     {
         bool _brk = false;
         json _args(json_array_arg);
         _args.push_back(environmentHandle);
         _args.push_back(ikGroupHandle);
         _args.push_back(flags);
-        auto _ret = this->_client->call("simIK.setIkGroupFlags", _args);
+        auto _ret = this->_client->call("simIK.setGroupFlags", _args);
     }
 
-    void simIK::setJointDependency(int64_t environmentHandle, int64_t jointHandle, int64_t depJointHandle, std::optional<double> offset, std::optional<double> mult)
+    void simIK::setJointDependency(int64_t environmentHandle, int64_t jointHandle, int64_t masterJointHandle, std::optional<double> offset, std::optional<double> mult, std::optional<std::string> callback)
     {
         bool _brk = false;
         json _args(json_array_arg);
         _args.push_back(environmentHandle);
         _args.push_back(jointHandle);
-        _args.push_back(depJointHandle);
+        _args.push_back(masterJointHandle);
         if(offset)
         {
             if(_brk) throw std::runtime_error("no gaps allowed");
@@ -5212,17 +5308,13 @@ namespace RemoteAPIObject
             else _args.push_back(*mult);
         }
         else _brk = true;
+        if(callback)
+        {
+            if(_brk) throw std::runtime_error("no gaps allowed");
+            else _args.push_back(*callback);
+        }
+        else _brk = true;
         auto _ret = this->_client->call("simIK.setJointDependency", _args);
-    }
-
-    void simIK::setJointIkWeight(int64_t environmentHandle, int64_t jointHandle, double weight)
-    {
-        bool _brk = false;
-        json _args(json_array_arg);
-        _args.push_back(environmentHandle);
-        _args.push_back(jointHandle);
-        _args.push_back(weight);
-        auto _ret = this->_client->call("simIK.setJointIkWeight", _args);
     }
 
     void simIK::setJointInterval(int64_t environmentHandle, int64_t jointHandle, bool cyclic, std::optional<std::vector<double>> interval)
@@ -5239,6 +5331,16 @@ namespace RemoteAPIObject
         }
         else _brk = true;
         auto _ret = this->_client->call("simIK.setJointInterval", _args);
+    }
+
+    void simIK::setJointLimitMargin(int64_t environmentHandle, int64_t jointHandle, double margin)
+    {
+        bool _brk = false;
+        json _args(json_array_arg);
+        _args.push_back(environmentHandle);
+        _args.push_back(jointHandle);
+        _args.push_back(margin);
+        auto _ret = this->_client->call("simIK.setJointLimitMargin", _args);
     }
 
     void simIK::setJointMaxStepSize(int64_t environmentHandle, int64_t jointHandle, double stepSize)
@@ -5281,14 +5383,14 @@ namespace RemoteAPIObject
         auto _ret = this->_client->call("simIK.setJointScrewPitch", _args);
     }
 
-    void simIK::setLinkedDummy(int64_t environmentHandle, int64_t dummyHandle, int64_t linkedDummyHandle)
+    void simIK::setJointWeight(int64_t environmentHandle, int64_t jointHandle, double weight)
     {
         bool _brk = false;
         json _args(json_array_arg);
         _args.push_back(environmentHandle);
-        _args.push_back(dummyHandle);
-        _args.push_back(linkedDummyHandle);
-        auto _ret = this->_client->call("simIK.setLinkedDummy", _args);
+        _args.push_back(jointHandle);
+        _args.push_back(weight);
+        auto _ret = this->_client->call("simIK.setJointWeight", _args);
     }
 
     void simIK::setObjectMatrix(int64_t environmentHandle, int64_t objectHandle, int64_t relativeToObjectHandle, std::vector<double> matrix)
@@ -5359,6 +5461,34 @@ namespace RemoteAPIObject
         _args.push_back(jointHandle);
         _args.push_back(eulerOrQuaternion);
         auto _ret = this->_client->call("simIK.setSphericalJointRotation", _args);
+    }
+
+    void simIK::setTargetDummy(int64_t environmentHandle, int64_t dummyHandle, int64_t targetDummyHandle)
+    {
+        bool _brk = false;
+        json _args(json_array_arg);
+        _args.push_back(environmentHandle);
+        _args.push_back(dummyHandle);
+        _args.push_back(targetDummyHandle);
+        auto _ret = this->_client->call("simIK.setTargetDummy", _args);
+    }
+
+    void simIK::syncFromIkWorld(int64_t environmentHandle, std::vector<int64_t> ikGroups)
+    {
+        bool _brk = false;
+        json _args(json_array_arg);
+        _args.push_back(environmentHandle);
+        _args.push_back(ikGroups);
+        auto _ret = this->_client->call("simIK.syncFromIkWorld", _args);
+    }
+
+    void simIK::syncToIkWorld(int64_t environmentHandle, std::vector<int64_t> ikGroups)
+    {
+        bool _brk = false;
+        json _args(json_array_arg);
+        _args.push_back(environmentHandle);
+        _args.push_back(ikGroups);
+        auto _ret = this->_client->call("simIK.syncToIkWorld", _args);
     }
 
 };
