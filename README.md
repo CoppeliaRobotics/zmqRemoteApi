@@ -20,14 +20,17 @@ The ZMQ Remote API requires the [ZMQ plugin](https://github.com/CoppeliaRobotics
 
 1. Install required packages for [libPlugin](https://github.com/CoppeliaRobotics/libPlugin): see libPlugin's [README](external/libPlugin/README.md)
 2. Checkout and compile
-```text
+```sh
 $ git clone --recursive https://github.com/CoppeliaRobotics/zmqRemoteApi
-$ mkdir zmqRemoteApi/build
-$ cd zmqRemoteApi/build
-$ cmake ..
+$ cd zmqRemoteApi
+$ git checkout coppeliasim-v4.5.0-rev0
+$ mkdir -p build && cd build
+$ cmake -DCMAKE_BUILD_TYPE=Release ..
 $ cmake --build .
 $ cmake --install .
 ```
+
+NOTE: replace `coppeliasim-v4.5.0-rev0` with the actual CoppeliaSim version you have.
 
 ### Clients
 
