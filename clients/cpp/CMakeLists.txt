@@ -5,16 +5,16 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_MACOSX_RPATH 1)
 set(CMAKE_CXX_STANDARD 17)
 
-if(NOT LIBPLUGIN_DIR)
+if(NOT COPPELIASIM_INCLUDE_DIR)
     if(DEFINED ENV{COPPELIASIM_ROOT_DIR})
-        set(LIBPLUGIN_DIR $ENV{COPPELIASIM_ROOT_DIR}/programming/libPlugin)
+        set(COPPELIASIM_INCLUDE_DIR $ENV{COPPELIASIM_ROOT_DIR}/programming/include)
     else()
         message(FATAL_ERROR "Environment variable COPPELIASIM_ROOT_DIR is not set")
     endif()
 endif()
 list(APPEND CMAKE_MODULE_PATH
     ${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules
-    ${LIBPLUGIN_DIR}/cmake)
+    ${COPPELIASIM_INCLUDE_DIR}/cmake)
 find_package(CoppeliaSim 4.1.0.0 REQUIRED)
 find_package(Python3 REQUIRED COMPONENTS Interpreter)
 
@@ -74,7 +74,7 @@ foreach(templateFile ${templateFiles})
         OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/generated/${templateFile}"
         COMMAND
             ${Python3_EXECUTABLE}
-            "${LIBPLUGIN_DIR}/simStubsGen/external/pycpp/pycpp.py"
+            "${COPPELIASIM_INCLUDE_DIR}/simStubsGen/external/pycpp/pycpp.py"
             -p "calltips_json=${CMAKE_CURRENT_BINARY_DIR}/generated/calltips.json"
             -p "constants_json=${CMAKE_CURRENT_BINARY_DIR}/generated/constants.json"
             -i "${CMAKE_CURRENT_SOURCE_DIR}/templates/${templateFile}"
@@ -82,7 +82,7 @@ foreach(templateFile ${templateFiles})
             -P "${CMAKE_CURRENT_SOURCE_DIR}/../../tools"
             -P "${CMAKE_CURRENT_SOURCE_DIR}"
         DEPENDS
-            "${LIBPLUGIN_DIR}/simStubsGen/external/pycpp/pycpp.py"
+            "${COPPELIASIM_INCLUDE_DIR}/simStubsGen/external/pycpp/pycpp.py"
             "${CMAKE_CURRENT_SOURCE_DIR}/templates/${templateFile}"
             "${CMAKE_CURRENT_BINARY_DIR}/generated/calltips.json"
             "${CMAKE_CURRENT_BINARY_DIR}/generated/constants.json"
