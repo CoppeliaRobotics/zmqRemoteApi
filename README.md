@@ -18,7 +18,7 @@ The ZMQ Remote API requires the [ZMQ plugin](https://github.com/CoppeliaRobotics
 
 ### Compiling
 
-1. Install required packages for [libPlugin](https://github.com/CoppeliaRobotics/libPlugin): see libPlugin's [README](external/libPlugin/README.md)
+1. Install required packages for simStubsGen: see simStubsGen's [README](https://github.com/CoppeliaRobotics/include/blob/master/simStubsGen/README.md)
 2. Checkout and compile
 ```sh
 $ git clone --recursive https://github.com/CoppeliaRobotics/zmqRemoteApi
