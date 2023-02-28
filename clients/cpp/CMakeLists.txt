@@ -32,6 +32,7 @@ if(NOT jsoncons_POPULATED)
     #add_subdirectory(${jsoncons_SOURCE_DIR} ${jsoncons_BINARY_DIR} EXCLUDE_FROM_ALL)
 endif()
 
+set(CPPZMQ_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 FetchContent_Declare(cppzmq
     GIT_REPOSITORY https://github.com/zeromq/cppzmq
     SOURCE_DIR ${CMAKE_CURRENT_BINARY_DIR}/cppzmq
