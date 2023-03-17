@@ -148,7 +148,7 @@ class FuncDef:
                     continue
                 if not obj.startswith('sim'):
                     continue
-                if obj == 'sim' and func in {'test', 'auxFunc', 'handleExtCalls'}:
+                if obj == 'sim' and func in {'test', 'auxFunc', 'handleExtCalls', 'getStringSignal', 'getInt32Signal', 'getFloatSignal'}:
                     continue
                 if func[0] == '_':
                     continue

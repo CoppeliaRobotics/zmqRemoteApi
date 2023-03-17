@@ -108,6 +108,72 @@ namespace RemoteAPIObject
     }
 
     // DEPRECATED END
+    
+    // SPECIAL START
+    std::vector<uint8_t> sim::getStringSignal(std::string signalName,bool* validSignal/*nullptr*/)
+    {
+        std::vector<uint8_t> retVal;
+        auto r = this->_client->call("sim.getStringSignal", {signalName.c_str()});
+        if (r.empty())
+        {
+            if (validSignal!=nullptr)
+                validSignal[0]=false;
+        }
+        else if(r[0].is_string())
+        {
+            if (validSignal!=nullptr)
+                validSignal[0]=true;
+            std::string r2=r[0].as<std::string>();
+            retVal.assign(r2.begin(),r2.end());
+        }
+        else if(r[0].is_byte_string())
+        {
+            if (validSignal!=nullptr)
+                validSignal[0]=true;
+            retVal=r[0].as<std::vector<uint8_t>>();
+        }
+        else
+        {
+            if (validSignal!=nullptr)
+                validSignal[0]=false;
+        }
+        return retVal;
+    }
+    int64_t sim::getInt32Signal(std::string signalName,bool* validSignal/*nullptr*/)
+    {
+        int64_t retVal=0;
+        auto r = this->_client->call("sim.getInt32Signal", {signalName.c_str()});
+        if (r.empty())
+        {
+            if (validSignal!=nullptr)
+                validSignal[0]=false;
+        }
+        else
+        {
+            if (validSignal!=nullptr)
+                validSignal[0]=true;
+            retVal=r[0].as<int64_t>();
+        }
+        return retVal;
+    }
+    double sim::getFloatSignal(std::string signalName,bool* validSignal/*nullptr*/)
+    {
+        double retVal=0.0;
+        auto r = this->_client->call("sim.getInt32Signal", {signalName.c_str()});
+        if (r.empty())
+        {
+            if (validSignal!=nullptr)
+                validSignal[0]=false;
+        }
+        else
+        {
+            if (validSignal!=nullptr)
+                validSignal[0]=true;
+            retVal=r[0].as<double>();
+        }
+        return retVal;
+    }
+    // SPECIAL END
 
     int64_t sim::addDrawingObject(int64_t objectType, double size, double duplicateTolerance, int64_t parentObjectHandle, int64_t maxItemCount, std::optional<std::vector<double>> color)
     {
@@ -310,6 +376,16 @@ namespace RemoteAPIObject
         }
         else _brk = true;
         auto _ret = this->_client->call("sim.adjustView", _args);
+        return _ret[0].as<int64_t>();
+    }
+
+    int64_t sim::alignShapeBB(int64_t shapeHandle, std::vector<double> pose)
+    {
+        bool _brk = false;
+        json _args(json_array_arg);
+        _args.push_back(shapeHandle);
+        _args.push_back(pose);
+        auto _ret = this->_client->call("sim.alignShapeBB", _args);
         return _ret[0].as<int64_t>();
     }
 
@@ -790,18 +866,6 @@ namespace RemoteAPIObject
         return _ret[0].as<int64_t>();
     }
 
-    int64_t sim::createMeshShape(int64_t options, double shadingAngle, std::vector<double> vertices, std::vector<int64_t> indices)
-    {
-        bool _brk = false;
-        json _args(json_array_arg);
-        _args.push_back(options);
-        _args.push_back(shadingAngle);
-        _args.push_back(vertices);
-        _args.push_back(indices);
-        auto _ret = this->_client->call("sim.createMeshShape", _args);
-        return _ret[0].as<int64_t>();
-    }
-
     int64_t sim::createOctree(double voxelSize, int64_t options, double pointSize)
     {
         bool _brk = false;
@@ -890,6 +954,22 @@ namespace RemoteAPIObject
         _args.push_back(intParams);
         _args.push_back(floatParams);
         auto _ret = this->_client->call("sim.createProximitySensor", _args);
+        return _ret[0].as<int64_t>();
+    }
+
+    int64_t sim::createShape(int64_t options, double shadingAngle, std::vector<double> vertices, std::vector<int64_t> indices, std::vector<double> normals, std::vector<double> textureCoordinates, std::vector<uint8_t> texture, std::vector<int64_t> textureResolution)
+    {
+        bool _brk = false;
+        json _args(json_array_arg);
+        _args.push_back(options);
+        _args.push_back(shadingAngle);
+        _args.push_back(vertices);
+        _args.push_back(indices);
+        _args.push_back(normals);
+        _args.push_back(textureCoordinates);
+        _args.push_back(bin(texture));
+        _args.push_back(textureResolution);
+        auto _ret = this->_client->call("sim.createShape", _args);
         return _ret[0].as<int64_t>();
     }
 
@@ -1310,15 +1390,6 @@ namespace RemoteAPIObject
         return _ret[0].as<double>();
     }
 
-    double sim::getFloatSignal(std::string signalName)
-    {
-        bool _brk = false;
-        json _args(json_array_arg);
-        _args.push_back(signalName);
-        auto _ret = this->_client->call("sim.getFloatSignal", _args);
-        return _ret[0].as<double>();
-    }
-
     std::vector<json> sim::getGenesisEvents()
     {
         bool _brk = false;
@@ -1353,15 +1424,6 @@ namespace RemoteAPIObject
         json _args(json_array_arg);
         _args.push_back(parameter);
         auto _ret = this->_client->call("sim.getInt32Param", _args);
-        return _ret[0].as<int64_t>();
-    }
-
-    int64_t sim::getInt32Signal(std::string signalName)
-    {
-        bool _brk = false;
-        json _args(json_array_arg);
-        _args.push_back(signalName);
-        auto _ret = this->_client->call("sim.getInt32Signal", _args);
         return _ret[0].as<int64_t>();
     }
 
@@ -2213,15 +2275,6 @@ namespace RemoteAPIObject
         _args.push_back(parameter);
         auto _ret = this->_client->call("sim.getStringParam", _args);
         return _ret[0].as<std::string>();
-    }
-
-    std::vector<uint8_t> sim::getStringSignal(std::string signalName)
-    {
-        bool _brk = false;
-        json _args(json_array_arg);
-        _args.push_back(signalName);
-        auto _ret = this->_client->call("sim.getStringSignal", _args);
-        return _ret[0].as<std::vector<uint8_t>>();
     }
 
     double sim::getSystemTime()
@@ -3219,6 +3272,16 @@ namespace RemoteAPIObject
         return _ret[0].as<int64_t>();
     }
 
+    int64_t sim::relocateShapeFrame(int64_t shapeHandle, std::vector<double> pose)
+    {
+        bool _brk = false;
+        json _args(json_array_arg);
+        _args.push_back(shapeHandle);
+        _args.push_back(pose);
+        auto _ret = this->_client->call("sim.relocateShapeFrame", _args);
+        return _ret[0].as<int64_t>();
+    }
+
     void sim::removeDrawingObject(int64_t drawingObjectHandle)
     {
         bool _brk = false;
@@ -3288,16 +3351,6 @@ namespace RemoteAPIObject
         _args.push_back(options);
         _args.push_back(points);
         auto _ret = this->_client->call("sim.removeVoxelsFromOctree", _args);
-        return _ret[0].as<int64_t>();
-    }
-
-    int64_t sim::reorientShapeBoundingBox(int64_t shapeHandle, int64_t relativeToHandle)
-    {
-        bool _brk = false;
-        json _args(json_array_arg);
-        _args.push_back(shapeHandle);
-        _args.push_back(relativeToHandle);
-        auto _ret = this->_client->call("sim.reorientShapeBoundingBox", _args);
         return _ret[0].as<int64_t>();
     }
 
@@ -4483,6 +4536,21 @@ namespace RemoteAPIObject
         return _ret[0].as<std::vector<int64_t>>();
     }
 
+    void sim::visitTree(int64_t rootHandle, std::string visitorFunc, std::optional<json> options)
+    {
+        bool _brk = false;
+        json _args(json_array_arg);
+        _args.push_back(rootHandle);
+        _args.push_back(visitorFunc);
+        if(options)
+        {
+            if(_brk) throw std::runtime_error("no gaps allowed");
+            else _args.push_back(*options);
+        }
+        else _brk = true;
+        auto _ret = this->_client->call("sim.visitTree", _args);
+    }
+
     double sim::wait(double dt, std::optional<bool> simulationTime)
     {
         bool _brk = false;
@@ -4665,6 +4733,22 @@ namespace RemoteAPIObject
         return std::make_tuple(_ret[0].as<std::vector<double>>(), _ret[1].as<std::vector<double>>());
     }
 
+    int64_t simIK::createDebugOverlay(int64_t environmentHandle, int64_t tipHandle, std::optional<int64_t> baseHandle)
+    {
+        bool _brk = false;
+        json _args(json_array_arg);
+        _args.push_back(environmentHandle);
+        _args.push_back(tipHandle);
+        if(baseHandle)
+        {
+            if(_brk) throw std::runtime_error("no gaps allowed");
+            else _args.push_back(*baseHandle);
+        }
+        else _brk = true;
+        auto _ret = this->_client->call("simIK.createDebugOverlay", _args);
+        return _ret[0].as<int64_t>();
+    }
+
     int64_t simIK::createDummy(int64_t environmentHandle, std::optional<std::string> dummyName)
     {
         bool _brk = false;
@@ -4752,6 +4836,14 @@ namespace RemoteAPIObject
         _args.push_back(environmentHandle);
         auto _ret = this->_client->call("simIK.duplicateEnvironment", _args);
         return _ret[0].as<int64_t>();
+    }
+
+    void simIK::eraseDebugOverlay(int64_t debugObject)
+    {
+        bool _brk = false;
+        json _args(json_array_arg);
+        _args.push_back(debugObject);
+        auto _ret = this->_client->call("simIK.eraseDebugOverlay", _args);
     }
 
     void simIK::eraseEnvironment(int64_t environmentHandle)
@@ -5043,13 +5135,13 @@ namespace RemoteAPIObject
         return _ret[0].as<double>();
     }
 
-    double simIK::getJointScrewPitch(int64_t environmentHandle, int64_t jointHandle)
+    double simIK::getJointScrewLead(int64_t environmentHandle, int64_t jointHandle)
     {
         bool _brk = false;
         json _args(json_array_arg);
         _args.push_back(environmentHandle);
         _args.push_back(jointHandle);
-        auto _ret = this->_client->call("simIK.getJointScrewPitch", _args);
+        auto _ret = this->_client->call("simIK.getJointScrewLead", _args);
         return _ret[0].as<double>();
     }
 
@@ -5134,6 +5226,16 @@ namespace RemoteAPIObject
         _args.push_back(relativeToObjectHandle);
         auto _ret = this->_client->call("simIK.getObjectTransformation", _args);
         return std::make_tuple(_ret[0].as<std::vector<double>>(), _ret[1].as<std::vector<double>>(), _ret[2].as<std::vector<double>>());
+    }
+
+    int64_t simIK::getObjectType(int64_t environmentHandle, int64_t objectHandle)
+    {
+        bool _brk = false;
+        json _args(json_array_arg);
+        _args.push_back(environmentHandle);
+        _args.push_back(objectHandle);
+        auto _ret = this->_client->call("simIK.getObjectType", _args);
+        return _ret[0].as<int64_t>();
     }
 
     std::tuple<int64_t, std::string, bool, int64_t> simIK::getObjects(int64_t environmentHandle, int64_t index)
@@ -5373,14 +5475,14 @@ namespace RemoteAPIObject
         auto _ret = this->_client->call("simIK.setJointPosition", _args);
     }
 
-    void simIK::setJointScrewPitch(int64_t environmentHandle, int64_t jointHandle, double pitch)
+    void simIK::setJointScrewLead(int64_t environmentHandle, int64_t jointHandle, double lead)
     {
         bool _brk = false;
         json _args(json_array_arg);
         _args.push_back(environmentHandle);
         _args.push_back(jointHandle);
-        _args.push_back(pitch);
-        auto _ret = this->_client->call("simIK.setJointScrewPitch", _args);
+        _args.push_back(lead);
+        auto _ret = this->_client->call("simIK.setJointScrewLead", _args);
     }
 
     void simIK::setJointWeight(int64_t environmentHandle, int64_t jointHandle, double weight)

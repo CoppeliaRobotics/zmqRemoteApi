@@ -22,6 +22,12 @@ namespace RemoteAPIObject
         void setObjectSelection(std::vector<double> objectHandles);
         // DEPRECATED END
         
+        // SPECIAL START
+        std::vector<uint8_t> getStringSignal(std::string signalName,bool* validSignal=nullptr);
+        int64_t getInt32Signal(std::string signalName,bool* validSignal=nullptr);
+        double getFloatSignal(std::string signalName,bool* validSignal=nullptr);
+        // SPECIAL END
+        
         int64_t addDrawingObject(int64_t objectType, double size, double duplicateTolerance, int64_t parentObjectHandle, int64_t maxItemCount, std::optional<std::vector<double>> color = {});
         int64_t addDrawingObjectItem(int64_t drawingObjectHandle, std::vector<double> itemData);
         void addForce(int64_t shapeHandle, std::vector<double> position, std::vector<double> force);
@@ -35,6 +41,7 @@ namespace RemoteAPIObject
         void addReferencedHandle(int64_t objectHandle, int64_t referencedHandle);
         int64_t addScript(int64_t scriptType);
         int64_t adjustView(int64_t viewHandleOrIndex, int64_t associatedViewableObjectHandle, int64_t options, std::optional<std::string> viewLabel = {});
+        int64_t alignShapeBB(int64_t shapeHandle, std::vector<double> pose);
         std::tuple<double, double, double> alphaBetaGammaToYawPitchRoll(double alphaAngle, double betaAngle, double gammaAngle);
         int64_t announceSceneContentChange();
         void associateScriptWithObject(int64_t scriptHandle, int64_t objectHandle);
@@ -73,12 +80,12 @@ namespace RemoteAPIObject
         int64_t createForceSensor(int64_t options, std::vector<int64_t> intParams, std::vector<double> floatParams);
         int64_t createHeightfieldShape(int64_t options, double shadingAngle, int64_t xPointCount, int64_t yPointCount, double xSize, std::vector<double> heights);
         int64_t createJoint(int64_t jointType, int64_t jointMode, int64_t options, std::optional<std::vector<double>> sizes = {});
-        int64_t createMeshShape(int64_t options, double shadingAngle, std::vector<double> vertices, std::vector<int64_t> indices);
         int64_t createOctree(double voxelSize, int64_t options, double pointSize);
         int64_t createPath(std::vector<double> ctrlPts, std::optional<int64_t> options = {}, std::optional<int64_t> subdiv = {}, std::optional<double> smoothness = {}, std::optional<int64_t> orientationMode = {}, std::optional<std::vector<double>> upVector = {});
         int64_t createPointCloud(double maxVoxelSize, int64_t maxPtCntPerVoxel, int64_t options, double pointSize);
         int64_t createPrimitiveShape(int64_t primitiveType, std::vector<double> sizes, std::optional<int64_t> options = {});
         int64_t createProximitySensor(int64_t sensorType, int64_t subType, int64_t options, std::vector<int64_t> intParams, std::vector<double> floatParams);
+        int64_t createShape(int64_t options, double shadingAngle, std::vector<double> vertices, std::vector<int64_t> indices, std::vector<double> normals, std::vector<double> textureCoordinates, std::vector<uint8_t> texture, std::vector<int64_t> textureResolution);
         std::tuple<int64_t, int64_t, std::vector<int64_t>> createTexture(std::string fileName, int64_t options, std::optional<std::vector<double>> planeSizes = {}, std::optional<std::vector<double>> scalingUV = {}, std::optional<std::vector<double>> xy_g = {}, std::optional<int64_t> fixedResolution = {}, std::optional<std::vector<int64_t>> resolution = {});
         int64_t createVisionSensor(int64_t options, std::vector<int64_t> intParams, std::vector<double> floatParams);
         void destroyCollection(int64_t collectionHandle);
@@ -108,12 +115,10 @@ namespace RemoteAPIObject
         int64_t getExplicitHandling(int64_t objectHandle);
         std::string getExtensionString(int64_t objectHandle, int64_t index, std::optional<std::string> key = {});
         double getFloatParam(int64_t parameter);
-        double getFloatSignal(std::string signalName);
         std::vector<json> getGenesisEvents();
         std::tuple<std::string, int64_t, std::vector<double>, std::vector<double>, std::vector<double>, std::vector<double>, int64_t, int64_t> getGraphCurve(int64_t graphHandle, int64_t graphType, int64_t curveIndex);
         std::tuple<int64_t, std::vector<double>, std::vector<double>, int64_t> getGraphInfo(int64_t graphHandle);
         int64_t getInt32Param(int64_t parameter);
-        int64_t getInt32Signal(std::string signalName);
         int64_t getIsRealTimeSimulation();
         std::tuple<int64_t, double, double> getJointDependency(int64_t jointHandle);
         double getJointForce(int64_t jointHandle);
@@ -198,7 +203,6 @@ namespace RemoteAPIObject
         std::tuple<int64_t, std::vector<int64_t>, std::vector<int64_t>> getSimulatorMessage();
         std::string getStackTraceback(std::optional<int64_t> scriptHandle = {});
         std::string getStringParam(int64_t parameter);
-        std::vector<uint8_t> getStringSignal(std::string signalName);
         double getSystemTime();
         std::tuple<int64_t, std::vector<int64_t>> getTextureId(std::string textureName);
         bool getThreadAutomaticSwitch();
@@ -275,6 +279,7 @@ namespace RemoteAPIObject
         int64_t registerScriptFuncHook(std::string funcToHook, std::string userFunc, bool execBefore);
         int64_t registerScriptFunction(std::string funcNameAtPluginName, std::string callTips);
         int64_t registerScriptVariable(std::string varNameAtPluginName);
+        int64_t relocateShapeFrame(int64_t shapeHandle, std::vector<double> pose);
         void removeDrawingObject(int64_t drawingObjectHandle);
         int64_t removeModel(int64_t objectHandle);
         void removeObjects(std::vector<int64_t> objectHandles);
@@ -283,7 +288,6 @@ namespace RemoteAPIObject
         void removeReferencedObjects(int64_t objectHandle);
         void removeScript(int64_t scriptHandle);
         int64_t removeVoxelsFromOctree(int64_t octreeHandle, int64_t options, std::vector<double> points);
-        int64_t reorientShapeBoundingBox(int64_t shapeHandle, int64_t relativeToHandle);
         std::vector<double> resamplePath(std::vector<double> path, std::vector<double> pathLengths, int64_t finalConfigCnt, std::optional<json> method = {}, std::optional<std::vector<int64_t>> types = {});
         void resetDynamicObject(int64_t objectHandle);
         void resetGraph(int64_t objectHandle);
@@ -386,6 +390,7 @@ namespace RemoteAPIObject
         std::vector<int64_t> unpackUInt16Table(std::vector<uint8_t> data, std::optional<int64_t> startUint16Index = {}, std::optional<int64_t> uint16Count = {}, std::optional<int64_t> additionalByteOffset = {});
         std::vector<int64_t> unpackUInt32Table(std::vector<uint8_t> data, std::optional<int64_t> startUint32Index = {}, std::optional<int64_t> uint32Count = {}, std::optional<int64_t> additionalByteOffset = {});
         std::vector<int64_t> unpackUInt8Table(std::vector<uint8_t> data, std::optional<int64_t> startUint8Index = {}, std::optional<int64_t> uint8count = {});
+        void visitTree(int64_t rootHandle, std::string visitorFunc, std::optional<json> options = {});
         double wait(double dt, std::optional<bool> simulationTime = {});
         json waitForSignal(std::string sigName);
         void writeCustomDataBlock(int64_t objectHandle, std::string tagName, std::vector<uint8_t> data);
@@ -1165,6 +1170,9 @@ namespace RemoteAPIObject
 #ifndef drawing_linestrip
         const int drawing_linestrip = 8;
 #endif
+#ifndef drawing_local
+        const int drawing_local = 8388608;
+#endif
 #ifndef drawing_overlay
         const int drawing_overlay = 262144;
 #endif
@@ -1398,6 +1406,12 @@ namespace RemoteAPIObject
 #endif
 #ifndef floatparam_dynamic_step_size
         const int floatparam_dynamic_step_size = 3;
+#endif
+#ifndef floatparam_maxtrisizeabs
+        const int floatparam_maxtrisizeabs = 6;
+#endif
+#ifndef floatparam_mintrisizerel
+        const int floatparam_mintrisizerel = 7;
 #endif
 #ifndef floatparam_mouse_wheel_zoom_factor
         const int floatparam_mouse_wheel_zoom_factor = 4;
@@ -1827,6 +1841,9 @@ namespace RemoteAPIObject
 #endif
 #ifndef jointfloatparam_screw_pitch
         const int jointfloatparam_screw_pitch = 2034;
+#endif
+#ifndef jointfloatparam_screwlead
+        const int jointfloatparam_screwlead = 2042;
 #endif
 #ifndef jointfloatparam_spherical_qw
         const int jointfloatparam_spherical_qw = 2016;
@@ -2823,6 +2840,9 @@ namespace RemoteAPIObject
 #endif
 #ifndef physics_ode
         const int physics_ode = 1;
+#endif
+#ifndef physics_physx
+        const int physics_physx = 5;
 #endif
 #ifndef physics_vortex
         const int physics_vortex = 2;
@@ -4007,6 +4027,7 @@ namespace RemoteAPIObject
         std::tuple<int64_t, json, json> addElementFromScene(int64_t environmentHandle, int64_t ikGroup, int64_t baseHandle, int64_t tipHandle, int64_t targetHandle, int64_t constraints);
         std::tuple<std::vector<double>, std::vector<double>> computeGroupJacobian(int64_t environmentHandle, int64_t ikGroupHandle);
         std::tuple<std::vector<double>, std::vector<double>> computeJacobian(int64_t environmentHandle, int64_t baseObject, int64_t lastJoint, int64_t constraints, std::vector<double> tipMatrix, std::optional<std::vector<double>> targetMatrix = {}, std::optional<std::vector<double>> constrBaseMatrix = {});
+        int64_t createDebugOverlay(int64_t environmentHandle, int64_t tipHandle, std::optional<int64_t> baseHandle = {});
         int64_t createDummy(int64_t environmentHandle, std::optional<std::string> dummyName = {});
         int64_t createEnvironment(std::optional<int64_t> flags = {});
         int64_t createGroup(int64_t environmentHandle, std::optional<std::string> ikGroupName = {});
@@ -4014,6 +4035,7 @@ namespace RemoteAPIObject
         bool doesGroupExist(int64_t environmentHandle, std::string ikGroupName);
         bool doesObjectExist(int64_t environmentHandle, std::string objectName);
         int64_t duplicateEnvironment(int64_t environmentHandle);
+        void eraseDebugOverlay(int64_t debugObject);
         void eraseEnvironment(int64_t environmentHandle);
         void eraseObject(int64_t environmentHandle, int64_t objectHandle);
         std::vector<double> findConfig(int64_t environmentHandle, int64_t ikGroupHandle, std::vector<int64_t> jointHandles, std::optional<double> thresholdDist = {}, std::optional<double> maxTime = {}, std::optional<std::vector<double>> metric = {}, std::optional<std::string> validationCallback = {}, std::optional<json> auxData = {});
@@ -4037,7 +4059,7 @@ namespace RemoteAPIObject
         double getJointMaxStepSize(int64_t environmentHandle, int64_t jointHandle);
         int64_t getJointMode(int64_t environmentHandle, int64_t jointHandle);
         double getJointPosition(int64_t environmentHandle, int64_t jointHandle);
-        double getJointScrewPitch(int64_t environmentHandle, int64_t jointHandle);
+        double getJointScrewLead(int64_t environmentHandle, int64_t jointHandle);
         std::tuple<std::vector<double>, std::vector<double>, std::vector<double>> getJointTransformation(int64_t environmentHandle, int64_t jointHandle);
         int64_t getJointType(int64_t environmentHandle, int64_t jointHandle);
         double getJointWeight(int64_t environmentHandle, int64_t jointHandle);
@@ -4046,6 +4068,7 @@ namespace RemoteAPIObject
         int64_t getObjectParent(int64_t environmentHandle, int64_t objectHandle);
         std::vector<double> getObjectPose(int64_t environmentHandle, int64_t objectHandle, int64_t relativeToObjectHandle);
         std::tuple<std::vector<double>, std::vector<double>, std::vector<double>> getObjectTransformation(int64_t environmentHandle, int64_t objectHandle, int64_t relativeToObjectHandle);
+        int64_t getObjectType(int64_t environmentHandle, int64_t objectHandle);
         std::tuple<int64_t, std::string, bool, int64_t> getObjects(int64_t environmentHandle, int64_t index);
         int64_t getTargetDummy(int64_t environmentHandle, int64_t dummyHandle);
         std::tuple<int64_t, int64_t, std::vector<double>> handleGroup(int64_t environmentHandle, int64_t ikGroup, std::optional<json> options = {});
@@ -4065,7 +4088,7 @@ namespace RemoteAPIObject
         void setJointMaxStepSize(int64_t environmentHandle, int64_t jointHandle, double stepSize);
         void setJointMode(int64_t environmentHandle, int64_t jointHandle, int64_t jointMode);
         void setJointPosition(int64_t environmentHandle, int64_t jointHandle, double position);
-        void setJointScrewPitch(int64_t environmentHandle, int64_t jointHandle, double pitch);
+        void setJointScrewLead(int64_t environmentHandle, int64_t jointHandle, double lead);
         void setJointWeight(int64_t environmentHandle, int64_t jointHandle, double weight);
         void setObjectMatrix(int64_t environmentHandle, int64_t objectHandle, int64_t relativeToObjectHandle, std::vector<double> matrix);
         void setObjectParent(int64_t environmentHandle, int64_t objectHandle, int64_t parentObjectHandle, std::optional<bool> keepInPlace = {});
