@@ -75,6 +75,14 @@ function zmqRemoteApi.handleRawMessage(rawReq)
 end
 
 function zmqRemoteApi.handleQueue()
+    function dumpBytes(x)
+        if sim.getNamedStringParam('zmqRemoteApi.debugBinaryFormat')=='base64' then
+            return 'base64='..sim.transformBuffer(req,sim.buffer_uint8,0,0,sim.buffer_base64)
+        else
+            return table.join(map(partial(string.format,'%02X'),string.bytes(x)),' ')
+        end
+    end
+
     local t=sim.getSystemTime()
     while true do
         local rc,revents=simZMQ.poll({rpcSocket},{simZMQ.POLLIN},0)
@@ -83,13 +91,13 @@ function zmqRemoteApi.handleQueue()
         local rc,req=simZMQ.recv(rpcSocket,0)
 
         if zmqRemoteApi.verbose()>2 then
-            print('Received raw request: len='..#req..', base64='..sim.transformBuffer(req,sim.buffer_uint8,0,0,sim.buffer_base64))
+            print('Received raw request: (len='..#req..') '..dumpBytes(req))
         end
 
         local resp=zmqRemoteApi.handleRawMessage(req)
 
         if zmqRemoteApi.verbose()>2 then
-            print('Sending raw response: len='..#resp..', base64='..sim.transformBuffer(resp,sim.buffer_uint8,0,0,sim.buffer_base64))
+            print('Sending raw response: (len='..#resp..') '..dumpBytes(resp))
         end
 
         simZMQ.send(rpcSocket,resp,0)
