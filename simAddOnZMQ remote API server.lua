@@ -1,7 +1,7 @@
 zmqRemoteApi={}
 
 function zmqRemoteApi.verbose()
-    return tonumber(sim.getStringNamedParam('zmqRemoteApi.verbose') or '0')
+    return sim.getNamedInt32Param('zmqRemoteApi.verbose') or 0
 end
 
 function zmqRemoteApi.info(obj)
@@ -114,9 +114,9 @@ function sysCall_init()
         return {cmd='cleanup'}
     end
     simZMQ.__raiseErrors(true) -- so we don't need to check retval with every call
-    rpcPort=tonumber(sim.getStringNamedParam('zmqRemoteApi.rpcPort') or '23000')
-    cntPort=tonumber(sim.getStringNamedParam('zmqRemoteApi.cntPort') or (rpcPort+1))
-    maxTimeSlot=tonumber(sim.getStringNamedParam('zmqRemoteApi.maxTimeSlot') or '0.005')
+    rpcPort=sim.getNamedInt32Param('zmqRemoteApi.rpcPort') or 23000
+    cntPort=sim.getNamedInt32Param('zmqRemoteApi.cntPort') or (rpcPort+1)
+    maxTimeSlot=sim.getNamedFloatParam('zmqRemoteApi.maxTimeSlot') or 0.005
     if zmqRemoteApi.verbose()>0 then
         sim.addLog(sim.verbosity_scriptinfos,string.format('ZeroMQ Remote API server starting (rpcPort=%d, cntPort=%d)...',rpcPort,cntPort))
     end
