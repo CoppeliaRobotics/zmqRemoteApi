@@ -110,67 +110,37 @@ namespace RemoteAPIObject
     // DEPRECATED END
     
     // SPECIAL START
-    std::vector<uint8_t> sim::getStringSignal(std::string signalName,bool* validSignal/*nullptr*/)
+    std::optional<std::vector<uint8_t>> sim::getStringSignal(std::string signalName)
     {
-        std::vector<uint8_t> retVal;
+        std::optional<std::vector<uint8_t>> retVal;
         auto r = this->_client->call("sim.getStringSignal", {signalName.c_str()});
-        if (r.empty())
+        if (!r.empty())
         {
-            if (validSignal!=nullptr)
-                validSignal[0]=false;
-        }
-        else if(r[0].is_string())
-        {
-            if (validSignal!=nullptr)
-                validSignal[0]=true;
-            std::string r2=r[0].as<std::string>();
-            retVal.assign(r2.begin(),r2.end());
-        }
-        else if(r[0].is_byte_string())
-        {
-            if (validSignal!=nullptr)
-                validSignal[0]=true;
-            retVal=r[0].as<std::vector<uint8_t>>();
-        }
-        else
-        {
-            if (validSignal!=nullptr)
-                validSignal[0]=false;
+            if(r[0].is_string())
+            {
+                std::string r2=r[0].as<std::string>();
+                std::vector<uint8_t> r3(r2.begin(),r2.end());
+                retVal=std::make_optional<std::vector<uint8_t>>(r3);
+            }
+            else if(r[0].is_byte_string())
+                retVal=std::make_optional<std::vector<uint8_t>>(r[0].as<std::vector<uint8_t>>());
         }
         return retVal;
     }
-    int64_t sim::getInt32Signal(std::string signalName,bool* validSignal/*nullptr*/)
+    std::optional<int64_t> sim::getInt32Signal(std::string signalName)
     {
-        int64_t retVal=0;
+        std::optional<int64_t> retVal;
         auto r = this->_client->call("sim.getInt32Signal", {signalName.c_str()});
-        if (r.empty())
-        {
-            if (validSignal!=nullptr)
-                validSignal[0]=false;
-        }
-        else
-        {
-            if (validSignal!=nullptr)
-                validSignal[0]=true;
-            retVal=r[0].as<int64_t>();
-        }
+        if (!r.empty())
+            retVal=std::make_optional<int64_t>(r[0].as<int64_t>());
         return retVal;
     }
-    double sim::getFloatSignal(std::string signalName,bool* validSignal/*nullptr*/)
+    std::optional<double> sim::getFloatSignal(std::string signalName)
     {
-        double retVal=0.0;
+        std::optional<double> retVal;
         auto r = this->_client->call("sim.getInt32Signal", {signalName.c_str()});
-        if (r.empty())
-        {
-            if (validSignal!=nullptr)
-                validSignal[0]=false;
-        }
-        else
-        {
-            if (validSignal!=nullptr)
-                validSignal[0]=true;
-            retVal=r[0].as<double>();
-        }
+        if (!r.empty())
+            retVal=std::make_optional<double>(r[0].as<double>());
         return retVal;
     }
     // SPECIAL END

@@ -23,9 +23,9 @@ namespace RemoteAPIObject
         // DEPRECATED END
         
         // SPECIAL START
-        std::vector<uint8_t> getStringSignal(std::string signalName,bool* validSignal=nullptr);
-        int64_t getInt32Signal(std::string signalName,bool* validSignal=nullptr);
-        double getFloatSignal(std::string signalName,bool* validSignal=nullptr);
+        std::optional<std::vector<uint8_t>> getStringSignal(std::string signalName);
+        std::optional<int64_t> getInt32Signal(std::string signalName);
+        std::optional<double> getFloatSignal(std::string signalName);
         // SPECIAL END
         
         int64_t addDrawingObject(int64_t objectType, double size, double duplicateTolerance, int64_t parentObjectHandle, int64_t maxItemCount, std::optional<std::vector<double>> color = {});
