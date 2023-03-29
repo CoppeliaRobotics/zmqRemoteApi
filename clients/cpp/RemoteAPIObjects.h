@@ -133,6 +133,7 @@ namespace RemoteAPIObject
         std::tuple<int64_t, std::vector<double>, std::vector<double>, std::vector<double>> getLightParameters(int64_t lightHandle);
         int64_t getLinkDummy(int64_t dummyHandle);
         std::vector<std::string> getMatchingPersistentDataTags(std::string pattern);
+        std::vector<double> getMatrixInverse(std::vector<double> matrix);
         int64_t getModelProperty(int64_t objectHandle);
         std::string getModuleInfo(std::string moduleName, int64_t infoType);
         std::tuple<std::string, int64_t> getModuleName(int64_t index);
@@ -174,6 +175,7 @@ namespace RemoteAPIObject
         std::vector<std::string> getPersistentDataTags();
         std::tuple<double, int64_t, int64_t, double> getPointCloudOptions(int64_t pointCloudHandle);
         std::vector<double> getPointCloudPoints(int64_t pointCloudHandle);
+        std::vector<double> getPoseInverse(std::vector<double> pose);
         std::tuple<std::vector<double>, std::vector<int64_t>> getQHull(std::vector<double> verticesIn);
         std::vector<double> getQuaternionFromMatrix(std::vector<double> matrix);
         double getRandom(std::optional<int64_t> seed = {});
@@ -237,8 +239,6 @@ namespace RemoteAPIObject
         std::vector<double> interpolateMatrices(std::vector<double> matrixIn1, std::vector<double> matrixIn2, double interpolFactor);
         std::vector<double> interpolatePoses(std::vector<double> poseIn1, std::vector<double> poseIn2, double interpolFactor);
         int64_t intersectPointsWithPointCloud(int64_t pointCloudHandle, int64_t options, std::vector<double> points, double tolerance);
-        void invertMatrix(std::vector<double> matrix);
-        void invertPose(std::vector<double> pose);
         int64_t isDeprecated(std::string funcOrConst);
         bool isDynamicallyEnabled(int64_t objectHandle);
         bool isHandle(int64_t objectHandle);
@@ -4097,8 +4097,8 @@ namespace RemoteAPIObject
         void setSphericalJointMatrix(int64_t environmentHandle, int64_t jointHandle, std::vector<double> matrix);
         void setSphericalJointRotation(int64_t environmentHandle, int64_t jointHandle, std::vector<double> eulerOrQuaternion);
         void setTargetDummy(int64_t environmentHandle, int64_t dummyHandle, int64_t targetDummyHandle);
-        void syncFromIkWorld(int64_t environmentHandle, std::vector<int64_t> ikGroups);
-        void syncToIkWorld(int64_t environmentHandle, std::vector<int64_t> ikGroups);
+        void syncFromSim(int64_t environmentHandle, std::vector<int64_t> ikGroups);
+        void syncToSim(int64_t environmentHandle, std::vector<int64_t> ikGroups);
 
 #ifndef calc_cannotinvert
         const int calc_cannotinvert = 2;

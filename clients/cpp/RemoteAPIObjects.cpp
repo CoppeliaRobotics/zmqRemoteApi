@@ -1522,6 +1522,15 @@ namespace RemoteAPIObject
         return _ret[0].as<std::vector<std::string>>();
     }
 
+    std::vector<double> sim::getMatrixInverse(std::vector<double> matrix)
+    {
+        bool _brk = false;
+        json _args(json_array_arg);
+        _args.push_back(matrix);
+        auto _ret = this->_client->call("sim.getMatrixInverse", _args);
+        return _ret[0].as<std::vector<double>>();
+    }
+
     int64_t sim::getModelProperty(int64_t objectHandle)
     {
         bool _brk = false;
@@ -1955,6 +1964,15 @@ namespace RemoteAPIObject
         json _args(json_array_arg);
         _args.push_back(pointCloudHandle);
         auto _ret = this->_client->call("sim.getPointCloudPoints", _args);
+        return _ret[0].as<std::vector<double>>();
+    }
+
+    std::vector<double> sim::getPoseInverse(std::vector<double> pose)
+    {
+        bool _brk = false;
+        json _args(json_array_arg);
+        _args.push_back(pose);
+        auto _ret = this->_client->call("sim.getPoseInverse", _args);
         return _ret[0].as<std::vector<double>>();
     }
 
@@ -2656,22 +2674,6 @@ namespace RemoteAPIObject
         _args.push_back(tolerance);
         auto _ret = this->_client->call("sim.intersectPointsWithPointCloud", _args);
         return _ret[0].as<int64_t>();
-    }
-
-    void sim::invertMatrix(std::vector<double> matrix)
-    {
-        bool _brk = false;
-        json _args(json_array_arg);
-        _args.push_back(matrix);
-        auto _ret = this->_client->call("sim.invertMatrix", _args);
-    }
-
-    void sim::invertPose(std::vector<double> pose)
-    {
-        bool _brk = false;
-        json _args(json_array_arg);
-        _args.push_back(pose);
-        auto _ret = this->_client->call("sim.invertPose", _args);
     }
 
     int64_t sim::isDeprecated(std::string funcOrConst)
@@ -5545,22 +5547,22 @@ namespace RemoteAPIObject
         auto _ret = this->_client->call("simIK.setTargetDummy", _args);
     }
 
-    void simIK::syncFromIkWorld(int64_t environmentHandle, std::vector<int64_t> ikGroups)
+    void simIK::syncFromSim(int64_t environmentHandle, std::vector<int64_t> ikGroups)
     {
         bool _brk = false;
         json _args(json_array_arg);
         _args.push_back(environmentHandle);
         _args.push_back(ikGroups);
-        auto _ret = this->_client->call("simIK.syncFromIkWorld", _args);
+        auto _ret = this->_client->call("simIK.syncFromSim", _args);
     }
 
-    void simIK::syncToIkWorld(int64_t environmentHandle, std::vector<int64_t> ikGroups)
+    void simIK::syncToSim(int64_t environmentHandle, std::vector<int64_t> ikGroups)
     {
         bool _brk = false;
         json _args(json_array_arg);
         _args.push_back(environmentHandle);
         _args.push_back(ikGroups);
-        auto _ret = this->_client->call("simIK.syncToIkWorld", _args);
+        auto _ret = this->_client->call("simIK.syncToSim", _args);
     }
 
 };
