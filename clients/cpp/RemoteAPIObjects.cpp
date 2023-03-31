@@ -701,7 +701,7 @@ namespace RemoteAPIObject
         bool _brk = false;
         json _args(json_array_arg);
         _args.push_back(signalName);
-        auto _ret = this->_client->call("clearStringSignal", _args);
+        auto _ret = this->_client->call("sim.clearStringSignal", _args);
     }
 
     int64_t sim::closeScene()
