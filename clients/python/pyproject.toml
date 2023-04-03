@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "coppeliasim_zmqremoteapi_client"
-version = "0.0.1"
+version = "0.0.2"
 authors = [
     { name="Federico Ferri (Coppelia Robotics)", email="federico@coppeliarobotics.com" },
 ]
@@ -15,6 +15,10 @@ classifiers = [
     "Programming Language :: Python :: 3",
     "License :: OSI Approved :: BSD License",
     "Operating System :: OS Independent",
+]
+dependencies = [
+    'pyzmq',
+    'cbor',
 ]
 
 [project.urls]
