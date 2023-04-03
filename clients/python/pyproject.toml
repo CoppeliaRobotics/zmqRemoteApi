@@ -1,0 +1,22 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "coppeliasim_zmqremoteapi_client"
+version = "0.0.1"
+authors = [
+    { name="Federico Ferri (Coppelia Robotics)", email="federico@coppeliarobotics.com" },
+]
+description = "Client for the CoppeliaSim's zmqRemoteApi"
+readme = "README.md"
+requires-python = ">=3.8"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: BSD License",
+    "Operating System :: OS Independent",
+]
+
+[project.urls]
+"Homepage" = "https://github.com/CoppeliaRobotics/zmqRemoteApi"
+"Bug Tracker" = "https://github.com/CoppeliaRobotics/zmqRemoteApi/issues"
