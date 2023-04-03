@@ -4,13 +4,13 @@ Python client for the zmqRemoteApi.
 
 ## Installing:
 
-```
+```sh
 python3 -m pip install coppeliasim-zmqremoteapi-client
 ```
 
 ## Usage
 
-```
+```python
 from coppeliasim_zmqremoteapi_client import *
 
 # create a client to connect to zmqRemoteApi server:
@@ -28,7 +28,7 @@ print(h)
 
 There is also an `asyncio` version of the client. Normal `asyncio` principles apply, and all methods are async:
 
-```
+```python
 from coppeliasim_zmqremoteapi_client.asyncio import *
 
 client = RemoteAPIClient()
@@ -44,7 +44,7 @@ asyncio.run(main())
 
 on Windows, if it doesn't work properly, before calling `asyncio.run(...)` call:
 
-```
+```python
 asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 ```
 
@@ -52,7 +52,7 @@ A note about performance of sequential requests: if performing many commands in 
 
 E.g. getting the handles of 100 objects:
 
-```
+```python
 handles = await asyncio.gather(*[sim.getObject(f'/Object{i+1}') for i in range(100)])
 ```
 
