@@ -14,7 +14,7 @@ import time
 import numpy as np
 import cv2
 
-from zmqRemoteApi import RemoteAPIClient
+from coppeliasim_zmqremoteapi_client import RemoteAPIClient
 
 
 print('Program started')

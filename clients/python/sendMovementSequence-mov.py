@@ -6,7 +6,7 @@
 
 import math
 
-from zmqRemoteApi import RemoteAPIClient
+from coppeliasim_zmqremoteapi_client import RemoteAPIClient
 
 print('Program started')
 

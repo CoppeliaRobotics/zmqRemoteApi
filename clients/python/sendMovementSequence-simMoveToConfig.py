@@ -6,7 +6,7 @@
 
 import math
 
-from zmqRemoteApi import RemoteAPIClient
+from coppeliasim_zmqremoteapi_client import RemoteAPIClient
 
 def movCallback(config,vel,accel,handles):
     for i in range(len(handles)):

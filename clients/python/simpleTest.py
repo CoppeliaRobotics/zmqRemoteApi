@@ -7,7 +7,7 @@
 
 import time
 
-from zmqRemoteApi import RemoteAPIClient
+from coppeliasim_zmqremoteapi_client import RemoteAPIClient
 
 
 print('Program started')
