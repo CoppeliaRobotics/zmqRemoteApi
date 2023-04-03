@@ -4,7 +4,7 @@ C++ client for the zmqRemoteApi.
 
 ## Usage example:
 
-```
+```cpp
 #include "RemoteAPIClient.h"
 #include <iostream>
 
