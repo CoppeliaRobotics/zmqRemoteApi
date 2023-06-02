@@ -117,10 +117,7 @@ function sysCall_info()
 end
 
 function sysCall_init()
-    if not simZMQ then
-        sim.addLog(sim.verbosity_errors,'zmqRemoteApi: the ZMQ plugin is not available')
-        return {cmd='cleanup'}
-    end
+    simZMQ=require'simZMQ'
     simZMQ.__raiseErrors(true) -- so we don't need to check retval with every call
     rpcPort=sim.getNamedInt32Param('zmqRemoteApi.rpcPort') or 23000
     cntPort=sim.getNamedInt32Param('zmqRemoteApi.cntPort') or (rpcPort+1)
