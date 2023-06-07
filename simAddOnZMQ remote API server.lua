@@ -1,3 +1,5 @@
+sim=require'sim'
+
 zmqRemoteApi={}
 
 function zmqRemoteApi.verbose()
