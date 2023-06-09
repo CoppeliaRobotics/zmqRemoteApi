@@ -6,6 +6,10 @@ function zmqRemoteApi.verbose()
     return sim.getNamedInt32Param('zmqRemoteApi.verbose') or 0
 end
 
+function zmqRemoteApi.require(name)
+    _G[name]=require(name)
+end
+
 function zmqRemoteApi.info(obj)
     if type(obj)=='string' then obj=zmqRemoteApi.getField(obj) end
     if type(obj)~='table' then return obj end
