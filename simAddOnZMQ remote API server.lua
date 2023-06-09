@@ -1,4 +1,5 @@
 sim=require'sim'
+removeLazyLoaders()
 
 zmqRemoteApi={}
 
