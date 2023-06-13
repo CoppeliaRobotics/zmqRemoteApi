@@ -15,6 +15,10 @@ print('Program started')
 client = RemoteAPIClient()
 sim = client.getObject('sim')
 
+# To include additional Modules, e.g.:
+#client.call('include',['simIK'])
+#simIK = client.getObject('simIK')
+
 # When simulation is not running, ZMQ message handling could be a bit
 # slow, since the idle loop runs at 8 Hz by default. So let's make
 # sure that the idle loop runs at full speed for this program:
