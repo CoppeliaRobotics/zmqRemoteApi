@@ -5,7 +5,7 @@ namespace RemoteAPIObject
     {
     }
 
-    // DEPRECATED START
+    // DEPRECATED/BACKCOMPATIBILITY START
     double sim::getJointMaxForce(int64_t jointHandle)
     {
         bool _brk = false;
@@ -106,8 +106,97 @@ namespace RemoteAPIObject
         _args.push_back(objectHandles);
         auto _ret = this->_client->call("sim.setObjectSelection", _args);
     }
-
-    // DEPRECATED END
+    std::vector<double> sim::getObjectPose(int64_t objectHandle, int64_t relativeToObjectHandle)
+    {
+        bool _brk = false;
+        json _args(json_array_arg);
+        _args.push_back(objectHandle);
+        _args.push_back(relativeToObjectHandle);
+        auto _ret = this->_client->call("sim.getObjectPose", _args);
+        return _ret[0].as<std::vector<double>>();
+    }
+    std::vector<double> sim::getObjectPosition(int64_t objectHandle, int64_t relativeToObjectHandle)
+    {
+        bool _brk = false;
+        json _args(json_array_arg);
+        _args.push_back(objectHandle);
+        _args.push_back(relativeToObjectHandle);
+        auto _ret = this->_client->call("sim.getObjectPosition", _args);
+        return _ret[0].as<std::vector<double>>();
+    }
+    std::vector<double> sim::getObjectQuaternion(int64_t objectHandle, int64_t relativeToObjectHandle)
+    {
+        bool _brk = false;
+        json _args(json_array_arg);
+        _args.push_back(objectHandle);
+        _args.push_back(relativeToObjectHandle);
+        auto _ret = this->_client->call("sim.getObjectQuaternion", _args);
+        return _ret[0].as<std::vector<double>>();
+    }
+    std::vector<double> sim::getObjectMatrix(int64_t objectHandle, int64_t relativeToObjectHandle)
+    {
+        bool _brk = false;
+        json _args(json_array_arg);
+        _args.push_back(objectHandle);
+        _args.push_back(relativeToObjectHandle);
+        auto _ret = this->_client->call("sim.getObjectMatrix", _args);
+        return _ret[0].as<std::vector<double>>();
+    }
+    std::vector<double> sim::getObjectOrientation(int64_t objectHandle, int64_t relativeToObjectHandle)
+    {
+        bool _brk = false;
+        json _args(json_array_arg);
+        _args.push_back(objectHandle);
+        _args.push_back(relativeToObjectHandle);
+        auto _ret = this->_client->call("sim.getObjectOrientation", _args);
+        return _ret[0].as<std::vector<double>>();
+    }
+    void sim::setObjectMatrix(int64_t objectHandle, int64_t relativeToObjectHandle, std::vector<double> matrix)
+    {
+        bool _brk = false;
+        json _args(json_array_arg);
+        _args.push_back(objectHandle);
+        _args.push_back(relativeToObjectHandle);
+        _args.push_back(matrix);
+        auto _ret = this->_client->call("sim.setObjectMatrix", _args);
+    }
+    void sim::setObjectOrientation(int64_t objectHandle, int64_t relativeToObjectHandle, std::vector<double> eulerAngles)
+    {
+        bool _brk = false;
+        json _args(json_array_arg);
+        _args.push_back(objectHandle);
+        _args.push_back(relativeToObjectHandle);
+        _args.push_back(eulerAngles);
+        auto _ret = this->_client->call("sim.setObjectOrientation", _args);
+    }
+    void sim::setObjectPose(int64_t objectHandle, int64_t relativeToObjectHandle, std::vector<double> pose)
+    {
+        bool _brk = false;
+        json _args(json_array_arg);
+        _args.push_back(objectHandle);
+        _args.push_back(relativeToObjectHandle);
+        _args.push_back(pose);
+        auto _ret = this->_client->call("sim.setObjectPose", _args);
+    }
+    void sim::setObjectPosition(int64_t objectHandle, int64_t relativeToObjectHandle, std::vector<double> position)
+    {
+        bool _brk = false;
+        json _args(json_array_arg);
+        _args.push_back(objectHandle);
+        _args.push_back(relativeToObjectHandle);
+        _args.push_back(position);
+        auto _ret = this->_client->call("sim.setObjectPosition", _args);
+    }
+    void sim::setObjectQuaternion(int64_t objectHandle, int64_t relativeToObjectHandle, std::vector<double> quaternion)
+    {
+        bool _brk = false;
+        json _args(json_array_arg);
+        _args.push_back(objectHandle);
+        _args.push_back(relativeToObjectHandle);
+        _args.push_back(quaternion);
+        auto _ret = this->_client->call("sim.setObjectQuaternion", _args);
+    }
+    // DEPRECATED/BACKCOMPATIBILITY END
     
     // SPECIAL START
     std::optional<std::vector<uint8_t>> sim::getStringSignal(std::string signalName)
@@ -1027,12 +1116,12 @@ namespace RemoteAPIObject
         return _ret[0].as<int64_t>();
     }
 
-    std::tuple<int64_t, json> sim::executeScriptString(std::string stringAtScriptName, int64_t scriptHandleOrType)
+    std::tuple<int64_t, json> sim::executeScriptString(std::string stringToExecute, int64_t scriptHandle)
     {
         bool _brk = false;
         json _args(json_array_arg);
-        _args.push_back(stringAtScriptName);
-        _args.push_back(scriptHandleOrType);
+        _args.push_back(stringToExecute);
+        _args.push_back(scriptHandle);
         auto _ret = this->_client->call("sim.executeScriptString", _args);
         return std::make_tuple(_ret[0].as<int64_t>(), _ret[1].as<json>());
     }
@@ -1185,21 +1274,21 @@ namespace RemoteAPIObject
         return _ret[0].as<std::vector<double>>();
     }
 
-    std::vector<std::string> sim::getApiFunc(int64_t scriptHandleOrType, std::string apiWord)
+    std::vector<std::string> sim::getApiFunc(int64_t scriptHandle, std::string apiWord)
     {
         bool _brk = false;
         json _args(json_array_arg);
-        _args.push_back(scriptHandleOrType);
+        _args.push_back(scriptHandle);
         _args.push_back(apiWord);
         auto _ret = this->_client->call("sim.getApiFunc", _args);
         return _ret[0].as<std::vector<std::string>>();
     }
 
-    std::string sim::getApiInfo(int64_t scriptHandleOrType, std::string apiWord)
+    std::string sim::getApiInfo(int64_t scriptHandle, std::string apiWord)
     {
         bool _brk = false;
         json _args(json_array_arg);
-        _args.push_back(scriptHandleOrType);
+        _args.push_back(scriptHandle);
         _args.push_back(apiWord);
         auto _ret = this->_client->call("sim.getApiInfo", _args);
         return _ret[0].as<std::string>();
@@ -1540,25 +1629,6 @@ namespace RemoteAPIObject
         return _ret[0].as<int64_t>();
     }
 
-    std::string sim::getModuleInfo(std::string moduleName, int64_t infoType)
-    {
-        bool _brk = false;
-        json _args(json_array_arg);
-        _args.push_back(moduleName);
-        _args.push_back(infoType);
-        auto _ret = this->_client->call("sim.getModuleInfo", _args);
-        return _ret[0].as<std::string>();
-    }
-
-    std::tuple<std::string, int64_t> sim::getModuleName(int64_t index)
-    {
-        bool _brk = false;
-        json _args(json_array_arg);
-        _args.push_back(index);
-        auto _ret = this->_client->call("sim.getModuleName", _args);
-        return std::make_tuple(_ret[0].as<std::string>(), _ret[1].as<int64_t>());
-    }
-
     bool sim::getNamedBoolParam(std::string name)
     {
         bool _brk = false;
@@ -1723,22 +1793,32 @@ namespace RemoteAPIObject
         return _ret[0].as<int64_t>();
     }
 
-    std::vector<double> sim::getObjectMatrix(int64_t objectHandle, int64_t relativeToObjectHandle)
+    std::vector<double> sim::getObjectMatrix(int64_t objectHandle, std::optional<int64_t> relativeToObjectHandle)
     {
         bool _brk = false;
         json _args(json_array_arg);
         _args.push_back(objectHandle);
-        _args.push_back(relativeToObjectHandle);
+        if(relativeToObjectHandle)
+        {
+            if(_brk) throw std::runtime_error("no gaps allowed");
+            else _args.push_back(*relativeToObjectHandle);
+        }
+        else _brk = true;
         auto _ret = this->_client->call("sim.getObjectMatrix", _args);
         return _ret[0].as<std::vector<double>>();
     }
 
-    std::vector<double> sim::getObjectOrientation(int64_t objectHandle, int64_t relativeToObjectHandle)
+    std::vector<double> sim::getObjectOrientation(int64_t objectHandle, std::optional<int64_t> relativeToObjectHandle)
     {
         bool _brk = false;
         json _args(json_array_arg);
         _args.push_back(objectHandle);
-        _args.push_back(relativeToObjectHandle);
+        if(relativeToObjectHandle)
+        {
+            if(_brk) throw std::runtime_error("no gaps allowed");
+            else _args.push_back(*relativeToObjectHandle);
+        }
+        else _brk = true;
         auto _ret = this->_client->call("sim.getObjectOrientation", _args);
         return _ret[0].as<std::vector<double>>();
     }
@@ -1752,22 +1832,32 @@ namespace RemoteAPIObject
         return _ret[0].as<int64_t>();
     }
 
-    std::vector<double> sim::getObjectPose(int64_t objectHandle, int64_t relativeToObjectHandle)
+    std::vector<double> sim::getObjectPose(int64_t objectHandle, std::optional<int64_t> relativeToObjectHandle)
     {
         bool _brk = false;
         json _args(json_array_arg);
         _args.push_back(objectHandle);
-        _args.push_back(relativeToObjectHandle);
+        if(relativeToObjectHandle)
+        {
+            if(_brk) throw std::runtime_error("no gaps allowed");
+            else _args.push_back(*relativeToObjectHandle);
+        }
+        else _brk = true;
         auto _ret = this->_client->call("sim.getObjectPose", _args);
         return _ret[0].as<std::vector<double>>();
     }
 
-    std::vector<double> sim::getObjectPosition(int64_t objectHandle, int64_t relativeToObjectHandle)
+    std::vector<double> sim::getObjectPosition(int64_t objectHandle, std::optional<int64_t> relativeToObjectHandle)
     {
         bool _brk = false;
         json _args(json_array_arg);
         _args.push_back(objectHandle);
-        _args.push_back(relativeToObjectHandle);
+        if(relativeToObjectHandle)
+        {
+            if(_brk) throw std::runtime_error("no gaps allowed");
+            else _args.push_back(*relativeToObjectHandle);
+        }
+        else _brk = true;
         auto _ret = this->_client->call("sim.getObjectPosition", _args);
         return _ret[0].as<std::vector<double>>();
     }
@@ -1781,12 +1871,17 @@ namespace RemoteAPIObject
         return _ret[0].as<int64_t>();
     }
 
-    std::vector<double> sim::getObjectQuaternion(int64_t objectHandle, int64_t relativeToObjectHandle)
+    std::vector<double> sim::getObjectQuaternion(int64_t objectHandle, std::optional<int64_t> relativeToObjectHandle)
     {
         bool _brk = false;
         json _args(json_array_arg);
         _args.push_back(objectHandle);
-        _args.push_back(relativeToObjectHandle);
+        if(relativeToObjectHandle)
+        {
+            if(_brk) throw std::runtime_error("no gaps allowed");
+            else _args.push_back(*relativeToObjectHandle);
+        }
+        else _brk = true;
         auto _ret = this->_client->call("sim.getObjectQuaternion", _args);
         return _ret[0].as<std::vector<double>>();
     }
@@ -1947,6 +2042,25 @@ namespace RemoteAPIObject
         json _args(json_array_arg);
         auto _ret = this->_client->call("sim.getPersistentDataTags", _args);
         return _ret[0].as<std::vector<std::string>>();
+    }
+
+    std::string sim::getPluginInfo(std::string pluginName, int64_t infoType)
+    {
+        bool _brk = false;
+        json _args(json_array_arg);
+        _args.push_back(pluginName);
+        _args.push_back(infoType);
+        auto _ret = this->_client->call("sim.getPluginInfo", _args);
+        return _ret[0].as<std::string>();
+    }
+
+    std::string sim::getPluginName(int64_t index)
+    {
+        bool _brk = false;
+        json _args(json_array_arg);
+        _args.push_back(index);
+        auto _ret = this->_client->call("sim.getPluginName", _args);
+        return _ret[0].as<std::string>();
     }
 
     std::tuple<double, int64_t, int64_t, double> sim::getPointCloudOptions(int64_t pointCloudHandle)
@@ -2163,7 +2277,7 @@ namespace RemoteAPIObject
         return std::make_tuple(_ret[0].as<std::vector<double>>(), _ret[1].as<std::vector<double>>());
     }
 
-    double sim::getShapeMass(int64_t shapeHandle)
+    double sim::getShapeMassAndInertia(int64_t shapeHandle)
     {
         bool _brk = false;
         json _args(json_array_arg);
@@ -2742,16 +2856,6 @@ namespace RemoteAPIObject
         return _ret[0].as<int64_t>();
     }
 
-    int64_t sim::loadModule(std::string filenameAndPath, std::string pluginName)
-    {
-        bool _brk = false;
-        json _args(json_array_arg);
-        _args.push_back(filenameAndPath);
-        _args.push_back(pluginName);
-        auto _ret = this->_client->call("sim.loadModule", _args);
-        return _ret[0].as<int64_t>();
-    }
-
     void sim::loadScene(std::string filename)
     {
         bool _brk = false;
@@ -3211,36 +3315,6 @@ namespace RemoteAPIObject
         json _args(json_array_arg);
         _args.push_back(refreshDegree);
         auto _ret = this->_client->call("sim.refreshDialogs", _args);
-        return _ret[0].as<int64_t>();
-    }
-
-    int64_t sim::registerScriptFuncHook(std::string funcToHook, std::string userFunc, bool execBefore)
-    {
-        bool _brk = false;
-        json _args(json_array_arg);
-        _args.push_back(funcToHook);
-        _args.push_back(userFunc);
-        _args.push_back(execBefore);
-        auto _ret = this->_client->call("sim.registerScriptFuncHook", _args);
-        return _ret[0].as<int64_t>();
-    }
-
-    int64_t sim::registerScriptFunction(std::string funcNameAtPluginName, std::string callTips)
-    {
-        bool _brk = false;
-        json _args(json_array_arg);
-        _args.push_back(funcNameAtPluginName);
-        _args.push_back(callTips);
-        auto _ret = this->_client->call("sim.registerScriptFunction", _args);
-        return _ret[0].as<int64_t>();
-    }
-
-    int64_t sim::registerScriptVariable(std::string varNameAtPluginName)
-    {
-        bool _brk = false;
-        json _args(json_array_arg);
-        _args.push_back(varNameAtPluginName);
-        auto _ret = this->_client->call("sim.registerScriptVariable", _args);
         return _ret[0].as<int64_t>();
     }
 
@@ -3812,16 +3886,6 @@ namespace RemoteAPIObject
         auto _ret = this->_client->call("sim.setModelProperty", _args);
     }
 
-    void sim::setModuleInfo(std::string moduleName, int64_t infoType, std::string info)
-    {
-        bool _brk = false;
-        json _args(json_array_arg);
-        _args.push_back(moduleName);
-        _args.push_back(infoType);
-        _args.push_back(info);
-        auto _ret = this->_client->call("sim.setModuleInfo", _args);
-    }
-
     void sim::setNamedBoolParam(std::string name, bool value)
     {
         bool _brk = false;
@@ -3926,23 +3990,33 @@ namespace RemoteAPIObject
         auto _ret = this->_client->call("sim.setObjectInt32Param", _args);
     }
 
-    void sim::setObjectMatrix(int64_t objectHandle, int64_t relativeToObjectHandle, std::vector<double> matrix)
+    void sim::setObjectMatrix(int64_t objectHandle, std::vector<double> matrix, std::optional<int64_t> relativeToObjectHandle)
     {
         bool _brk = false;
         json _args(json_array_arg);
         _args.push_back(objectHandle);
-        _args.push_back(relativeToObjectHandle);
         _args.push_back(matrix);
+        if(relativeToObjectHandle)
+        {
+            if(_brk) throw std::runtime_error("no gaps allowed");
+            else _args.push_back(*relativeToObjectHandle);
+        }
+        else _brk = true;
         auto _ret = this->_client->call("sim.setObjectMatrix", _args);
     }
 
-    void sim::setObjectOrientation(int64_t objectHandle, int64_t relativeToObjectHandle, std::vector<double> eulerAngles)
+    void sim::setObjectOrientation(int64_t objectHandle, std::vector<double> eulerAngles, std::optional<int64_t> relativeToObjectHandle)
     {
         bool _brk = false;
         json _args(json_array_arg);
         _args.push_back(objectHandle);
-        _args.push_back(relativeToObjectHandle);
         _args.push_back(eulerAngles);
+        if(relativeToObjectHandle)
+        {
+            if(_brk) throw std::runtime_error("no gaps allowed");
+            else _args.push_back(*relativeToObjectHandle);
+        }
+        else _brk = true;
         auto _ret = this->_client->call("sim.setObjectOrientation", _args);
     }
 
@@ -3961,23 +4035,33 @@ namespace RemoteAPIObject
         auto _ret = this->_client->call("sim.setObjectParent", _args);
     }
 
-    void sim::setObjectPose(int64_t objectHandle, int64_t relativeToObjectHandle, std::vector<double> pose)
+    void sim::setObjectPose(int64_t objectHandle, std::vector<double> pose, std::optional<int64_t> relativeToObjectHandle)
     {
         bool _brk = false;
         json _args(json_array_arg);
         _args.push_back(objectHandle);
-        _args.push_back(relativeToObjectHandle);
         _args.push_back(pose);
+        if(relativeToObjectHandle)
+        {
+            if(_brk) throw std::runtime_error("no gaps allowed");
+            else _args.push_back(*relativeToObjectHandle);
+        }
+        else _brk = true;
         auto _ret = this->_client->call("sim.setObjectPose", _args);
     }
 
-    void sim::setObjectPosition(int64_t objectHandle, int64_t relativeToObjectHandle, std::vector<double> position)
+    void sim::setObjectPosition(int64_t objectHandle, std::vector<double> position, std::optional<int64_t> relativeToObjectHandle)
     {
         bool _brk = false;
         json _args(json_array_arg);
         _args.push_back(objectHandle);
-        _args.push_back(relativeToObjectHandle);
         _args.push_back(position);
+        if(relativeToObjectHandle)
+        {
+            if(_brk) throw std::runtime_error("no gaps allowed");
+            else _args.push_back(*relativeToObjectHandle);
+        }
+        else _brk = true;
         auto _ret = this->_client->call("sim.setObjectPosition", _args);
     }
 
@@ -3990,13 +4074,18 @@ namespace RemoteAPIObject
         auto _ret = this->_client->call("sim.setObjectProperty", _args);
     }
 
-    void sim::setObjectQuaternion(int64_t objectHandle, int64_t relativeToObjectHandle, std::vector<double> quaternion)
+    void sim::setObjectQuaternion(int64_t objectHandle, std::vector<double> quaternion, std::optional<int64_t> relativeToObjectHandle)
     {
         bool _brk = false;
         json _args(json_array_arg);
         _args.push_back(objectHandle);
-        _args.push_back(relativeToObjectHandle);
         _args.push_back(quaternion);
+        if(relativeToObjectHandle)
+        {
+            if(_brk) throw std::runtime_error("no gaps allowed");
+            else _args.push_back(*relativeToObjectHandle);
+        }
+        else _brk = true;
         auto _ret = this->_client->call("sim.setObjectQuaternion", _args);
     }
 
@@ -4033,6 +4122,16 @@ namespace RemoteAPIObject
         json _args(json_array_arg);
         _args.push_back(pageIndex);
         auto _ret = this->_client->call("sim.setPage", _args);
+    }
+
+    void sim::setPluginInfo(std::string pluginName, int64_t infoType, std::string info)
+    {
+        bool _brk = false;
+        json _args(json_array_arg);
+        _args.push_back(pluginName);
+        _args.push_back(infoType);
+        _args.push_back(info);
+        auto _ret = this->_client->call("sim.setPluginInfo", _args);
     }
 
     void sim::setPointCloudOptions(int64_t pointCloudHandle, double maxVoxelSize, int64_t maxPtCntPerVoxel, int64_t options, double pointSize)
@@ -4332,15 +4431,6 @@ namespace RemoteAPIObject
         _args.push_back(shapeHandle);
         auto _ret = this->_client->call("sim.ungroupShape", _args);
         return _ret[0].as<std::vector<int64_t>>();
-    }
-
-    int64_t sim::unloadModule(int64_t pluginHandle)
-    {
-        bool _brk = false;
-        json _args(json_array_arg);
-        _args.push_back(pluginHandle);
-        auto _ret = this->_client->call("sim.unloadModule", _args);
-        return _ret[0].as<int64_t>();
     }
 
     std::vector<double> sim::unpackDoubleTable(std::vector<uint8_t> data, std::optional<int64_t> startDoubleIndex, std::optional<int64_t> doubleCount, std::optional<int64_t> additionalByteOffset)
@@ -5157,13 +5247,18 @@ namespace RemoteAPIObject
         return _ret[0].as<int64_t>();
     }
 
-    std::vector<double> simIK::getObjectMatrix(int64_t environmentHandle, int64_t objectHandle, int64_t relativeToObjectHandle)
+    std::vector<double> simIK::getObjectMatrix(int64_t environmentHandle, int64_t objectHandle, std::optional<int64_t> relativeToObjectHandle)
     {
         bool _brk = false;
         json _args(json_array_arg);
         _args.push_back(environmentHandle);
         _args.push_back(objectHandle);
-        _args.push_back(relativeToObjectHandle);
+        if(relativeToObjectHandle)
+        {
+            if(_brk) throw std::runtime_error("no gaps allowed");
+            else _args.push_back(*relativeToObjectHandle);
+        }
+        else _brk = true;
         auto _ret = this->_client->call("simIK.getObjectMatrix", _args);
         return _ret[0].as<std::vector<double>>();
     }
@@ -5178,24 +5273,34 @@ namespace RemoteAPIObject
         return _ret[0].as<int64_t>();
     }
 
-    std::vector<double> simIK::getObjectPose(int64_t environmentHandle, int64_t objectHandle, int64_t relativeToObjectHandle)
+    std::vector<double> simIK::getObjectPose(int64_t environmentHandle, int64_t objectHandle, std::optional<int64_t> relativeToObjectHandle)
     {
         bool _brk = false;
         json _args(json_array_arg);
         _args.push_back(environmentHandle);
         _args.push_back(objectHandle);
-        _args.push_back(relativeToObjectHandle);
+        if(relativeToObjectHandle)
+        {
+            if(_brk) throw std::runtime_error("no gaps allowed");
+            else _args.push_back(*relativeToObjectHandle);
+        }
+        else _brk = true;
         auto _ret = this->_client->call("simIK.getObjectPose", _args);
         return _ret[0].as<std::vector<double>>();
     }
 
-    std::tuple<std::vector<double>, std::vector<double>, std::vector<double>> simIK::getObjectTransformation(int64_t environmentHandle, int64_t objectHandle, int64_t relativeToObjectHandle)
+    std::tuple<std::vector<double>, std::vector<double>, std::vector<double>> simIK::getObjectTransformation(int64_t environmentHandle, int64_t objectHandle, std::optional<int64_t> relativeToObjectHandle)
     {
         bool _brk = false;
         json _args(json_array_arg);
         _args.push_back(environmentHandle);
         _args.push_back(objectHandle);
-        _args.push_back(relativeToObjectHandle);
+        if(relativeToObjectHandle)
+        {
+            if(_brk) throw std::runtime_error("no gaps allowed");
+            else _args.push_back(*relativeToObjectHandle);
+        }
+        else _brk = true;
         auto _ret = this->_client->call("simIK.getObjectTransformation", _args);
         return std::make_tuple(_ret[0].as<std::vector<double>>(), _ret[1].as<std::vector<double>>(), _ret[2].as<std::vector<double>>());
     }
@@ -5467,14 +5572,19 @@ namespace RemoteAPIObject
         auto _ret = this->_client->call("simIK.setJointWeight", _args);
     }
 
-    void simIK::setObjectMatrix(int64_t environmentHandle, int64_t objectHandle, int64_t relativeToObjectHandle, std::vector<double> matrix)
+    void simIK::setObjectMatrix(int64_t environmentHandle, int64_t objectHandle, std::vector<double> matrix, std::optional<int64_t> relativeToObjectHandle)
     {
         bool _brk = false;
         json _args(json_array_arg);
         _args.push_back(environmentHandle);
         _args.push_back(objectHandle);
-        _args.push_back(relativeToObjectHandle);
         _args.push_back(matrix);
+        if(relativeToObjectHandle)
+        {
+            if(_brk) throw std::runtime_error("no gaps allowed");
+            else _args.push_back(*relativeToObjectHandle);
+        }
+        else _brk = true;
         auto _ret = this->_client->call("simIK.setObjectMatrix", _args);
     }
 
@@ -5494,26 +5604,36 @@ namespace RemoteAPIObject
         auto _ret = this->_client->call("simIK.setObjectParent", _args);
     }
 
-    void simIK::setObjectPose(int64_t environmentHandle, int64_t objectHandle, int64_t relativeToObjectHandle, std::vector<double> pose)
+    void simIK::setObjectPose(int64_t environmentHandle, int64_t objectHandle, std::vector<double> pose, std::optional<int64_t> relativeToObjectHandle)
     {
         bool _brk = false;
         json _args(json_array_arg);
         _args.push_back(environmentHandle);
         _args.push_back(objectHandle);
-        _args.push_back(relativeToObjectHandle);
         _args.push_back(pose);
+        if(relativeToObjectHandle)
+        {
+            if(_brk) throw std::runtime_error("no gaps allowed");
+            else _args.push_back(*relativeToObjectHandle);
+        }
+        else _brk = true;
         auto _ret = this->_client->call("simIK.setObjectPose", _args);
     }
 
-    void simIK::setObjectTransformation(int64_t environmentHandle, int64_t objectHandle, int64_t relativeToObjectHandle, std::vector<double> position, std::vector<double> eulerOrQuaternion)
+    void simIK::setObjectTransformation(int64_t environmentHandle, int64_t objectHandle, std::vector<double> position, std::vector<double> eulerOrQuaternion, std::optional<int64_t> relativeToObjectHandle)
     {
         bool _brk = false;
         json _args(json_array_arg);
         _args.push_back(environmentHandle);
         _args.push_back(objectHandle);
-        _args.push_back(relativeToObjectHandle);
         _args.push_back(position);
         _args.push_back(eulerOrQuaternion);
+        if(relativeToObjectHandle)
+        {
+            if(_brk) throw std::runtime_error("no gaps allowed");
+            else _args.push_back(*relativeToObjectHandle);
+        }
+        else _brk = true;
         auto _ret = this->_client->call("simIK.setObjectTransformation", _args);
     }
 
