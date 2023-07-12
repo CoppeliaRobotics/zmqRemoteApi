@@ -36,7 +36,7 @@ client.setStepping(True)
 sim.startSimulation()
 
 while (t := sim.getSimulationTime()) < 3:
-    img, resX, resY = sim.getVisionSensorCharImage(visionSensorHandle)
+    img, [resX, resY] = sim.getVisionSensorImg(visionSensorHandle)
     img = np.frombuffer(img, dtype=np.uint8).reshape(resY, resX, 3)
 
     # In CoppeliaSim images are left to right (x-axis), and bottom to top (y-axis)
