@@ -75,6 +75,10 @@ class RemoteAPIClient:
         ret = type(name, (), {})
         if not _info:
             _info = self.call('zmqRemoteApi.info', [name])
+        if not _info:
+            print(f'warning: namespace {name} not found, trying implicit include...')
+            self.call('include',[name])
+            _info = self.call('zmqRemoteApi.info', [name])
         for k, v in _info.items():
             if not isinstance(v, dict):
                 raise ValueError('found nondict')
