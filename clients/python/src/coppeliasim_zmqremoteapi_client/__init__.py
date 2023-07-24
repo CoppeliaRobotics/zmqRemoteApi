@@ -75,10 +75,6 @@ class RemoteAPIClient:
         ret = type(name, (), {})
         if not _info:
             _info = self.call('zmqRemoteApi.info', [name])
-        if not _info:
-            print(f'warning: namespace {name} not found, trying implicit include...')
-            self.call('include',[name])
-            _info = self.call('zmqRemoteApi.info', [name])
         for k, v in _info.items():
             if not isinstance(v, dict):
                 raise ValueError('found nondict')
@@ -95,6 +91,10 @@ class RemoteAPIClient:
             ret.moveToPose=self._moveToPose
             self.sim=ret
         return ret
+
+    def require(self, name):
+        self.call('zmqRemoteApi.require', [name])
+        return self.getObject(name)
 
     def setStepping(self, enable=True):
         ret = None
@@ -345,7 +345,7 @@ class RemoteAPIClient:
 
 if __name__ == '__console__':
     client = RemoteAPIClient()
-    sim = client.getObject('sim')
+    sim = client.require('sim')
 
 
 __all__ = ['RemoteAPIClient']

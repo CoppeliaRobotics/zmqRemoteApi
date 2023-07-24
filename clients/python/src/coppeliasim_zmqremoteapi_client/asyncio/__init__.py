@@ -122,6 +122,10 @@ class RemoteAPIClient:
                 setattr(ret, k, self.getObject(f'{name}.{k}', _info=v))
         return ret
 
+    async def require(self, name):
+        await self.call('zmqRemoteApi.require', [name])
+        return await self.getObject(name)
+
     async def setStepping(self, enable=True):
         return await self.call('setStepping', [enable,self.uuid])
 

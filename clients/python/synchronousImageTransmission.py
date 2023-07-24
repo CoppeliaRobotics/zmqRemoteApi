@@ -14,7 +14,7 @@ from coppeliasim_zmqremoteapi_client import RemoteAPIClient
 print('Program started')
 
 client = RemoteAPIClient()
-sim = client.getObject('sim')
+sim = client.require('sim')
 
 visionSensorHandle = sim.getObject('/VisionSensor')
 passiveVisionSensorHandle = sim.getObject('/PassiveVisionSensor')

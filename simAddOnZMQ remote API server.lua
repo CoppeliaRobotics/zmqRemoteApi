@@ -230,13 +230,6 @@ function step(uuid)
     steppedClients[uuid]=true
 end
 
-function include(arg) 
-    -- so that clients can require additional modules with e.g.:
-    -- client.call('include',['simOMPL'])
-    -- simOMPL = client.getObject('simOMPL')
-    _G[arg]=require(arg)
-end
-
 -- via the remote API, we should always return a string:
 _S.readCustomDataBlock=sim.readCustomDataBlock
 function sim.readCustomDataBlock(obj,tag)

@@ -11,7 +11,7 @@ if __name__ == '__main__':
         from zmqRemoteApi import RemoteAPIClient
 
         client = RemoteAPIClient()
-        sim = client.getObject('sim')
+        sim = client.require('sim')
 
         def progress(i, lst, prev_pct):
             pct = int((i + 1) * 100 / len(lst))

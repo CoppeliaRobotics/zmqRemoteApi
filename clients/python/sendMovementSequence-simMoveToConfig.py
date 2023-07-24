@@ -18,7 +18,7 @@ def movCallback(config,vel,accel,handles):
 print('Program started')
 
 client = RemoteAPIClient()
-sim = client.getObject('sim')
+sim = client.require('sim')
 
 targetArm = '/blueArm'
 # targetArm = '/redArm'

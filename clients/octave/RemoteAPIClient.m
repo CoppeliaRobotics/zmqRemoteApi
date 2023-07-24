@@ -84,6 +84,11 @@ classdef RemoteAPIClient
             remoteObject = RemoteAPIObject(obj, name);
         end
 
+        function remoteObject = require(obj, name)
+            obj.call('zmqRemoteApi.require', {name})
+            remoteObject = obj.getObject(name)
+        end
+
         function setStepping(obj, enable)
             if nargin < 2
                 enable = true;

@@ -9,7 +9,7 @@ from coppeliasim_zmqremoteapi_client import RemoteAPIClient
 print('Program started')
 
 client = RemoteAPIClient()
-sim = client.getObject('sim')
+sim = client.require('sim')
 
 tipHandle = sim.getObject('/LBR4p/tip')
 targetHandle = sim.getObject('/LBR4p/target')

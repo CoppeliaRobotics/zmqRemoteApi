@@ -9,7 +9,7 @@
 fprintf('Program started\n');
 
 client = RemoteAPIClient();
-sim = client.getObject('sim');
+sim = client.require('sim');
 
 visionSensorHandle = sim.getObject('/VisionSensor');
 passiveVisionSensorHandle = sim.getObject('/PassiveVisionSensor');

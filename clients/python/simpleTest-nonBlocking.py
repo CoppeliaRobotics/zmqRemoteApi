@@ -14,7 +14,7 @@ async def mainFunc():
     print('Program started')
 
     async with RemoteAPIClient() as client:
-        sim = await client.getObject('sim')
+        sim = await client.require('sim')
 
         # When simulation is not running, ZMQ message handling could be a bit
         # slow, since the idle loop runs at 8 Hz by default. So let's make

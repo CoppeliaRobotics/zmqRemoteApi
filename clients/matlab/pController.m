@@ -12,7 +12,7 @@ dynStepSize = 0.005;
 velUpperLimit = deg2rad(360);
 
 client = RemoteAPIClient();
-sim = client.getObject('sim');
+sim = client.require('sim');
 
 jointHandle = sim.getObject('/Cuboid[0]/joint');
 jointAngle = sim.getJointPosition(jointHandle);

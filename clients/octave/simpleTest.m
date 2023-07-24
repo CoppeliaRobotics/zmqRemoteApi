@@ -5,7 +5,7 @@
 fprintf('Program started\n')
 
 client = RemoteAPIClient();
-sim = client.getObject('sim');
+sim = client.require('sim');
 
 % When simulation is not running, ZMQ message handling could be a bit
 % slow, since the idle loop runs at 8 Hz by default. So let's make

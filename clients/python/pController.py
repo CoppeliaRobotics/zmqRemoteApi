@@ -13,7 +13,7 @@ print('Program started')
 maxForce = 100
 
 client = RemoteAPIClient()
-sim = client.getObject('sim')
+sim = client.require('sim')
 
 
 def moveToAngle(targetAngle):

@@ -108,6 +108,11 @@ classdef RemoteAPIClient
             remoteObject = RemoteAPIObject(obj, name);
         end
 
+        function remoteObject = require(obj, name)
+            obj.call('zmqRemoteApi.require', {name})
+            remoteObject = obj.getObject(name)
+        end
+
         function setStepping(obj, enable)
             arguments
                 obj (1,1) RemoteAPIClient
