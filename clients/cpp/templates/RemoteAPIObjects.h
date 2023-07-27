@@ -20,6 +20,11 @@ namespace RemoteAPIObject
     public:
         `obj`(RemoteAPIClient *client);
 
+#py if obj == 'sim':
+#include "sim-deprecated.h"
+#include "sim-special.h"
+
+#py endif
 #py for func, func_def in func_defs.items():
 #py if func_def.in_args.is_variadic() or func_def.out_args.is_variadic():
 #py continue

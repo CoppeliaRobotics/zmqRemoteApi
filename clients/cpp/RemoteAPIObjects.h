@@ -10,34 +10,9 @@ namespace RemoteAPIObject
     public:
         sim(RemoteAPIClient *client);
 
-        // DEPRECATED/BACKCOMPATIBILITY START
-        double getJointMaxForce(int64_t jointHandle);
-        void setJointMaxForce(int64_t objectHandle, double forceOrTorque);
-        int64_t createPureShape(int64_t primitiveType, int64_t options, std::vector<double> sizes, double mass, std::optional<std::vector<int64_t>> precision = {});
-        void removeObject(int64_t objectHandle);
-        std::tuple<std::vector<uint8_t>, std::vector<int64_t>> getVisionSensorDepthBuffer(int64_t sensorHandle, std::optional<std::vector<int64_t>> pos = {}, std::optional<std::vector<int64_t>> size = {});
-        std::tuple<std::vector<uint8_t>, std::vector<int64_t>> getVisionSensorCharImage(int64_t sensorHandle, std::optional<std::vector<int64_t>> pos = {}, std::optional<std::vector<int64_t>> size = {});
-        void setVisionSensorCharImage(int64_t sensorHandle, std::vector<uint8_t> image);
-        std::vector<int64_t> getObjectSelection();
-        void setObjectSelection(std::vector<double> objectHandles);
-        std::vector<double> getObjectPose(int64_t objectHandle, int64_t relativeToObjectHandle);
-        std::vector<double> getObjectMatrix(int64_t objectHandle, int64_t relativeToObjectHandle);
-        std::vector<double> getObjectPosition(int64_t objectHandle, int64_t relativeToObjectHandle);
-        std::vector<double> getObjectQuaternion(int64_t objectHandle, int64_t relativeToObjectHandle);
-        std::vector<double> getObjectOrientation(int64_t objectHandle, int64_t relativeToObjectHandle);
-        void setObjectPose(int64_t objectHandle, int64_t relativeToObjectHandle, std::vector<double> pose);
-        void setObjectMatrix(int64_t objectHandle, int64_t relativeToObjectHandle, std::vector<double> matrix);
-        void setObjectPosition(int64_t objectHandle, int64_t relativeToObjectHandle, std::vector<double> position);
-        void setObjectQuaternion(int64_t objectHandle, int64_t relativeToObjectHandle, std::vector<double> quaternion);
-        void setObjectOrientation(int64_t objectHandle, int64_t relativeToObjectHandle, std::vector<double> eulerAngles);
-        // DEPRECATED/BACKCOMPATIBILITY END
-        
-        // SPECIAL START
-        std::optional<std::vector<uint8_t>> getStringSignal(std::string signalName);
-        std::optional<int64_t> getInt32Signal(std::string signalName);
-        std::optional<double> getFloatSignal(std::string signalName);
-        // SPECIAL END
-        
+#include "sim-deprecated.h"
+#include "sim-special.h"
+
         int64_t addDrawingObject(int64_t objectType, double size, double duplicateTolerance, int64_t parentObjectHandle, int64_t maxItemCount, std::optional<std::vector<double>> color = {});
         int64_t addDrawingObjectItem(int64_t drawingObjectHandle, std::vector<double> itemData);
         void addForce(int64_t shapeHandle, std::vector<double> position, std::vector<double> force);
