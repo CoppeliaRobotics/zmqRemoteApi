@@ -49,7 +49,7 @@ add_custom_command(
     OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/generated/calltips.json"
     COMMAND
         ${CMAKE_COMMAND} -E env
-        PYTHONPATH="${CMAKE_CURRENT_SOURCE_DIR}/../python"
+        PYTHONPATH="${CMAKE_CURRENT_SOURCE_DIR}/../python/src"
         ${Python3_EXECUTABLE}
         "${CMAKE_CURRENT_SOURCE_DIR}/../../tools/get_raw_calltips.py"
         "${CMAKE_CURRENT_BINARY_DIR}/generated/calltips.json"
@@ -60,7 +60,7 @@ add_custom_command(
     OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/generated/constants.json"
     COMMAND
         ${CMAKE_COMMAND} -E env
-        PYTHONPATH="${CMAKE_CURRENT_SOURCE_DIR}/../python"
+        PYTHONPATH="${CMAKE_CURRENT_SOURCE_DIR}/../python/src"
         ${Python3_EXECUTABLE}
         "${CMAKE_CURRENT_SOURCE_DIR}/../../tools/get_constants.py"
         "${CMAKE_CURRENT_BINARY_DIR}/generated/constants.json"
