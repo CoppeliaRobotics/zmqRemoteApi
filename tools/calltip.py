@@ -133,22 +133,32 @@ class FuncDef:
         return FuncDef._parser.transform(tree)
 
     @staticmethod
-    def from_calltips_json(path):
+    def from_calltips_json(path, include_objects=[], exclude_objects=[], exclude_methods=[]):
         import json
         with open(path, 'rt') as f:
             calltips = json.load(f)
+        def parse_list(x, sep=','):
+            if isinstance(x, str):
+                x = [y for y in [z.strip() for z in x.split(sep)] if y != '']
+            if isinstance(x, (tuple, list)):
+                x = set(x)
+            if not isinstance(x, set):
+                raise TypeError
+            return x
+        include_objects, exclude_objects, exclude_methods = map(parse_list, (include_objects, exclude_objects, exclude_methods))
+        allowed_object_prefixes = {'sim'}
         ret = {}
         for k, v in calltips.items():
             s = k.split('.')
             if len(s) == 2:
                 obj, func = s
-#                if obj in ('simEigen', 'simB0', 'simRemoteApi', 'simQML'):
-#                    continue
-                if obj != 'sim' and obj != 'simIK':
+                if not any(obj.startswith(p) for p in allowed_object_prefixes):
                     continue
-                if not obj.startswith('sim'):
+                if include_objects and obj not in include_objects:
                     continue
-                if obj == 'sim' and func in {'test', 'auxFunc', 'handleExtCalls', 'getStringSignal', 'getInt32Signal', 'getFloatSignal'}:
+                elif obj in exclude_objects:
+                    continue
+                if f'{obj}.{func}' in exclude_methods:
                     continue
                 if func[0] == '_':
                     continue

@@ -1,8 +1,9 @@
 #py from calltip import FuncDef
 #py from cpp_utils import *
+#py all_func_defs = FuncDef.from_calltips_json(pycpp.params['calltips_json'], pycpp.params['include_objects'], pycpp.params['exclude_objects'], pycpp.params['exclude_methods'])
 namespace RemoteAPIObject
 {
-#py for obj, func_defs in FuncDef.from_calltips_json(pycpp.params['calltips_json']).items():
+#py for obj, func_defs in all_func_defs.items():
     `obj`::`obj`(RemoteAPIClient *client)
         : _client(client)
     {
@@ -47,7 +48,7 @@ RemoteAPIObjects::RemoteAPIObjects(RemoteAPIClient *client)
     this->client = client;
 }
 
-#py for obj, func_defs in FuncDef.from_calltips_json(pycpp.params['calltips_json']).items():
+#py for obj, func_defs in all_func_defs.items():
 RemoteAPIObject::`obj` RemoteAPIObjects::`obj`()
 {
     return RemoteAPIObject::`obj`(this->client);
