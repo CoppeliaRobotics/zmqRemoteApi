@@ -120,6 +120,11 @@ json RemoteAPIClient::getObject(const std::string &name)
     return call("zmqRemoteApi.info", json(json_array_arg, {name}));
 }
 
+void RemoteAPIClient::require(const std::string &name)
+{
+    call("zmqRemoteApi.require", json(json_array_arg, {name}));
+}
+
 void RemoteAPIClient::setVerbose(int level)
 {
     verbose = level;

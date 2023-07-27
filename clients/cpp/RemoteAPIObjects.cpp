@@ -3,6 +3,7 @@ namespace RemoteAPIObject
     sim::sim(RemoteAPIClient *client)
         : _client(client)
     {
+        _client->require("sim");
     }
 
     // DEPRECATED/BACKCOMPATIBILITY START
@@ -4733,6 +4734,7 @@ namespace RemoteAPIObject
     simIK::simIK(RemoteAPIClient *client)
         : _client(client)
     {
+        _client->require("simIK");
     }
 
     int64_t simIK::addElement(int64_t environmentHandle, int64_t ikGroupHandle, int64_t tipDummyHandle)

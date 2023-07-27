@@ -6,6 +6,7 @@ namespace RemoteAPIObject
     `obj`::`obj`(RemoteAPIClient *client)
         : _client(client)
     {
+        _client->require("`obj`");
     }
 
 #py for func, func_def in func_defs.items():
