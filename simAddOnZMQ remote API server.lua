@@ -69,12 +69,12 @@ function zmqRemoteApi.handleRequest(req)
 end
 
 function zmqRemoteApi.handleRawMessage(rawReq)
-    local status,req=pcall(cbor.decode,rawReq)
+    local status,req=pcall(cborDecode.decode,rawReq)
     if status then
         local resp=zmqRemoteApi.handleRequest(req)
-        local status,resp=pcall(cbor.encode,resp)
+        local status,resp=pcall(sim.packCbor,resp)
         if status then return resp end
-        return cbor.encode({success=false,error=resp})
+        return sim.packCbor({success=false,error=resp})
     else
         sim.addLog(sim.verbosity_errors,'Decode error: '..req)
         return ''
@@ -167,7 +167,7 @@ function sysCall_init()
         sim.addLog(sim.verbosity_scriptinfos,string.format('ZeroMQ Remote API server starting (rpcPort=%d, cntPort=%d)...',rpcPort,cntPort))
     end
     -- cbor=require 'cbor' -- encodes strings as buffers, always. DO NOT USE!!
-    cbor=require'org.conman.cbor'
+    cborDecode=require'org.conman.cbor' -- use only for decoding. For encoding use sim.packCbor
     context=simZMQ.ctx_new()
     rpcSocket=simZMQ.socket(context,simZMQ.REP)
     simZMQ.bind(rpcSocket,string.format('tcp://*:%d',rpcPort))
