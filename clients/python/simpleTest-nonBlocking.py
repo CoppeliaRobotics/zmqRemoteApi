@@ -16,12 +16,6 @@ async def mainFunc():
     async with RemoteAPIClient() as client:
         sim = await client.require('sim')
 
-        # When simulation is not running, ZMQ message handling could be a bit
-        # slow, since the idle loop runs at 8 Hz by default. So let's make
-        # sure that the idle loop runs at full speed for this program:
-        defaultIdlsFps = await sim.getInt32Param(sim.intparam_idle_fps)
-        await sim.setInt32Param(sim.intparam_idle_fps, 0)
-
         # Create a few dummies (below executes "concurrently", i.e. without
         # waiting for the result of one call, before sending the request for
         # the next call; this will significantly improve speed when order of
@@ -61,9 +55,6 @@ async def mainFunc():
         # Remove the dummies created earlier
         # (executes "concurrently", see above):
         await asyncio.gather(*[sim.removeObject(h) for h in handles])
-
-        # Restore the original idle loop frequency:
-        await sim.setInt32Param(sim.intparam_idle_fps, defaultIdlsFps)
 
     print('Program ended')
 

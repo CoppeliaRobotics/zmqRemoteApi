@@ -7,12 +7,6 @@ fprintf('Program started\n')
 client = RemoteAPIClient();
 sim = client.require('sim');
 
-% When simulation is not running, ZMQ message handling could be a bit
-% slow, since the idle loop runs at 8 Hz by default. So let's make
-% sure that the idle loop runs at full speed for this program:
-defaultIdleFps = sim.getInt32Param(sim.intparam_idle_fps);
-sim.setInt32Param(sim.intparam_idle_fps, 0);
-
 % Create a few dummies and set their positions:
 n = 50;
 handles = zeros(n, 1);
@@ -54,8 +48,5 @@ sim.stopSimulation();
 for i=1:n
     sim.removeObject(handles(i));
 end
-
-% Restore the original idle loop frequency:
-sim.setInt32Param(sim.intparam_idle_fps, defaultIdleFps);
 
 fprintf('Program ended\n');

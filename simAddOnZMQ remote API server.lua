@@ -90,25 +90,55 @@ function zmqRemoteApi.handleQueue()
         end
     end
 
-    local t=sim.getSystemTime()
+    local startTime=sim.getSystemTime()
+    local msgCnt=0
     while true do
         local rc,revents=simZMQ.poll({rpcSocket},{simZMQ.POLLIN},0)
-        if rc<=0 then break end
+        if rc>0 then
+            msgCnt=msgCnt+1
+            local rc,req=simZMQ.recv(rpcSocket,0)
 
-        local rc,req=simZMQ.recv(rpcSocket,0)
+            if zmqRemoteApi.verbose()>2 then
+                print('Received raw request: (len='..#req..') '..dumpBytes(req))
+            end
 
-        if zmqRemoteApi.verbose()>2 then
-            print('Received raw request: (len='..#req..') '..dumpBytes(req))
+            local resp=zmqRemoteApi.handleRawMessage(req)
+
+            if zmqRemoteApi.verbose()>2 then
+                print('Sending raw response: (len='..#resp..') '..dumpBytes(resp))
+            end
+
+            simZMQ.send(rpcSocket,resp,0)
         end
-
-        local resp=zmqRemoteApi.handleRawMessage(req)
-
-        if zmqRemoteApi.verbose()>2 then
-            print('Sending raw response: (len='..#resp..') '..dumpBytes(resp))
+        
+        local waitingForStep=false
+        if sim.getSimulationState()~=sim.simulation_stopped then
+            if next(steppingClients)~=nil and sim.getSimulationState()~=sim.simulation_stopped then
+                for uuid,v in pairs(steppingClients) do
+                    if steppedClients[uuid]==nil then
+                        waitingForStep=true
+                        break
+                    end
+                end
+            end
         end
-
-        simZMQ.send(rpcSocket,resp,0)
-        if sim.getSystemTime()-t>maxTimeSlot then break end
+        
+        local maxWaitTime=-1
+        if waitingForStep then
+            maxWaitTime=msgQueueTimeout_stepped
+        else
+            if msgCnt>0 then
+                if sim.getSimulationState()&sim.simulation_advancing==0 then
+                    maxWaitTime=msgQueueTimeout_idle
+                else
+                    maxWaitTime=msgQueueTimeout_running
+                end
+            end
+        end
+        
+        if sim.getSystemTime()-startTime>maxWaitTime then
+            break
+        end
     end
 end
 
@@ -129,6 +159,10 @@ function sysCall_init()
     rpcPort=sim.getNamedInt32Param('zmqRemoteApi.rpcPort') or 23000
     cntPort=sim.getNamedInt32Param('zmqRemoteApi.cntPort') or (rpcPort+1)
     maxTimeSlot=sim.getNamedFloatParam('zmqRemoteApi.maxTimeSlot') or 0.005
+    msgQueueTimeout_stepped=sim.getNamedFloatParam('zmqRemoteApi.msgQueueTimeout_stepped') or 1.0
+    msgQueueTimeout_idle=sim.getNamedFloatParam('zmqRemoteApi.msgQueueTimeout_idle') or 0.2
+    msgQueueTimeout_running=sim.getNamedFloatParam('zmqRemoteApi.msgQueueTimeout_running') or 0.005
+    
     if zmqRemoteApi.verbose()>0 then
         sim.addLog(sim.verbosity_scriptinfos,string.format('ZeroMQ Remote API server starting (rpcPort=%d, cntPort=%d)...',rpcPort,cntPort))
     end
@@ -164,6 +198,16 @@ end
 
 function sysCall_addOnScriptSuspended()
     return {cmd='cleanup'}
+end
+
+function getMsgQueueTimeouts()
+    return {idle=msgQueueTimeout_idle,running=msgQueueTimeout_running,stepped=msgQueueTimeout_stepped}
+end
+
+function setMsgQueueTimeouts(timeout)
+    msgQueueTimeout_idle=timeout.idle or msgQueueTimeout_idle
+    msgQueueTimeout_running=timeout.running or msgQueueTimeout_running
+    msgQueueTimeout_stepped=timeout.stepped or msgQueueTimeout_stepped
 end
 
 function sysCall_nonSimulation()
