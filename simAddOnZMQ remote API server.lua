@@ -9,6 +9,44 @@ end
 
 function zmqRemoteApi.require(name)
     _G[name]=require(name)
+    zmqRemoteApi.parseFuncsReturnTypes(name)
+end
+
+function zmqRemoteApi.parseFuncsReturnTypes(nameSpace)
+    local funcs=sim.getApiFunc(-1,'+'..nameSpace..'.')
+    for i=1,#funcs,1 do
+        local func=funcs[i]
+        local inf=sim.getApiInfo(-1,func)
+        local p=string.find(inf,'(',1,true)
+        if p then
+            inf=string.sub(inf,1,p-1)
+            p=string.find(inf,'=')
+            if p then
+                inf=string.sub(inf,1,p-1)
+                local t={}
+                local i=1
+                for token in (inf..","):gmatch("([^,]*),") do
+                    p=string.find(token,' ')
+                    if p then
+                        token=string.sub(token,1,p-1)
+                        if token=='string' then
+                            t[i]=1
+                        elseif token=='buffer' then
+                            t[i]=2
+                        else
+                            t[i]=0
+                        end
+                    else
+                        t[i]=0
+                    end
+                    i=i+1
+                end
+                returnTypes[func]=t
+            else
+                returnTypes[func]={}
+            end
+        end
+    end
 end
 
 function zmqRemoteApi.info(obj)
@@ -49,6 +87,18 @@ function zmqRemoteApi.handleRequest(req)
         else
             local status,retvals=pcall(function()
                 local ret={func(unpack(args))}
+                -- Try to assign correct types to text and buffers:
+                local args=returnTypes[req['func']]
+                if args then
+                    local cnt=math.min(#ret,#args)
+                    for i=1,cnt,1 do
+                        if args[i]==1 then
+                            ret[i]=ret[i]..'@:txt:'
+                        elseif args[i]==2 then
+                            ret[i]=ret[i]..'@:dat:'
+                        end
+                    end
+                end
                 return ret
             end)
             resp[status and 'ret' or 'error']=retvals
@@ -154,8 +204,11 @@ function sysCall_info()
 end
 
 function sysCall_init()
+    returnTypes={}
     simZMQ=require'simZMQ'
     simZMQ.__raiseErrors(true) -- so we don't need to check retval with every call
+    zmqRemoteApi.parseFuncsReturnTypes('sim')
+    zmqRemoteApi.parseFuncsReturnTypes('simZMQ')
     rpcPort=sim.getNamedInt32Param('zmqRemoteApi.rpcPort') or 23000
     cntPort=sim.getNamedInt32Param('zmqRemoteApi.cntPort') or (rpcPort+1)
     maxTimeSlot=sim.getNamedFloatParam('zmqRemoteApi.maxTimeSlot') or 0.005
