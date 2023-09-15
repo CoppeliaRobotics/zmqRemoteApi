@@ -26,7 +26,7 @@ visionSensorHandle = sim.getObject('/VisionSensor')
 passiveVisionSensorHandle = sim.getObject('/PassiveVisionSensor')
 
 # Run a simulation in stepping mode:
-client.setStepping(True)
+sim.setStepping(True)
 sim.startSimulation()
 
 while (t := sim.getSimulationTime()) < 3:
@@ -40,7 +40,7 @@ while (t := sim.getSimulationTime()) < 3:
 
     cv2.imshow('', img)
     cv2.waitKey(1)
-    client.step()  # triggers next simulation step
+    sim.step()  # triggers next simulation step
 
 sim.stopSimulation()
 

@@ -36,7 +36,6 @@ class RemoteAPIClient:
         self.socket = self.context.socket(zmq.REQ)
         self.socket.connect(f'tcp://{host}:{port}')
         self.uuid = str(uuid.uuid4())
-        self.threadLocLevel = 0
         main_globals = sys.modules['__main__'].__dict__
         main_globals['require']=self.require
 
@@ -84,7 +83,6 @@ class RemoteAPIClient:
             # We have a callback or a wait:
             if reply['func']=='_*wait*_':
                 self._send({'func': '_*executed*_', 'args': []})
-                reply = self._recv()
             else:
                 funcToRun=_getFuncIfExists(reply['func'])
                 if funcToRun != None: # we cannot raise an error: e.g. a custom UI async callback cannot be assigned to a specific client
@@ -92,7 +90,7 @@ class RemoteAPIClient:
                 if args == None:
                     args = []
                 self._send({'func': '_*executed*_', 'args': args})
-                reply = self._recv()
+            reply = self._recv()
         if 'err' in reply:
             raise Exception(reply.get('err')) #__EXCEPTION__
         return self._process_response(reply)
@@ -111,24 +109,17 @@ class RemoteAPIClient:
                 setattr(ret, k, v['const'])
             else:
                 setattr(ret, k, self.getObject(f'{name}.{k}', _info=v))
-        if name=="sim":
-            ret.setStepping=self.setStepping
-            ret.step=self.step
-            ret.switchThread=self.step
-            self.sim=ret
         return ret
 
     def require(self, name):
         self.call('zmqRemoteApi.require', [name])
         return self.getObject(name)
 
-    def setStepping(self, enable=True):
-        return self.call('zmqRemoteApi.setStepping', [enable])
+    def setStepping(self, enable=True): # for backw. comp., now via sim.setStepping
+        return self.call('sim.setStepping', [enable])
 
-    def step(self, *, wait=True):
-        self.call('zmqRemoteApi.step', [])
-        if wait:
-            self.call('zmqRemoteApi.waitForStep', [])
+    def step(self, *, wait=True): # for backw. comp., now via sim.step
+        self.call('sim.step', [wait])
 
 if __name__ == '__console__':
     client = RemoteAPIClient()

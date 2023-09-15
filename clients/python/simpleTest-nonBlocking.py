@@ -42,14 +42,14 @@ async def mainFunc():
             await asyncio.sleep(0.1)
 
         # Run a simulation in stepping mode:
-        await client.setStepping(True)
+        await sim.setStepping(True)
         await sim.startSimulation()
         while (t := await sim.getSimulationTime()) < 3:
             s = f'Simulation time: {t:.2f} [s] (simulation running '\
                 'synchronously to client, i.e. stepped)'
             print(s)
             await sim.addLog(sim.verbosity_scriptinfos, s)
-            await client.step()  # triggers next simulation step
+            await sim.step()  # triggers next simulation step
         await sim.stopSimulation()
 
         # Remove the dummies created earlier

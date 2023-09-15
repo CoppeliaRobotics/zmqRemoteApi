@@ -10,14 +10,14 @@ public class Example
         var client = new RemoteAPIClient();
         var sim = client.getObject().sim();
 
-        client.setStepping(true);
+        sim.setStepping(true);
         sim.startSimulation();
 
         float simTime = 0.0f;
         while((simTime = sim.getSimulationTime()) < 3)
         {
             System.out.println("Simulation time: " + simTime + " [s]");
-            client.step();
+            sim.step();
         }
         sim.stopSimulation();
     }

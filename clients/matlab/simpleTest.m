@@ -32,7 +32,7 @@ while sim.getSimulationState() ~= sim.simulation_stopped
 end
 
 % Run a simulation in stepping mode:
-client.setStepping(true);
+sim.setStepping(true);
 sim.startSimulation();
 while 1
     t = sim.getSimulationTime();
@@ -40,7 +40,7 @@ while 1
     s = sprintf('Simulation time: %.2f [s] (simulation running synchronously to client, i.e. stepped)', t);
     fprintf('%s\n', s);
     sim.addLog(sim.verbosity_scriptinfos, s)
-    client.step();  % triggers next simulation step
+    sim.step();  % triggers next simulation step
 end
 sim.stopSimulation();
 

@@ -19,7 +19,7 @@ jointAngle = sim.getJointPosition(jointHandle);
 sim.setJointTargetVelocity(jointHandle, deg2rad(360));
 
 % enable the stepping mode on the client:
-client.setStepping(true);
+sim.setStepping(true);
 
 sim.startSimulation();
 
@@ -44,7 +44,7 @@ for i=1:numel(angles)
         % .
         sim.setJointTargetVelocity(jointHandle, velocity);
         sim.setJointMaxForce(jointHandle, maxForce);
-        client.step();
+        sim.step();
         jointAngle = sim.getJointPosition(jointHandle);
     end
 end

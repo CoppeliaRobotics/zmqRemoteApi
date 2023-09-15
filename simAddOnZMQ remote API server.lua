@@ -88,10 +88,11 @@ function zmqRemoteApi.handleRequest(req)
     end
     local resp={}
     if req['func']~=nil and req['func']~='' then
-        local func=zmqRemoteApi.getField(req['func'])
+        currentFunctionName=req['func']
+        local func=zmqRemoteApi.getField(currentFunctionName)
         local args=req['args'] or {}
         if not func then
-            resp['err']='No such function: '..req['func']
+            resp['err']='No such function: '..currentFunctionName
         else
             -- Handle function arguments:
             local prefix="<function "
@@ -123,7 +124,6 @@ function zmqRemoteApi.handleRequest(req)
                 trace=string.gsub(trace,"\t","_=TB=_")
                 return trace
             end
-
 
             local status,retvals=xpcall(function()
                 local ret={func(unpack(args))}
@@ -207,12 +207,18 @@ function zmqRemoteApi.handleQueue()
         if dataPresent then
             msgCnt=msgCnt+1
             local req=zmqRemoteApi.receive()
-            zmqRemoteApi.setClientInfoFromUUID(req.uuid)
-            currentClientInfo.lastReq=req
-            zmqRemoteApi.resumeCoroutine() -- simZMQ.send in there
-            if clients[req.uuid]==nil then
-                clientCnt=clientCnt+1
-                clients[req.uuid]=true
+            if req.uuid then
+                zmqRemoteApi.setClientInfoFromUUID(req.uuid)
+                currentClientInfo.lastReq=req
+                zmqRemoteApi.resumeCoroutine() -- simZMQ.send in there
+                if clients[req.uuid]==nil then
+                    clientCnt=clientCnt+1
+                    clients[req.uuid]=true
+                end
+            else
+                -- Previous version of ZMQ remote API
+                currentClientInfo={} -- to avoid error in next:
+                zmqRemoteApi.send({success=false, error="The client ZeroMQ remote API version does not match CoppeliaSim's version"})
             end
         end
 
@@ -273,7 +279,7 @@ function sim.wait(dt,simTime)
     if not simTime then
         local st=sim.getSystemTime()
         while sim.getSystemTime()-st<dt do
-            _simSwitchThread()
+            _switchThread()
         end
     else
         originalWait(dt,true)
@@ -283,21 +289,26 @@ end
 -- Special handling of sim.switchThread:
 originalSwitchThread=sim.switchThread
 function sim.switchThread()
-    if sim.getSimulationState()~=sim.simulation_stopped and sim.getSimulationState()~=sim.simulation_paused then
-        if currentClientInfo.stepping then
-            currentClientInfo.desiredStep=currentStep+1
-        end
-        local cs=currentStep
-        while cs==currentStep do
-            -- stays inside here until we are ready with next simulation step
-            _simSwitchThread()
-        end
+    if currentFunctionName=='sim.switchThread' then -- when called from external client
+        currentFunctionName='sim.step'
+        sim.step()
     else
-        _simSwitchThread()
+        if sim.getSimulationState()~=sim.simulation_stopped and sim.getSimulationState()~=sim.simulation_paused then
+            if currentClientInfo.stepping then
+                currentClientInfo.desiredStep=currentStep+1
+            end
+            local cs=currentStep
+            while cs==currentStep do
+                -- stays inside here until we are ready with next simulation step
+                _switchThread()
+            end
+        else
+            _switchThread()
+        end
     end
 end
 
-function _simSwitchThread()
+function _switchThread()
     -- Reentrant. Stays in here until the client returned '_*executed*_'
     if not currentClientInfo.replySent then
         -- We are switching before we sent a reply. This is a blocking command and
@@ -313,7 +324,7 @@ function _simSwitchThread()
         local reply=zmqRemoteApi.handleRequest(req)
         zmqRemoteApi.send(reply)
         currentClientInfo.replySent=true
-        _simSwitchThread()
+        _switchThread()
     end
 end
 
@@ -329,7 +340,7 @@ function coroutineMain()
         local reply=zmqRemoteApi.handleRequest(req) -- We might switchThread in there, with blocking functions or callback functions
         zmqRemoteApi.send(reply)
         currentClientInfo.replySent=true
-        _simSwitchThread()
+        _switchThread()
     end
 end
 
@@ -391,7 +402,7 @@ function zmqRemoteApi.callRemoteFunction(functionName,_args)
     -- This is called when a CoppeliaSim function (e.g. sim.moveToConfig) calls a callback
     zmqRemoteApi.send({func=functionName,args=_args})
     currentClientInfo.replySent=true
-    _simSwitchThread() -- Stays in here until '_*executed*_' received
+    _switchThread() -- Stays in here until '_*executed*_' received
     return unpack(currentClientInfo.lastReq.args)
 end
 
@@ -456,18 +467,30 @@ function sysCall_afterSimulation()
     end
 end
 
-function zmqRemoteApi.setStepping(enable)
-    currentClientInfo.stepping=enable
-    currentClientInfo.desiredStep=currentStep
+originalSetStepping=sim.setStepping
+function sim.setStepping(enableOrLevel)
+    if currentFunctionName=='sim.setStepping' then -- when called from external client
+        currentClientInfo.stepping=enableOrLevel
+        currentClientInfo.desiredStep=currentStep
+    else
+        originalSetStepping(enableOrLevel)
+    end
 end
 
-function zmqRemoteApi.step()
-    currentClientInfo.desiredStep=currentClientInfo.desiredStep+1
-end
-
-function zmqRemoteApi.waitForStep()
-    while currentClientInfo.desiredStep>currentStep do
-        _simSwitchThread()
+originalStep=sim.step
+function sim.step(waitForNextStep)
+    if currentFunctionName=='sim.step' then -- when called from external client
+        if currentClientInfo.stepping then
+            if waitForNextStep==nil then waitForNextStep=true end
+            currentClientInfo.desiredStep=currentClientInfo.desiredStep+1
+            if waitForNextStep then
+                while currentClientInfo.desiredStep>currentStep do
+                    _switchThread()
+                end
+            end
+        end
+    else
+        originalStep()
     end
 end
 

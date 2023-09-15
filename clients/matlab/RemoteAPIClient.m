@@ -7,7 +7,7 @@ classdef RemoteAPIClient
         ctx
         socket
         uuid
-        cntSocket
+        callbacks
     end
 
     methods(Static, Access = private)
@@ -51,10 +51,6 @@ classdef RemoteAPIClient
                 'cntPort', -1, ...
                 'verbose', false ...
             );
-            if opts.cntPort == -1
-                opts.cntPort = opts.port + 1;
-            end
-
             tcpaddr = @(host, port) sprintf('tcp://%s:%d', host, port);
 
             obj.verbose = opts.verbose;
@@ -65,23 +61,19 @@ classdef RemoteAPIClient
             obj.socket.connect(java.lang.String(tcpaddr(opts.host, opts.port)));
 
             obj.uuid = char(java.util.UUID.randomUUID);
-
-            obj.cntSocket = obj.ctx.createSocket(SocketType.SUB);
-            obj.cntSocket.subscribe(java.lang.String(''));
-            obj.cntSocket.setConflate(true);
-            obj.cntSocket.connect(java.lang.String(tcpaddr(opts.host, opts.cntPort)));
+            obj.callbacks = containers.Map();
         end
 
         function delete(obj)
             obj.socket.close();
-            obj.cntSocket.close();
             obj.ctx.close();
         end
 
         function outputArgs = call(obj, fn, inputArgs)
+            % Call function with specified arguments. Is Reentrant
             import org.zeromq.*;
 
-            req = struct('func', fn, 'args', {inputArgs});
+            req = struct('func', fn, 'args', {inputArgs}, 'uuid', {obj.uuid});
             req_raw = cbor.encode(req);
             req_frame = ZFrame(req_raw);
             req_msg = ZMsg();
@@ -89,14 +81,43 @@ classdef RemoteAPIClient
             req_msg.send(obj.socket, 0);
 
             resp_msg = ZMsg.recvMsg(obj.socket, 0);
+            disp(resp_msg);
             resp_frame = resp_msg.pop();
+            disp(resp_frame);
             resp_raw = typecast(resp_frame.getData(), 'uint8');
+            disp(resp_raw);
             resp = cbor.decode(resp_raw);
 
-            if resp.success == 0
-                error(resp.error)
-            end
+            while isfield(resp, 'func')
+                args = {}
+                if ~strcmp(resp.func, '_*wait*_')
+                    if isKey(obj.callbacks, resp.func) % we cannot raise an error: e.g. a custom UI async callback cannot be assigned to a specific client
+                        callback = obj.callbacks(resp.func);
+                        try
+                            a = callback(resp.func, resp.args);
+                            if ~isempty(a)
+                                args = a
+                            end
+                        catch ME
+                            error('Error in callback: %s', ME.message);
+                        end
+                    end
+                end
+                req2 = struct('func', '_*executed*_', 'args', args, 'uuid', {obj.uuid});
+                req2_raw = cbor.encode(req2);
+                req2_frame = ZFrame(req2_raw);
+                req2_msg = ZMsg();
+                req2_msg.add(req2_frame);
+                req2_msg.send(obj.socket, 0);
 
+                resp_msg = ZMsg.recvMsg(obj.socket, 0);
+                resp_frame = resp_msg.pop();
+                resp_raw = typecast(resp_frame.getData(), 'uint8');
+                resp = cbor.decode(resp_raw);
+            end
+            if isfield(resp, 'err')
+                error(resp.err)
+            end
             if numel(resp.ret) == 0
                 outputArgs = {};
             else
@@ -119,7 +140,7 @@ classdef RemoteAPIClient
                 enable (1,1) logical = true
             end
 
-            obj.call('setStepping', {enable, obj.uuid});
+            obj.call('sim.setStepping', {enable});
         end
 
         function step(obj, wait)
@@ -128,20 +149,7 @@ classdef RemoteAPIClient
                 wait (1,1) logical = true
             end
 
-            obj.getStepCount(false);
-            obj.call('step', {obj.uuid});
-            obj.getStepCount(wait);
-        end
-
-        function getStepCount(obj, wait)
-            import org.zeromq.*;
-
-            if wait
-                flags = 0;
-            else
-                flags = ZMQ.DONTWAIT;
-            end
-            obj.cntSocket.recv(flags);
+            obj.call('sim.step', {wait});
         end
     end
 end

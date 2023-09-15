@@ -19,7 +19,7 @@ int main(int argc, char **argv)
 
     auto visionSensorHandle = sim.getObject("/VisionSensor");
 
-    client.setStepping(true);
+    sim.setStepping(true);
     sim.startSimulation();
 
     QApplication app(argc, argv);
@@ -33,7 +33,7 @@ int main(int argc, char **argv)
     vbox->addWidget(label);
     vbox->addWidget(btnStep);
     QObject::connect(btnStep, &QPushButton::clicked, [&] {
-        client.step();
+        sim.step();
         auto [img, res] = sim.getVisionSensorImg(visionSensorHandle);
         QImage image(img.data(), res[0], res[1], QImage::Format_RGB888);
         label->setMinimumSize(res[0], res[1]);

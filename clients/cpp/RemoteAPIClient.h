@@ -6,6 +6,8 @@
 #include <zmq.hpp>
 #include <jsoncons/json.hpp>
 #include <jsoncons_ext/cbor/cbor.hpp>
+#include <functional>
+#include <unordered_map>
 
 using namespace jsoncons;
 
@@ -20,6 +22,8 @@ json bin(const std::vector<uint8_t> &v);
 
 class RemoteAPIClient
 {
+    using CallbackType = std::function<json(const char*, const json &)>;
+
 public:
     RemoteAPIClient(const std::string host = "localhost", int rpcPort = 23000, int cntPort = -1, int verbose_ = -1);
     json call(const std::string &func, std::initializer_list<json> args);
@@ -27,8 +31,9 @@ public:
     json getObject(const std::string &name);
     void require(const std::string &name);
     void setVerbose(int level = 1);
-    void setStepping(bool enable = true);
-    void step(bool wait = true);
+    void setStepping(bool enable = true); // for backw. comp., now via sim.setStepping
+    void step(bool wait = true); // for backw. comp., now via sim.step
+    void registerCallback(const std::string &funcName, CallbackType callback);
 
 #ifdef SIM_REMOTEAPICLIENT_OBJECTS
     inline RemoteAPIObjects& getObject() { return remoteAPIObjects; }
@@ -37,14 +42,14 @@ private:
 #endif // SIM_REMOTEAPICLIENT_OBJECTS
 
 protected:
-    long getStepCount(bool wait);
-    void send(const json &j);
+    void send(json &j);
     json recv();
 
 private:
+    CallbackType _getFunctionPointerByName(const std::string &funcName);
     int verbose{0};
     std::string uuid;
     zmq::context_t ctx;
     zmq::socket_t rpcSocket;
-    zmq::socket_t cntSocket;
+    std::unordered_map<std::string, CallbackType> callbacks;
 };

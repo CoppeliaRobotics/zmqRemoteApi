@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.UUID;
+import java.util.function.Function;
 
 import java.math.BigInteger;
 
@@ -41,7 +42,6 @@ public class RemoteAPIClient
     public RemoteAPIClient(String host, int rpcPort, int cntPort, int verbose)
     {
         if(rpcPort == -1) rpcPort = 23000;
-        if(cntPort == -1) cntPort = rpcPort + 1;
 
         this.verbose = verbose;
         if(this.verbose == -1)
@@ -57,11 +57,6 @@ public class RemoteAPIClient
 
         this.rpcSocket = context.createSocket(SocketType.REQ);
         this.rpcSocket.connect(String.format("tcp://%s:%d", host, rpcPort));
-
-        this.cntSocket = context.createSocket(SocketType.SUB);
-        this.cntSocket.subscribe("");
-        this.cntSocket.setConflate(true);
-        this.cntSocket.connect(String.format("tcp://%s:%d", host, cntPort));
 
         this.uuid = UUID.randomUUID().toString();
     }
@@ -106,32 +101,83 @@ public class RemoteAPIClient
     {
         DataItem k_func = convertArg("func"),
                  k_args = convertArg("args"),
-                 k_success = convertArg("success"),
-                 k_error = convertArg("error"),
+                 k_err = convertArg("err"),
+                 k_uuid = convertArg("uuid"),
                  k_ret = convertArg("ret");
+
         co.nstant.in.cbor.model.Map req = new co.nstant.in.cbor.model.Map();
         req.put(k_func, convertArg(func));
         co.nstant.in.cbor.model.Array v_args = new co.nstant.in.cbor.model.Array();
         for(int i = 0; i < args.size(); i++)
             v_args.add(args.get(i));
         req.put(k_args, v_args);
+        req.put(k_uuid, convertArg(this.uuid));
         if(this.verbose >= 1)
             System.out.println("Sending: " + req.toString());
         this.send(req);
+
         co.nstant.in.cbor.model.Map rep = (co.nstant.in.cbor.model.Map)this.recv();
         if(this.verbose >= 1)
             System.out.println("Received: " + rep.toString());
-        boolean success = toBoolean(rep.get(k_success)).booleanValue();
-        if(!success)
+
+        while (rep.getKeys().contains(k_func))
         {
-            DataItem error = rep.get(k_error);
+            // Check if the function name is "_*wait*_", in which case we just wait
+            List<DataItem> callbackResults = new ArrayList<DataItem>();
+            UnicodeString respFunc = (UnicodeString) rep.get(k_func);
+            if (respFunc != null && !"_*wait*_".equals(respFunc.getString()))
+            {
+                List<DataItem> callbackArgs = ((co.nstant.in.cbor.model.Array)rep.get(k_args)).getDataItems();
+
+                callbackResults = executeCallback(respFunc.getString(), callbackArgs);
+            }
+
+            co.nstant.in.cbor.model.Map req2 = new co.nstant.in.cbor.model.Map();
+            req2.put(k_func, convertArg("_*executed*_"));
+            co.nstant.in.cbor.model.Array v_args = new co.nstant.in.cbor.model.Array();
+            for(int i = 0; i < callbackResults.size(); i++)
+                v_args.add(callbackResults.get(i));
+            req2.put(k_args, v_args);
+            req2.put(k_uuid, convertArg(this.uuid));
+            if(this.verbose >= 1)
+                System.out.println("Sending: " + req2.toString());
+            this.send(req2);
+
+            rep = (co.nstant.in.cbor.model.Map)this.recv();
+            if(this.verbose >= 1)
+                System.out.println("Received: " + rep.toString());
+        }
+
+        if (rep.getKeys().contains(k_err))
+        {
+            DataItem error = rep.get(k_err);
             throw new RuntimeException(error != null ? toString(error) : "Unknown error");
         }
+
         DataItem ret = rep.get(k_ret);
         // XXX: empty 'ret' comes in as a Map
         if(ret instanceof co.nstant.in.cbor.model.Map)
             return java.util.Collections.emptyList();
         return ((co.nstant.in.cbor.model.Array)ret).getDataItems();
+
+    }
+
+    public void registerCallback(String funcName, Function<List<DataItem>, List<DataItem>> callback)
+    {
+        if (callbacks.containsKey(funcName))
+            throw new RuntimeException("A callback is already registered for function: " + funcName);
+        callbacks.put(funcName, callback);
+    }
+
+    private List<DataItem> executeCallback(String funcName, List<DataItem> args)
+    {
+        if (callbacks.containsKey(funcName))
+        {
+            Function<List<DataItem>, List<DataItem>> callback = callbacks.get(funcName);
+            return callback.apply(args);
+        }
+        else
+            return new ArrayList<DataItem>(); // we cannot raise an error: e.g. a custom UI async callback cannot be assigned to a specific client
     }
 
     public DataItem convertArg(Boolean arg)
@@ -349,7 +395,7 @@ public class RemoteAPIClient
 
     public void setStepping(Boolean enable) throws CborException
     {
-        call("setStepping", new Object[]{enable, this.uuid});
+        call("sim.setStepping", new Object[]{enable});
     }
 
     public void step() throws IOException, CborException
@@ -359,29 +405,7 @@ public class RemoteAPIClient
 
     public void step(Boolean wait) throws IOException, CborException
     {
-        if(wait) getStepCount(false);
-        call("step", new Object[]{this.uuid});
-        if(wait) getStepCount(true);
-    }
-
-    long getStepCount(boolean wait) throws IOException
-    {
-        if(this.verbose >= 2)
-            System.out.println("Read step count" + (wait ? "" : " without wait") + "...");
-
-        byte[] data = this.cntSocket.recv(wait ? 0 : ZMQ.DONTWAIT);
-        if(data == null)
-            return -1;
-
-        if(this.verbose >= 3)
-            System.out.println("Step count (raw): " + dump(data, verbose >= 4 ? -1 : 16));
-
-        int c = ByteBuffer.wrap(data).order(ByteOrder.LITTLE_ENDIAN).getInt();
-
-        if(this.verbose >= 2)
-            System.out.println("Step count: " + c);
-
-        return c;
+        call("sim.step", new Object[]{wait});
     }
 
     public RemoteAPIObjects getObject()
@@ -391,10 +415,10 @@ public class RemoteAPIClient
         return objs;
     }
 
+    private Map<String, Function<List<DataItem>, List<DataItem>>> callbacks = new HashMap<>();
     private int verbose = -1;
     ZContext context;
     ZMQ.Socket rpcSocket;
-    ZMQ.Socket cntSocket;
     String uuid;
     RemoteAPIObjects objs = null;
 }

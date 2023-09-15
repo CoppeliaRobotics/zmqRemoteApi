@@ -22,7 +22,7 @@ def moveToAngle(targetAngle):
         vel = computeTargetVelocity(jointAngle, targetAngle)
         sim.setJointTargetVelocity(jointHandle, vel)
         sim.setJointMaxForce(jointHandle, maxForce)
-        client.step()
+        sim.step()
         jointAngle = sim.getJointPosition(jointHandle)
 
 
@@ -53,7 +53,7 @@ jointAngle = sim.getJointPosition(jointHandle)
 sim.setJointTargetVelocity(jointHandle, 360 * math.pi / 180)
 
 # enable the stepping mode on the client:
-client.setStepping(True)
+sim.setStepping(True)
 
 sim.startSimulation()
 

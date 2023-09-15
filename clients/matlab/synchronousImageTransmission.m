@@ -14,7 +14,7 @@ sim = client.require('sim');
 visionSensorHandle = sim.getObject('/VisionSensor');
 passiveVisionSensorHandle = sim.getObject('/PassiveVisionSensor');
 
-client.setStepping(true);
+sim.setStepping(true);
 sim.startSimulation();
 
 startTime = sim.getSimulationTime();
@@ -24,7 +24,7 @@ while t - startTime < 5
     % display image in MATLAB:
     %imshow(flip(permute(reshape(img, 3, resY, resX), [3 2 1]), 1));
     sim.setVisionSensorCharImage(passiveVisionSensorHandle, img);
-    client.step();
+    sim.step();
     t = sim.getSimulationTime();
 end
 sim.stopSimulation();

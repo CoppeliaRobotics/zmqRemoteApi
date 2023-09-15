@@ -39,12 +39,12 @@ int main()
     auto visionSensorHandle = sim.getObject("/VisionSensor");
     auto passiveVisionSensorHandle = sim.getObject("/PassiveVisionSensor");
 
-    client.setStepping(true);
+    sim.setStepping(true);
     sim.startSimulation();
 
     while(1)
     {
-        client.step();
+        sim.step();
 
         auto [img, res] = sim.getVisionSensorImg(visionSensorHandle);
 

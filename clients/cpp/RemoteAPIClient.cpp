@@ -65,7 +65,6 @@ json bin(const std::vector<uint8_t> &v)
 
 RemoteAPIClient::RemoteAPIClient(const std::string host, int rpcPort, int cntPort, int verbose_)
     : rpcSocket(ctx, zmq::socket_type::req),
-      cntSocket(ctx, zmq::socket_type::sub),
       verbose(verbose_)
 {
     if(verbose == -1)
@@ -76,18 +75,10 @@ RemoteAPIClient::RemoteAPIClient(const std::string host, int rpcPort, int cntPor
             verbose = 0;
     }
 
-    if(cntPort == -1)
-        cntPort = rpcPort + 1;
-
     uuid = uuid::generate_uuid_v4();
 
     auto rpcAddr = (boost::format("tcp://%s:%d") % host % rpcPort).str();
     rpcSocket.connect(rpcAddr);
-
-    auto cntAddr = (boost::format("tcp://%s:%d") % host % cntPort).str();
-    cntSocket.set(zmq::sockopt::subscribe, "");
-    cntSocket.set(zmq::sockopt::conflate, 1);
-    cntSocket.connect(cntAddr);
 }
 
 json RemoteAPIClient::call(const std::string &func, std::initializer_list<json> args)
@@ -96,21 +87,43 @@ json RemoteAPIClient::call(const std::string &func, std::initializer_list<json> 
 }
 
 json RemoteAPIClient::call(const std::string &func, const json &args)
-{
+{ // call function with specified arguments. Is reentrant
     json req;
     req["func"] = func;
     req["args"] = args;
     send(req);
 
     json resp = recv();
-    bool ok = resp["success"].as<bool>();
-    if(!ok)
-    {
-        if(resp.contains("error"))
-            throw std::runtime_error(resp["error"].as<std::string>());
+    while (resp.contains("func"))
+    { // We have a callback or a wait:
+        if (resp["func"].as<std::string>().compare("_*wait*_")==0)
+        {
+            json req2;
+            req2["func"] = "_*executed*_";
+            req2["args"] = json::array();
+            send(req2);
+        }
         else
-            throw std::runtime_error("unknown error");
+        { // call a callback
+            auto funcToRun = _getFunctionPointerByName(resp["func"].as<std::string>());
+            json rep;
+            rep["func"] = "_*executed*_";
+            if(funcToRun)
+            {
+                auto args = funcToRun(resp["func"].as<const char*>(), resp["args"]);
+                rep["args"] = args;
+            }
+            else
+            {
+                call("_*executed*_", json::array());
+                rep["args"] = json::array();;
+            }
+            send(rep);
+        }
+        resp = recv();
     }
+    if (resp.contains("err"))
+        throw std::runtime_error(resp["error"].as<std::string>());
     const auto &ret = resp["ret"];
     return ret;
 }
@@ -131,35 +144,21 @@ void RemoteAPIClient::setVerbose(int level)
 }
 
 void RemoteAPIClient::setStepping(bool enable)
-{
-    call("setStepping", {enable, uuid});
+{ // for backw. comp., now via sim.setStepping
+    call("sim.setStepping", {enable});
 }
 
 void RemoteAPIClient::step(bool wait)
-{
-    if(wait) getStepCount(false);
-    call("step", {uuid});
-    if(wait) getStepCount(true);
+{ // for backw. comp., now via sim.step
+    call("sim.step", {wait});
 }
 
-long RemoteAPIClient::getStepCount(bool wait)
-{
-    zmq::message_t msg;
-    if(!cntSocket.recv(msg, wait ? zmq::recv_flags::none : zmq::recv_flags::dontwait))
-        return -1;
-
-    auto c = reinterpret_cast<const int*>(msg.data())[0];
-
-    if(verbose > 0)
-        std::cout << "Step count: " << c << std::endl;
-
-    return c;
-}
-
-void RemoteAPIClient::send(const json &j)
+void RemoteAPIClient::send(json &j)
 {
     if(verbose > 0)
         std::cout << "Sending: " << pretty_print(j) << std::endl;
+
+    j["uuid"] = uuid;
 
     std::vector<uint8_t> data;
     cbor::encode_cbor(j, data);
@@ -197,6 +196,19 @@ json RemoteAPIClient::recv()
         std::cout << "Received: " << pretty_print(j) << std::endl;
 
     return j;
+}
+
+void RemoteAPIClient::registerCallback(const std::string &funcName, CallbackType callback)
+{
+    callbacks[funcName] = callback;
+}
+
+RemoteAPIClient::CallbackType RemoteAPIClient::_getFunctionPointerByName(const std::string &funcName)
+{
+    auto it = callbacks.find(funcName);
+    if(it != callbacks.end())
+        return it->second;
+    return nullptr;
 }
 
 #ifdef SIM_REMOTEAPICLIENT_OBJECTS

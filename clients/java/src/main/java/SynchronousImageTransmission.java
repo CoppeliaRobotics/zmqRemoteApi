@@ -22,7 +22,7 @@ public class SynchronousImageTransmission
         var visionSensorHandle = sim.getObject("/VisionSensor");
         var passiveVisionSensorHandle = sim.getObject("/PassiveVisionSensor");
 
-        client.setStepping(true);
+        sim.setStepping(true);
         sim.startSimulation();
 
         float startTime = sim.getSimulationTime();
@@ -32,7 +32,7 @@ public class SynchronousImageTransmission
             byte[] imgData = (byte[])r[0];
             List<Long> res = (List<Long>)r[1];
             sim.setVisionSensorImg(passiveVisionSensorHandle, imgData);
-            client.step();
+            sim.step();
         }
         sim.stopSimulation();
     }
