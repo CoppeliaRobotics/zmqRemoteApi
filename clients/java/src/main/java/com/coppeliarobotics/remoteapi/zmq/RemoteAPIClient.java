@@ -61,6 +61,23 @@ public class RemoteAPIClient
         this.uuid = UUID.randomUUID().toString();
     }
 
+    public void close()
+    {
+        DataItem k_func = convertArg("func"),
+                 k_args = convertArg("args"),
+                 k_err = convertArg("err"),
+                 k_uuid = convertArg("uuid"),
+                 k_ver = convertArg("ver"),
+                 k_ret = convertArg("ret");
+
+        co.nstant.in.cbor.model.Map req = new co.nstant.in.cbor.model.Map();
+        req.put(k_func, convertArg("_*end*_"));
+        req.put(k_args, new co.nstant.in.cbor.model.Array());
+        req.put(k_uuid, convertArg(this.uuid));
+        req.put(k_ver, convertArg(this.VERSION));
+        this.send(req);
+    }
+
     protected void send(DataItem req) throws CborException
     {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -103,6 +120,7 @@ public class RemoteAPIClient
                  k_args = convertArg("args"),
                  k_err = convertArg("err"),
                  k_uuid = convertArg("uuid"),
+                 k_ver = convertArg("ver"),
                  k_ret = convertArg("ret");
 
         co.nstant.in.cbor.model.Map req = new co.nstant.in.cbor.model.Map();
@@ -112,6 +130,7 @@ public class RemoteAPIClient
             v_args.add(args.get(i));
         req.put(k_args, v_args);
         req.put(k_uuid, convertArg(this.uuid));
+        req.put(k_ver, convertArg(this.VERSION));
         if(this.verbose >= 1)
             System.out.println("Sending: " + req.toString());
         this.send(req);
@@ -139,6 +158,7 @@ public class RemoteAPIClient
                 v_args.add(callbackResults.get(i));
             req2.put(k_args, v_args);
             req2.put(k_uuid, convertArg(this.uuid));
+            req2.put(k_ver, convertArg(this.VERSION));
             if(this.verbose >= 1)
                 System.out.println("Sending: " + req2.toString());
             this.send(req2);
@@ -420,5 +440,6 @@ public class RemoteAPIClient
     ZContext context;
     ZMQ.Socket rpcSocket;
     String uuid;
+    int VERSION = 2;
     RemoteAPIObjects objs = null;
 }

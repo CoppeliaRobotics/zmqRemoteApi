@@ -7,6 +7,7 @@ classdef RemoteAPIClient
         ctx
         socket
         uuid
+        VERSION
         callbacks
     end
 
@@ -61,10 +62,18 @@ classdef RemoteAPIClient
             obj.socket.connect(java.lang.String(tcpaddr(opts.host, opts.port)));
 
             obj.uuid = char(java.util.UUID.randomUUID);
+            obj.VERSION = 2;
             obj.callbacks = containers.Map();
         end
 
         function delete(obj)
+            req = struct('func', '_*end*_', 'args', {}, 'uuid', {obj.uuid}, 'ver', {obj.VERSION});
+            req_raw = cbor.encode(req);
+            req_frame = ZFrame(req_raw);
+            req_msg = ZMsg();
+            req_msg.add(req_frame);
+            req_msg.send(obj.socket, 0);
+
             obj.socket.close();
             obj.ctx.close();
         end
@@ -73,7 +82,7 @@ classdef RemoteAPIClient
             % Call function with specified arguments. Is Reentrant
             import org.zeromq.*;
 
-            req = struct('func', fn, 'args', {inputArgs}, 'uuid', {obj.uuid});
+            req = struct('func', fn, 'args', {inputArgs}, 'uuid', {obj.uuid}, 'ver', {obj.VERSION});
             req_raw = cbor.encode(req);
             req_frame = ZFrame(req_raw);
             req_msg = ZMsg();
@@ -103,7 +112,7 @@ classdef RemoteAPIClient
                         end
                     end
                 end
-                req2 = struct('func', '_*executed*_', 'args', args, 'uuid', {obj.uuid});
+                req2 = struct('func', '_*executed*_', 'args', args, 'uuid', {obj.uuid}, 'ver', {obj.VERSION});
                 req2_raw = cbor.encode(req2);
                 req2_frame = ZFrame(req2_raw);
                 req2_msg = ZMsg();

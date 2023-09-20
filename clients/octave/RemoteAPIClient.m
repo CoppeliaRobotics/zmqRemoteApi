@@ -5,6 +5,7 @@ classdef RemoteAPIClient
         socket
         max_recv_sz
         uuid
+        VERSION
         callbacks
     end
 
@@ -46,15 +47,20 @@ classdef RemoteAPIClient
             assert(zmq_connect(obj.socket, tcpaddr(opts.host, opts.port)));
 
             obj.uuid = sprintf('%04X%04X-%04X-%04X-%04X-%04X%04X%04X', randint(1, 8, 2^16, time()));
+            obj.VERSION = 2;
             obj.callbacks = struct();
         end
 
         function delete(obj)
+            req = struct('func', '_*end*_', 'args', {inputArgs}, 'uuid', {obj.uuid}, 'ver', {obj.VERSION});
+            req_raw = cbor.encode(req);
+            zmq_send(obj.socket, req_raw);
+
             zmq_close(obj.socket)
         end
 
         function outputArgs = call(obj, fn, inputArgs)
-            req = struct('func', fn, 'args', {inputArgs}, 'uuid', {obj.uuid});
+            req = struct('func', fn, 'args', {inputArgs}, 'uuid', {obj.uuid}, 'ver', {obj.VERSION});
             req_raw = cbor.encode(req);
             zmq_send(obj.socket, req_raw);
 
@@ -78,7 +84,7 @@ classdef RemoteAPIClient
                         end
                     end
                 end
-                req2 = struct('func', '_*executed*_', 'args', args, 'uuid', {obj.uuid});
+                req2 = struct('func', '_*executed*_', 'args', args, 'uuid', {obj.uuid}, 'ver', {obj.VERSION});
                 req2_raw = cbor.encode(req2);
                 zmq_send(obj.socket, req2_raw);
 

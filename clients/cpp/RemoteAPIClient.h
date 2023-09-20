@@ -26,6 +26,7 @@ class RemoteAPIClient
 
 public:
     RemoteAPIClient(const std::string host = "localhost", int rpcPort = 23000, int cntPort = -1, int verbose_ = -1);
+    ~RemoteAPIClient();
     json call(const std::string &func, std::initializer_list<json> args);
     json call(const std::string &func, const json &args = json(json_array_arg));
     json getObject(const std::string &name);
@@ -49,6 +50,7 @@ private:
     CallbackType _getFunctionPointerByName(const std::string &funcName);
     int verbose{0};
     std::string uuid;
+    int VERSION;
     zmq::context_t ctx;
     zmq::socket_t rpcSocket;
     std::unordered_map<std::string, CallbackType> callbacks;

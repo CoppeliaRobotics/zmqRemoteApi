@@ -76,9 +76,18 @@ RemoteAPIClient::RemoteAPIClient(const std::string host, int rpcPort, int cntPor
     }
 
     uuid = uuid::generate_uuid_v4();
+    VERSION = 2;
 
     auto rpcAddr = (boost::format("tcp://%s:%d") % host % rpcPort).str();
     rpcSocket.connect(rpcAddr);
+}
+
+RemoteAPIClient::~RemoteAPIClient()
+{
+    json req;
+    req["func"] = "_*end*_";
+    req["args"] = json::array();
+    send(req);
 }
 
 json RemoteAPIClient::call(const std::string &func, std::initializer_list<json> args)
@@ -159,6 +168,7 @@ void RemoteAPIClient::send(json &j)
         std::cout << "Sending: " << pretty_print(j) << std::endl;
 
     j["uuid"] = uuid;
+    j["ver"] = VERSION;
 
     std::vector<uint8_t> data;
     cbor::encode_cbor(j, data);

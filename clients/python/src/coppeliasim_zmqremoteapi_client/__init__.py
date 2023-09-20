@@ -10,6 +10,8 @@ import zmq
 
 import sys
 
+import re
+
 def b64(b):
     import base64
     return base64.b64encode(b).decode('ascii')
@@ -36,11 +38,14 @@ class RemoteAPIClient:
         self.socket = self.context.socket(zmq.REQ)
         self.socket.connect(f'tcp://{host}:{port}')
         self.uuid = str(uuid.uuid4())
+        self.callbackFuncs = {}
+        self.VERSION = 2
         main_globals = sys.modules['__main__'].__dict__
         main_globals['require']=self.require
 
     def __del__(self):
         """Disconnect and destroy client."""
+        self._send({'func': '_*end*_', 'args': []})
         self.socket.close()
         self.context.term()
 
@@ -50,8 +55,14 @@ class RemoteAPIClient:
             req['args']=list(req['args'])
             for i in range(len(req['args'])):
                 if callable(req['args'][i]):
-                    req['args'][i]=str(req['args'][i])
+                    funcStr = str(req['args'][i])
+                    m = re.search(r"<function (.+) at ", funcStr)
+                    if m:
+                        funcStr = m.group(1)
+                        self.callbackFuncs[funcStr] = req['args'][i]
+                        req['args'][i] = funcStr + "@func"
         req['uuid']=self.uuid
+        req['ver']=self.VERSION
         if self.verbose > 0:
             print('Sending:', req)
         rawReq = cbor.dumps(req)
@@ -84,9 +95,12 @@ class RemoteAPIClient:
             if reply['func']=='_*wait*_':
                 self._send({'func': '_*executed*_', 'args': []})
             else:
-                funcToRun=_getFuncIfExists(reply['func'])
-                if funcToRun != None: # we cannot raise an error: e.g. a custom UI async callback cannot be assigned to a specific client
-                    args=funcToRun(*reply['args'])
+                if reply['func'] in self.callbackFuncs:
+                    args=self.callbackFuncs[reply['func']](*reply['args'])
+                else:
+                    funcToRun=_getFuncIfExists(reply['func'])
+                    if funcToRun != None: # we cannot raise an error: e.g. a custom UI async callback cannot be assigned to a specific client
+                        args=funcToRun(*reply['args'])
                 if args == None:
                     args = []
                 self._send({'func': '_*executed*_', 'args': args})
