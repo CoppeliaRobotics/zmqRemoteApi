@@ -140,6 +140,18 @@ function sim.switchThread()
     sim.yield() -- using the modified version above
 end
 
+function tobin(data)
+    local d={data=data}
+    setmetatable(d,{__tocbor=function(self) return cbor.TYPE.BIN(self.data) end})
+    return d
+end
+
+function totxt(data)
+    local d={data=data}
+    setmetatable(d,{__tocbor=function(self) return cbor.TYPE.TEXT(self.data) end})
+    return d
+end
+
 function zmqRemoteApi.verbose()
     return sim.getNamedInt32Param('zmqRemoteApi.verbose') or 0
 end
@@ -264,9 +276,9 @@ function zmqRemoteApi.handleRequest(req)
                     local cnt=math.min(#ret,#args)
                     for i=1,cnt,1 do
                         if args[i]==1 then
-                            ret[i]=ret[i]..'@:txt:'
+                            ret[i]=totxt(ret[i])
                         elseif args[i]==2 then
-                            ret[i]=ret[i]..'@:dat:'
+                            ret[i]=tobin(ret[i])
                         end
                     end
                 end
@@ -304,7 +316,7 @@ function zmqRemoteApi.receive()
     if receiveIsNext then
         local rc,dat=simZMQ.recv(rpcSocket,0)
         receiveIsNext=false
-        rc,retVal=pcall(cborDecode.decode,dat)
+        rc,retVal=pcall(cbor.decode,dat)
         if not rc then
             error('CBOR decode error: '..sim.transformBuffer(dat,sim.buffer_uint8,1,0,sim.buffer_base64))
         end
@@ -317,7 +329,7 @@ end
 function zmqRemoteApi.send(reply)
     if not receiveIsNext then
         local dat=reply
-        status,reply=pcall(sim.packCbor,reply)
+        status,reply=pcall(cbor.encode,reply)
         if not status then
             error('CBOR encode error: '..getAsString(dat))
         end
@@ -439,7 +451,7 @@ function sysCall_init()
     if zmqRemoteApi.verbose()>0 then
         sim.addLog(sim.verbosity_scriptinfos,string.format('ZeroMQ Remote API server starting (rpcPort=%d)...',rpcPort))
     end
-    cborDecode=require'org.conman.cbor' -- use only for decoding. For encoding use sim.packCbor
+    cbor=require'org.conman.cbor'
     context=simZMQ.ctx_new()
     rpcSocket=simZMQ.socket(context,simZMQ.REP)
     simZMQ.bind(rpcSocket,string.format('tcp://*:%d',rpcPort))
