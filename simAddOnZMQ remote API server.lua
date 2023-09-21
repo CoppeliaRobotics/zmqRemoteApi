@@ -47,7 +47,7 @@ function sim.wait(dt,simTime)
     if not simTime then
         local st=sim.getSystemTime()
         while sim.getSystemTime()-st<dt do
-            _switchThread()
+            _yield()
         end
     else
         originalWait(dt,true)
@@ -72,7 +72,7 @@ function sim.step(waitForNextStep)
             currentClientInfo.desiredStep=currentClientInfo.desiredStep+1
             if waitForNextStep then
                 while currentClientInfo.desiredStep>currentStep do
-                    _switchThread()
+                    _yield()
                 end
             end
         end
@@ -91,11 +91,11 @@ function sim.readCustomDataBlock(obj,tag)
     return retVal
 end
 
--- Special handling of sim.switchThread:
-originalSwitchThread=sim.switchThread
-function sim.switchThread()
+-- Special handling of sim.yield:
+originalYield=sim.yield
+function sim.yield()
     currentClientInfo.ignoreCallDepth = true
-    if currentFunctionName=='sim.switchThread' then -- when called from external client
+    if currentFunctionName=='sim.switchThread' or currentFunctionName=='sim.yield' then -- when called from external client
         currentFunctionName='sim.step'
         sim.step()
     else
@@ -106,16 +106,16 @@ function sim.switchThread()
             local cs=currentStep
             while cs==currentStep do
                 -- stays inside here until we are ready with next simulation step
-                _switchThread()
+                _yield()
             end
         else
-            _switchThread()
+            _yield()
         end
     end
     currentClientInfo.ignoreCallDepth = false
 end
 
-function _switchThread()
+function _yield()
     -- Reentrant. Stays in here until the client returned '_*executed*_'
     if not currentClientInfo.replySent then
         -- We are switching before we sent a reply. This is a blocking command and
@@ -123,7 +123,7 @@ function _switchThread()
         zmqRemoteApi.send({func='_*wait*_',args={}}) -- Tell the client to wait and send '_*executed*_' back
     end
     currentClientInfo.replySent=false
-    originalSwitchThread()
+    originalYield()
     -- The coroutine is resuming from here exactly. A new command must have arrived
     while currentClientInfo.lastReq.func~='_*executed*_' do
         local req=currentClientInfo.lastReq
@@ -131,13 +131,13 @@ function _switchThread()
         local reply=zmqRemoteApi.handleRequest(req)
         zmqRemoteApi.send(reply)
         currentClientInfo.replySent=true
-        _switchThread()
+        _yield()
     end
 end
 
--- Special handling of sim.yield:
-function sim.yield()
-    sim.switchThread() -- using the modified version above
+-- Special handling of sim.switchThread:
+function sim.switchThread()
+    sim.yield() -- using the modified version above
 end
 
 function zmqRemoteApi.verbose()
@@ -418,7 +418,7 @@ function coroutineMain()
         local reply=zmqRemoteApi.handleRequest(req) -- We might switchThread in there, with blocking functions or callback functions
         zmqRemoteApi.send(reply)
         currentClientInfo.replySent=true
-        _switchThread()
+        _yield()
     end
 end
 
@@ -447,7 +447,7 @@ function sysCall_init()
         sim.addLog(sim.verbosity_scriptinfos,'ZeroMQ Remote API server started')
     end
 
-    setThreadAutomaticSwitch(false)
+    setAutoYield(false)
     currentStep=0
     receiveIsNext=true
     pythonCallbacks={pythonCallback1,pythonCallback2,pythonCallback3}
@@ -481,7 +481,7 @@ function zmqRemoteApi.callRemoteFunction(functionName,_args)
     -- This is called when a CoppeliaSim function (e.g. sim.moveToConfig) calls a callback
     zmqRemoteApi.send({func=functionName,args=_args})
     currentClientInfo.replySent=true
-    _switchThread() -- Stays in here until '_*executed*_' received
+    _yield() -- Stays in here until '_*executed*_' received
     return unpack(currentClientInfo.lastReq.args)
 end
 
