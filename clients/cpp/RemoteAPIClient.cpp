@@ -88,6 +88,7 @@ RemoteAPIClient::~RemoteAPIClient()
     req["func"] = "_*end*_";
     req["args"] = json::array();
     send(req);
+    recv();
 }
 
 json RemoteAPIClient::call(const std::string &func, std::initializer_list<json> args)

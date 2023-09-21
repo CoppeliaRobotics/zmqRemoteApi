@@ -7,6 +7,10 @@ function sim.setThreadAutomaticSwitch()
     -- Shadow the original function
 end
 
+function sim.setAutoYield()
+    -- Shadow the original function
+end
+
 originalStopSimulation = sim.stopSimulation
 function sim.stopSimulation()
     for k, v in pairs(allClients) do
@@ -129,6 +133,11 @@ function _switchThread()
         currentClientInfo.replySent=true
         _switchThread()
     end
+end
+
+-- Special handling of sim.yield:
+function sim.yield()
+    sim.switchThread() -- using the modified version above
 end
 
 function zmqRemoteApi.verbose()

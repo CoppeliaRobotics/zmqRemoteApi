@@ -76,6 +76,7 @@ public class RemoteAPIClient
         req.put(k_uuid, convertArg(this.uuid));
         req.put(k_ver, convertArg(this.VERSION));
         this.send(req);
+        this.recv();
     }
 
     protected void send(DataItem req) throws CborException

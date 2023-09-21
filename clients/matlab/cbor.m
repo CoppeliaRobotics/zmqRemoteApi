@@ -100,17 +100,17 @@ classdef cbor
                 end
             end
             if major == cbor.UNSIGNED_INT
-                if isnan(info1) error('malformed data (int + undefined length)') end
+                if isnan(info1) error('malformed data (int + undefined length)'); end
                 o = info1;
             elseif major == cbor.NEGATIVE_INT
-                if isnan(info1) error('malformed data (negative int + undefined length)') end
+                if isnan(info1) error('malformed data (negative int + undefined length)'); end
                 o = -1 - info1;
             elseif major == cbor.BYTE_STRING
-                if isnan(info1) error('undefined length byte strings are not supported by this decoder') end
+                if isnan(info1) error('undefined length byte strings are not supported by this decoder'); end
                 o = d1(1:info1);
                 d1 = d1((info1+1):end);
             elseif major == cbor.TEXT_STRING
-                if isnan(info1) error('undefined length text strings are not supported by this decoder') end
+                if isnan(info1) error('undefined length text strings are not supported by this decoder'); end
                 o = native2unicode(d1(1:info1), 'UTF-8');
                 d1 = d1((info1+1):end);
             elseif major == cbor.ARRAY
@@ -118,7 +118,7 @@ classdef cbor
                 o = {};
                 homogeneous = true;
                 for i=1:info1
-                    if d1(1) == 255 d1 = d1(2:end); break end
+                    if d1(1) == 255 d1 = d1(2:end); break; end
                     [o{i}, d1] = cbor.decode(d1);
                     if homogeneous && i > 1 && ~strcmp(class(o{1}),class(o{i}))
                         homogeneous = false;
@@ -132,7 +132,7 @@ classdef cbor
                 n = {};
                 v = {};
                 for i=1:info1
-                    if d1(1) == 255 d1 = d1(2:end); break end
+                    if d1(1) == 255 d1 = d1(2:end); break; end
                     [n{i}, d1] = cbor.decode(d1);
                     [v{i}, d1] = cbor.decode(d1);
                     if n{i}(1) == '_'
@@ -146,7 +146,7 @@ classdef cbor
                     % simple value 32..255 in next byte
                     info = d1(1);
                     d1 = d1(2:end);
-                    if info < 32 error('malformed simple value (0..31 in byte ext)') end
+                    if info < 32 error('malformed simple value (0..31 in byte ext)'); end
                 end
 
                 if info == cbor.FALSE

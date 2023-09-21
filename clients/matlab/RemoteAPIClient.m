@@ -73,6 +73,7 @@ classdef RemoteAPIClient
             req_msg = ZMsg();
             req_msg.add(req_frame);
             req_msg.send(obj.socket, 0);
+            ZMsg.recvMsg(obj.socket, 0);
 
             obj.socket.close();
             obj.ctx.close();
@@ -90,29 +91,26 @@ classdef RemoteAPIClient
             req_msg.send(obj.socket, 0);
 
             resp_msg = ZMsg.recvMsg(obj.socket, 0);
-            disp(resp_msg);
             resp_frame = resp_msg.pop();
-            disp(resp_frame);
             resp_raw = typecast(resp_frame.getData(), 'uint8');
-            disp(resp_raw);
             resp = cbor.decode(resp_raw);
 
             while isfield(resp, 'func')
-                args = {}
+                args = {};
                 if ~strcmp(resp.func, '_*wait*_')
                     if isKey(obj.callbacks, resp.func) % we cannot raise an error: e.g. a custom UI async callback cannot be assigned to a specific client
                         callback = obj.callbacks(resp.func);
                         try
                             a = callback(resp.func, resp.args);
                             if ~isempty(a)
-                                args = a
+                                args = a;
                             end
                         catch ME
                             error('Error in callback: %s', ME.message);
                         end
                     end
                 end
-                req2 = struct('func', '_*executed*_', 'args', args, 'uuid', {obj.uuid}, 'ver', {obj.VERSION});
+                req2 = struct('func', '_*executed*_', 'args', {args}, 'uuid', {obj.uuid}, 'ver', {obj.VERSION});
                 req2_raw = cbor.encode(req2);
                 req2_frame = ZFrame(req2_raw);
                 req2_msg = ZMsg();
@@ -125,7 +123,7 @@ classdef RemoteAPIClient
                 resp = cbor.decode(resp_raw);
             end
             if isfield(resp, 'err')
-                error(resp.err)
+                error(resp.err);
             end
             if numel(resp.ret) == 0
                 outputArgs = {};
@@ -139,8 +137,8 @@ classdef RemoteAPIClient
         end
 
         function remoteObject = require(obj, name)
-            obj.call('zmqRemoteApi.require', {name})
-            remoteObject = obj.getObject(name)
+            obj.call('zmqRemoteApi.require', {name});
+            remoteObject = obj.getObject(name);
         end
 
         function setStepping(obj, enable)

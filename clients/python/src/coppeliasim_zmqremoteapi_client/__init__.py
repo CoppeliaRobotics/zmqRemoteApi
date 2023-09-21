@@ -46,6 +46,7 @@ class RemoteAPIClient:
     def __del__(self):
         """Disconnect and destroy client."""
         self._send({'func': '_*end*_', 'args': []})
+        self._recv()
         self.socket.close()
         self.context.term()
 
