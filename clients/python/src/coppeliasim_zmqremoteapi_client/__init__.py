@@ -137,9 +137,9 @@ class RemoteAPIClient:
     def getScriptFunctions(self, scriptHandle):
         return type('', (object,), {
             '__getattr__':
-                lambda self, func:
+                lambda _, func:
                     lambda *args:
-                        sim.callScriptFunction(func, scriptHandle, *args)
+                        self.call('sim.callScriptFunction', (func, scriptHandle) + args)
         })()
 
     def setStepping(self, enable=True): # for backw. comp., now via sim.setStepping
