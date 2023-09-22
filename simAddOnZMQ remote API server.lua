@@ -7,22 +7,34 @@ function sim.setThreadAutomaticSwitch()
     -- Shadow the original function
 end
 
-function sim.setAutoYield()
-    -- Shadow the original function
-end
-
 originalStopSimulation = sim.stopSimulation
 function sim.stopSimulation()
     for k, v in pairs(allClients) do
-        v.stepping = false
-        v.holdCalls = false
+        v.steppingLevel = 0
+        v.holdCalls = 0
         v.desiredStep = currentStep + 10
     end
     originalStopSimulation()
 end
 
-function sim.holdCalls(enabled)
-    currentClientInfo.holdCalls = enabled
+originalAcquireLock = sim.acquireLock
+function sim.acquireLock()
+    if currentFunction == sim.acquireLock then
+        currentClientInfo.holdCalls = currentClientInfo.holdCalls + 1
+    else
+        originalAcquireLock()
+    end
+end
+
+originalReleaseLock = sim.releaseLock
+function sim.releaseLock()
+    if currentFunction == sim.releaseLock then
+        if currentClientInfo.holdCalls > 0 then
+            currentClientInfo.holdCalls = currentClientInfo.holdCalls - 1
+        end
+    else
+        originalReleaseLock()
+    end
 end
 
 function sim.restartServer()
@@ -55,25 +67,33 @@ function sim.wait(dt,simTime)
 end
 
 originalSetStepping=sim.setStepping
-function sim.setStepping(enableOrLevel)
-    if currentFunctionName=='sim.setStepping' then -- when called from external client
-        currentClientInfo.stepping=enableOrLevel
-        currentClientInfo.desiredStep=currentStep
+function sim.setStepping(enabled)
+    -- Shadow original function:
+    -- When stepping is true, CoppeliaSim ALWAYS blocks while Python runs some code
+    -- When stepping is false, CoppeliaSim run concurently to Python, i.e. Python is "free" (until a request from Python comes)
+    local retVal = 0
+    if currentFunction == sim.setStepping then
+        retVal = currentClientInfo.steppingLevel
+        if enabled then
+            currentClientInfo.steppingLevel = currentClientInfo.steppingLevel + 1
+        else
+            if currentClientInfo.steppingLevel > 0 then
+                currentClientInfo.steppingLevel = currentClientInfo.steppingLevel - 1
+            end
+        end
     else
-        originalSetStepping(enableOrLevel)
+        retVal = originalSetStepping(enabled)
     end
+    return retVal
 end
 
 originalStep=sim.step
-function sim.step(waitForNextStep)
-    if currentFunctionName=='sim.step' then -- when called from external client
-        if currentClientInfo.stepping then
-            if waitForNextStep==nil then waitForNextStep=true end
+function sim.step()
+    if currentFunction == sim.step then -- when called from external client
+        if currentClientInfo.steppingLevel > 0 then
             currentClientInfo.desiredStep=currentClientInfo.desiredStep+1
-            if waitForNextStep then
-                while currentClientInfo.desiredStep>currentStep do
-                    _yield()
-                end
+            while currentClientInfo.desiredStep>currentStep do
+                _yield() -- by default we wait for the simulation time to increase before returning
             end
         end
     else
@@ -95,22 +115,17 @@ end
 originalYield=sim.yield
 function sim.yield()
     currentClientInfo.ignoreCallDepth = true
-    if currentFunctionName=='sim.switchThread' or currentFunctionName=='sim.yield' then -- when called from external client
-        currentFunctionName='sim.step'
-        sim.step()
-    else
-        if sim.getSimulationState()~=sim.simulation_stopped and sim.getSimulationState()~=sim.simulation_paused then
-            if currentClientInfo.stepping then
-                currentClientInfo.desiredStep=currentStep+1
-            end
-            local cs=currentStep
-            while cs==currentStep do
-                -- stays inside here until we are ready with next simulation step
-                _yield()
-            end
-        else
+    if sim.getSimulationState()~=sim.simulation_stopped and sim.getSimulationState()~=sim.simulation_paused then
+        if currentClientInfo.steppingLevel > 0 then
+            currentClientInfo.desiredStep=currentStep+1
+        end
+        local cs=currentStep
+        while cs==currentStep do
+            -- stays inside here until we are ready with next simulation step
             _yield()
         end
+    else
+        _yield()
     end
     currentClientInfo.ignoreCallDepth = false
 end
@@ -237,12 +252,18 @@ function zmqRemoteApi.handleRequest(req)
     end
     local resp = {}
     if req['func'] ~= nil and req['func'] ~= '' then
-        currentFunctionName = req['func']
-        local func = zmqRemoteApi.getField(currentFunctionName)
+        local func = zmqRemoteApi.getField(req['func'])
         local args = req['args'] or {}
         if not func then
-            resp['err'] = 'No such function: '..currentFunctionName
+            resp['err'] = 'No such function: '..req['func']
         else
+
+            if func == sim.switchThread or func == sim.yield then
+                func = sim.step
+            end
+
+            currentFunction = func
+
             -- Handle function arguments:
             local cbi = 1
             for i = 1, #args, 1 do
@@ -287,7 +308,7 @@ function zmqRemoteApi.handleRequest(req)
 
             resp[status and 'ret' or 'err']=retvals
         end
-        currentFunctionName = ''
+        currentFunction = nil
     elseif req['eval']~=nil and req['eval']~='' then
         local status,retvals=pcall(function()
             -- cannot prefix 'return ' here, otherwise non-trivial code breaks
@@ -399,7 +420,7 @@ function zmqRemoteApi.setClientInfoFromUUID(uuid)
     currentClientInfo=allClients[uuid]
     if currentClientInfo==nil then
         local cor=coroutine.create(coroutineMain)
-        currentClientInfo = {corout = cor, pythonCallbackStrs = {'','',''}, idleSince = systTime, lastReq = nil, stepping = false, desiredStep = currentStep, callDepth = 0}
+        currentClientInfo = {corout = cor, pythonCallbackStrs = {'','',''}, idleSince = systTime, lastReq = nil, steppingLevel = 0, desiredStep = currentStep, callDepth = 0, holdCalls = 0}
 
         allClients[uuid]=currentClientInfo
     end
@@ -470,7 +491,7 @@ function sysCall_init()
                   -- allClients.uuidXXX.pythonCallbackStrs[3]
                   -- allClients.uuidXXX.idleSince
                   -- allClients.uuidXXX.lastReq
-                  -- allClients.uuidXXX.stepping
+                  -- allClients.uuidXXX.steppingLevel
                   -- allClients.uuidXXX.desiredStep
                   -- allClients.uuidXXX.holdCalls
                   -- allClients.uuidXXX.callDepth
@@ -523,7 +544,7 @@ function sysCall_nonSimulation()
         holdCalls = false
         if not leaveRequest then
             for k,v in pairs(allClients) do
-                if v.holdCalls then
+                if v.holdCalls > 0 then
                     holdCalls = true
                 end
                 if v.callDepth > 0 and not v.ignoreCallDepth then
@@ -546,7 +567,7 @@ function sysCall_actuation()
         waitForStep = false
         if not leaveRequest then
             for k,v in pairs(allClients) do
-                if v.stepping then
+                if v.steppingLevel > 0 then
                     if v.desiredStep<=currentStep then
                         waitForStep = true
                     end
@@ -555,7 +576,7 @@ function sysCall_actuation()
                         waitForStep = true
                     end
                 end
-                if v.holdCalls then
+                if v.holdCalls > 0 then
                     waitForStep = true
                 end
             end
@@ -580,6 +601,6 @@ end
 function sysCall_afterSimulation()
     currentStep=0
     for k,v in pairs(allClients) do
-        v.stepping=false -- important, since we can't really notice when a client leaves
+        v.steppingLevel = 0
     end
 end

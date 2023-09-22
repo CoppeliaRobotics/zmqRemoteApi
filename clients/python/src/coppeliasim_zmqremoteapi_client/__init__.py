@@ -124,11 +124,23 @@ class RemoteAPIClient:
                 setattr(ret, k, v['const'])
             else:
                 setattr(ret, k, self.getObject(f'{name}.{k}', _info=v))
+
+        if name == 'sim':
+            ret.getScriptFunctions = self.getScriptFunctions
+
         return ret
 
     def require(self, name):
         self.call('zmqRemoteApi.require', [name])
         return self.getObject(name)
+
+    def getScriptFunctions(self, scriptHandle):
+        return type('', (object,), {
+            '__getattr__':
+                lambda self, func:
+                    lambda *args:
+                        sim.callScriptFunction(func, scriptHandle, *args)
+        })()
 
     def setStepping(self, enable=True): # for backw. comp., now via sim.setStepping
         return self.call('sim.setStepping', [enable])
