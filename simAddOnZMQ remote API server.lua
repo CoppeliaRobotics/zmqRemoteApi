@@ -264,7 +264,7 @@ function zmqRemoteApi.handleRequest(req)
 
             currentFunction = func
 
-            -- Handle function arguments:
+            -- Handle function arguments and possible nil values:
             local cbi = 1
             for i = 1, #args, 1 do
                 if type(args[i]) == 'string' then
@@ -273,6 +273,8 @@ function zmqRemoteApi.handleRequest(req)
                         args[i] = pythonCallbacks[cbi]
                         currentClientInfo.pythonCallbackStrs[cbi] = nm
                         cbi = cbi + 1
+                    elseif args[i] == '_*NIL*_' then
+                        args[i] = nil
                     end
                 end
             end
@@ -600,7 +602,9 @@ end
 
 function sysCall_afterSimulation()
     currentStep=0
+    --[[ disable following to keep a similar behaviour as Lua scripts, that keep their stepping behaviour past a simulation run
     for k,v in pairs(allClients) do
         v.steppingLevel = 0
     end
+    --]]
 end
