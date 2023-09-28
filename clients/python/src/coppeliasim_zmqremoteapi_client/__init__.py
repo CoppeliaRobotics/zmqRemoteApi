@@ -39,6 +39,7 @@ class RemoteAPIClient:
         self.socket.connect(f'tcp://{host}:{port}')
         self.uuid = str(uuid.uuid4())
         self.callbackFuncs = {}
+        self.requiredItems = {}
         self.VERSION = 2
         main_globals = sys.modules['__main__'].__dict__
         main_globals['require']=self.require
@@ -66,7 +67,10 @@ class RemoteAPIClient:
         req['ver']=self.VERSION
         if self.verbose > 0:
             print('Sending:', req)
-        rawReq = cbor.dumps(req)
+        try:
+            rawReq = cbor.dumps(req)
+        except Exception as err:
+            raise Exception("illegal argument " + str(err)) #__EXCEPTION__
         if self.verbose > 1:
             print(f'Sending raw len={len(rawReq)}, base64={b64(rawReq)}')
         self.socket.send(rawReq)
@@ -131,8 +135,12 @@ class RemoteAPIClient:
         return ret
 
     def require(self, name):
-        self.call('zmqRemoteApi.require', [name])
-        return self.getObject(name)
+        if name in self.requiredItems:
+            ret = self.requiredItems[name]
+        else:
+            self.call('zmqRemoteApi.require', [name])
+            ret = self.getObject(name)
+        return ret
 
     def getScriptFunctions(self, scriptHandle):
         return type('', (object,), {
