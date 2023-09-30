@@ -170,6 +170,7 @@ void RemoteAPIClient::send(json &j)
 
     j["uuid"] = uuid;
     j["ver"] = VERSION;
+    j["lang"] = "c++";
 
     std::vector<uint8_t> data;
     cbor::encode_cbor(j, data);

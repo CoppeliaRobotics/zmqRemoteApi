@@ -52,7 +52,7 @@ classdef RemoteAPIClient
         end
 
         function delete(obj)
-            req = struct('func', '_*end*_', 'args', {inputArgs}, 'uuid', {obj.uuid}, 'ver', {obj.VERSION});
+            req = struct('func', '_*end*_', 'args', {inputArgs}, 'uuid', {obj.uuid}, 'ver', {obj.VERSION}, 'lang', 'octave');
             req_raw = cbor.encode(req);
             zmq_send(obj.socket, req_raw);
             zmq_recv(obj.socket, obj.max_recv_sz);
@@ -61,7 +61,7 @@ classdef RemoteAPIClient
         end
 
         function outputArgs = call(obj, fn, inputArgs)
-            req = struct('func', fn, 'args', {inputArgs}, 'uuid', {obj.uuid}, 'ver', {obj.VERSION});
+            req = struct('func', fn, 'args', {inputArgs}, 'uuid', {obj.uuid}, 'ver', {obj.VERSION}, 'lang', 'octave');
             req_raw = cbor.encode(req);
             zmq_send(obj.socket, req_raw);
 
@@ -83,7 +83,7 @@ classdef RemoteAPIClient
                         end
                     end
                 end
-                req2 = struct('func', '_*executed*_', 'args', {args}, 'uuid', {obj.uuid}, 'ver', {obj.VERSION});
+                req2 = struct('func', '_*executed*_', 'args', {args}, 'uuid', {obj.uuid}, 'ver', {obj.VERSION}, 'lang', 'octave');
                 req2_raw = cbor.encode(req2);
                 zmq_send(obj.socket, req2_raw);
 

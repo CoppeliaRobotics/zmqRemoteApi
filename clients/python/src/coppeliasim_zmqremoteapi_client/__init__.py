@@ -65,6 +65,7 @@ class RemoteAPIClient:
                         req['args'][i] = funcStr + "@func"
         req['uuid']=self.uuid
         req['ver']=self.VERSION
+        req['lang']='python'
         if self.verbose > 0:
             print('Sending:', req)
         try:

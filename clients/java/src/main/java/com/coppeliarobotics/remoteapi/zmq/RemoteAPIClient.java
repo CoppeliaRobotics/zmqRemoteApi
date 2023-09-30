@@ -68,6 +68,7 @@ public class RemoteAPIClient
                  k_err = convertArg("err"),
                  k_uuid = convertArg("uuid"),
                  k_ver = convertArg("ver"),
+                 k_lang = convertArg("lang"),
                  k_ret = convertArg("ret");
 
         co.nstant.in.cbor.model.Map req = new co.nstant.in.cbor.model.Map();
@@ -122,6 +123,7 @@ public class RemoteAPIClient
                  k_err = convertArg("err"),
                  k_uuid = convertArg("uuid"),
                  k_ver = convertArg("ver"),
+                 k_lang = convertArg("lang"),
                  k_ret = convertArg("ret");
 
         co.nstant.in.cbor.model.Map req = new co.nstant.in.cbor.model.Map();
@@ -132,6 +134,7 @@ public class RemoteAPIClient
         req.put(k_args, v_args);
         req.put(k_uuid, convertArg(this.uuid));
         req.put(k_ver, convertArg(this.VERSION));
+        req.put(k_lang, convertArg("java"));
         if(this.verbose >= 1)
             System.out.println("Sending: " + req.toString());
         this.send(req);
@@ -159,6 +162,7 @@ public class RemoteAPIClient
                 v_args.add(callbackResults.get(i));
             req2.put(k_args, v_args);
             req2.put(k_uuid, convertArg(this.uuid));
+            req2.put(k_lang, convertArg("java"));
             req2.put(k_ver, convertArg(this.VERSION));
             if(this.verbose >= 1)
                 System.out.println("Sending: " + req2.toString());

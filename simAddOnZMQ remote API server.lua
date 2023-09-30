@@ -384,6 +384,7 @@ function zmqRemoteApi.handleQueue()
             msgCnt = msgCnt + 1
             local req = zmqRemoteApi.receive()
             if req.ver then
+                auxFunc('stts', 'zmqRemoteApiConnection-'..req.lang)
                 if req.func == '_*end*_' then
                     zmqRemoteApi.send({})
                     allClients[req.uuid] = nil -- the client left
@@ -397,6 +398,7 @@ function zmqRemoteApi.handleQueue()
                     end
                 end
             else
+                auxFunc('stts', 'zmqRemoteApiConnection-???')
                 -- Previous version of ZMQ remote API
                 currentClientInfo = {} -- to avoid error in next:
                 zmqRemoteApi.send({success = false, error = "The client ZeroMQ remote API version does not match CoppeliaSim's version"})
