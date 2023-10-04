@@ -9,6 +9,13 @@ namespace RemoteAPIObject
 #include "sim-deprecated.cpp"
 #include "sim-special.cpp"
 
+    void sim::acquireLock()
+    {
+        bool _brk = false;
+        json _args(json_array_arg);
+        auto _ret = this->_client->call("sim.acquireLock", _args);
+    }
+
     int64_t sim::addDrawingObject(int64_t objectType, double size, double duplicateTolerance, int64_t parentObjectHandle, int64_t maxItemCount, std::optional<std::vector<double>> color)
     {
         bool _brk = false;
@@ -1078,6 +1085,14 @@ namespace RemoteAPIObject
         return _ret[0].as<std::vector<double>>();
     }
 
+    double sim::getAutoYieldDelay()
+    {
+        bool _brk = false;
+        json _args(json_array_arg);
+        auto _ret = this->_client->call("sim.getAutoYieldDelay", _args);
+        return _ret[0].as<double>();
+    }
+
     bool sim::getBoolParam(int64_t parameter)
     {
         bool _brk = false;
@@ -2115,6 +2130,14 @@ namespace RemoteAPIObject
         return _ret[0].as<int64_t>();
     }
 
+    bool sim::getSimulationStopping()
+    {
+        bool _brk = false;
+        json _args(json_array_arg);
+        auto _ret = this->_client->call("sim.getSimulationStopping", _args);
+        return _ret[0].as<bool>();
+    }
+
     double sim::getSimulationTime()
     {
         bool _brk = false;
@@ -2179,43 +2202,11 @@ namespace RemoteAPIObject
         return std::make_tuple(_ret[0].as<int64_t>(), _ret[1].as<std::vector<int64_t>>());
     }
 
-    std::tuple<bool, int64_t> sim::getThreadAutomaticSwitch()
-    {
-        bool _brk = false;
-        json _args(json_array_arg);
-        auto _ret = this->_client->call("sim.getThreadAutomaticSwitch", _args);
-        return std::make_tuple(_ret[0].as<bool>(), _ret[1].as<int64_t>());
-    }
-
-    bool sim::getThreadExistRequest()
-    {
-        bool _brk = false;
-        json _args(json_array_arg);
-        auto _ret = this->_client->call("sim.getThreadExistRequest", _args);
-        return _ret[0].as<bool>();
-    }
-
     int64_t sim::getThreadId()
     {
         bool _brk = false;
         json _args(json_array_arg);
         auto _ret = this->_client->call("sim.getThreadId", _args);
-        return _ret[0].as<int64_t>();
-    }
-
-    bool sim::getThreadSwitchAllowed()
-    {
-        bool _brk = false;
-        json _args(json_array_arg);
-        auto _ret = this->_client->call("sim.getThreadSwitchAllowed", _args);
-        return _ret[0].as<bool>();
-    }
-
-    int64_t sim::getThreadSwitchTiming()
-    {
-        bool _brk = false;
-        json _args(json_array_arg);
-        auto _ret = this->_client->call("sim.getThreadSwitchTiming", _args);
         return _ret[0].as<int64_t>();
     }
 
@@ -2776,21 +2767,6 @@ namespace RemoteAPIObject
         return _ret[0].as<std::vector<double>>();
     }
 
-    std::vector<uint8_t> sim::packCbor(json item, std::optional<bool> doublePrecision)
-    {
-        bool _brk = false;
-        json _args(json_array_arg);
-        _args.push_back(item);
-        if(doublePrecision)
-        {
-            if(_brk) throw std::runtime_error("no gaps allowed");
-            else _args.push_back(*doublePrecision);
-        }
-        else _brk = true;
-        auto _ret = this->_client->call("sim.packCbor", _args);
-        return _ret[0].as<std::vector<uint8_t>>();
-    }
-
     std::vector<uint8_t> sim::packDoubleTable(std::vector<double> doubleNumbers, std::optional<int64_t> startDoubleIndex, std::optional<int64_t> doubleCount)
     {
         bool _brk = false;
@@ -3114,6 +3090,13 @@ namespace RemoteAPIObject
         _args.push_back(refreshDegree);
         auto _ret = this->_client->call("sim.refreshDialogs", _args);
         return _ret[0].as<int64_t>();
+    }
+
+    void sim::releaseLock()
+    {
+        bool _brk = false;
+        json _args(json_array_arg);
+        auto _ret = this->_client->call("sim.releaseLock", _args);
     }
 
     int64_t sim::relocateShapeFrame(int64_t shapeHandle, std::vector<double> pose)
@@ -3445,6 +3428,14 @@ namespace RemoteAPIObject
         _args.push_back(parameter);
         _args.push_back(arrayOfValues);
         auto _ret = this->_client->call("sim.setArrayParam", _args);
+    }
+
+    void sim::setAutoYieldDelay(double dt)
+    {
+        bool _brk = false;
+        json _args(json_array_arg);
+        _args.push_back(dt);
+        auto _ret = this->_client->call("sim.setAutoYieldDelay", _args);
     }
 
     void sim::setBoolParam(int64_t parameter, bool boolState)
@@ -4045,12 +4036,13 @@ namespace RemoteAPIObject
         auto _ret = this->_client->call("sim.setShapeTexture", _args);
     }
 
-    void sim::setStepping(bool enabled)
+    int64_t sim::setStepping(bool enabled)
     {
         bool _brk = false;
         json _args(json_array_arg);
         _args.push_back(enabled);
         auto _ret = this->_client->call("sim.setStepping", _args);
+        return _ret[0].as<int64_t>();
     }
 
     void sim::setStringParam(int64_t parameter, std::string stringState)
@@ -4069,32 +4061,6 @@ namespace RemoteAPIObject
         _args.push_back(signalName);
         _args.push_back(bin(signalValue));
         auto _ret = this->_client->call("sim.setStringSignal", _args);
-    }
-
-    int64_t sim::setThreadAutomaticSwitch(bool automaticSwitch)
-    {
-        bool _brk = false;
-        json _args(json_array_arg);
-        _args.push_back(automaticSwitch);
-        auto _ret = this->_client->call("sim.setThreadAutomaticSwitch", _args);
-        return _ret[0].as<int64_t>();
-    }
-
-    int64_t sim::setThreadSwitchAllowed(bool allowed)
-    {
-        bool _brk = false;
-        json _args(json_array_arg);
-        _args.push_back(allowed);
-        auto _ret = this->_client->call("sim.setThreadSwitchAllowed", _args);
-        return _ret[0].as<int64_t>();
-    }
-
-    void sim::setThreadSwitchTiming(int64_t dtInMs)
-    {
-        bool _brk = false;
-        json _args(json_array_arg);
-        _args.push_back(dtInMs);
-        auto _ret = this->_client->call("sim.setThreadSwitchTiming", _args);
     }
 
     void sim::setVisionSensorImg(int64_t sensorHandle, std::vector<uint8_t> image, std::optional<int64_t> options, std::optional<std::vector<int64_t>> pos, std::optional<std::vector<int64_t>> size)
@@ -4132,16 +4098,10 @@ namespace RemoteAPIObject
         return _ret[0].as<int64_t>();
     }
 
-    void sim::step(std::optional<bool> wait)
+    void sim::step()
     {
         bool _brk = false;
         json _args(json_array_arg);
-        if(wait)
-        {
-            if(_brk) throw std::runtime_error("no gaps allowed");
-            else _args.push_back(*wait);
-        }
-        else _brk = true;
         auto _ret = this->_client->call("sim.step", _args);
     }
 
@@ -4174,13 +4134,6 @@ namespace RemoteAPIObject
         _args.push_back(tolerance);
         auto _ret = this->_client->call("sim.subtractObjectFromPointCloud", _args);
         return _ret[0].as<int64_t>();
-    }
-
-    void sim::switchThread()
-    {
-        bool _brk = false;
-        json _args(json_array_arg);
-        auto _ret = this->_client->call("sim.switchThread", _args);
     }
 
     std::tuple<std::string, std::vector<int64_t>, std::vector<int64_t>> sim::textEditorClose(int64_t handle)
@@ -4547,6 +4500,13 @@ namespace RemoteAPIObject
         _args.push_back(rollAngle);
         auto _ret = this->_client->call("sim.yawPitchRollToAlphaBetaGamma", _args);
         return std::make_tuple(_ret[0].as<double>(), _ret[1].as<double>(), _ret[2].as<double>());
+    }
+
+    void sim::yield()
+    {
+        bool _brk = false;
+        json _args(json_array_arg);
+        auto _ret = this->_client->call("sim.yield", _args);
     }
 
     simAssimp::simAssimp(RemoteAPIClient *client)
@@ -7254,6 +7214,35 @@ namespace RemoteAPIObject
         return _ret[0].as<std::vector<int64_t>>();
     }
 
+    simLuaCmd::simLuaCmd(RemoteAPIClient *client)
+        : _client(client)
+    {
+        _client->require("simLuaCmd");
+    }
+
+    void simLuaCmd::clearHistory()
+    {
+        bool _brk = false;
+        json _args(json_array_arg);
+        auto _ret = this->_client->call("simLuaCmd.clearHistory", _args);
+    }
+
+    void simLuaCmd::setExecWrapper(std::string wrapperFunc)
+    {
+        bool _brk = false;
+        json _args(json_array_arg);
+        _args.push_back(wrapperFunc);
+        auto _ret = this->_client->call("simLuaCmd.setExecWrapper", _args);
+    }
+
+    void simLuaCmd::setVisible(bool b)
+    {
+        bool _brk = false;
+        json _args(json_array_arg);
+        _args.push_back(b);
+        auto _ret = this->_client->call("simLuaCmd.setVisible", _args);
+    }
+
     simMTB::simMTB(RemoteAPIClient *client)
         : _client(client)
     {
@@ -9449,6 +9438,11 @@ RemoteAPIObject::simIK RemoteAPIObjects::simIK()
 RemoteAPIObject::simLDraw RemoteAPIObjects::simLDraw()
 {
     return RemoteAPIObject::simLDraw(this->client);
+}
+
+RemoteAPIObject::simLuaCmd RemoteAPIObjects::simLuaCmd()
+{
+    return RemoteAPIObject::simLuaCmd(this->client);
 }
 
 RemoteAPIObject::simMTB RemoteAPIObjects::simMTB()

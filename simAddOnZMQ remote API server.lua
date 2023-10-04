@@ -167,6 +167,18 @@ function totxt(data)
     return d
 end
 
+function toarray(data)
+    local d={data=data}
+    setmetatable(d,{__tocbor=function(self) return cbor.TYPE.ARRAY(self.data) end})
+    return d
+end
+
+function tomap(data)
+    local d={data=data}
+    setmetatable(d,{__tocbor=function(self) return cbor.TYPE.MAP(self.data) end})
+    return d
+end
+
 function zmqRemoteApi.verbose()
     return sim.getNamedInt32Param('zmqRemoteApi.verbose') or 0
 end
@@ -197,6 +209,8 @@ function zmqRemoteApi.parseFuncsReturnTypes(nameSpace)
                             t[i]=1
                         elseif token=='buffer' then
                             t[i]=2
+                        elseif token=='map' then
+                            t[i]=3
                         else
                             t[i]=0
                         end
@@ -302,6 +316,14 @@ function zmqRemoteApi.handleRequest(req)
                             ret[i]=totxt(ret[i])
                         elseif args[i]==2 then
                             ret[i]=tobin(ret[i])
+                        else
+                            if type(ret[i])=='table' and next(ret[i])==nil then
+                                if args[i]==3 then
+                                    ret[i]=tomap(ret[i])
+                                else
+                                    ret[i]=toarray(ret[i])
+                                end
+                            end
                         end
                     end
                 end
