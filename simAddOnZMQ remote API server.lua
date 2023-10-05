@@ -186,6 +186,15 @@ end
 function zmqRemoteApi.require(name)
     _G[name]=require(name)
     zmqRemoteApi.parseFuncsReturnTypes(name)
+    if not sim.getBoolParam(sim.boolparam_execunsafeext) then
+        sim.executeScriptString = nil
+        sim.launchExecutable = nil
+        if simSubprocess then
+            simSubprocess.exec = nil
+            simSubprocess.execAsync = nil
+        end
+        -- more in sysCall_init and zmqRemoteApi.handleRequest
+    end
 end
 
 function zmqRemoteApi.parseFuncsReturnTypes(nameSpace)
@@ -277,6 +286,13 @@ function zmqRemoteApi.handleRequest(req)
             end
 
             currentFunction = func
+
+            if func == sim.callScriptFunction then
+                if #args > 0 and ( args[1] == '_evalExec' or args[1] == '_evalExecRet' ) and not sim.getBoolParam(sim.boolparam_execunsafeext) then
+                    args[1] = "FORBIDDEN"
+                end
+                -- more in sysCall_init and zmqRemoteApi.require
+            end
 
             -- Handle function arguments and possible nil values:
             local cbi = 1
@@ -486,6 +502,17 @@ function sysCall_info()
 end
 
 function sysCall_init()
+    if not sim.getBoolParam(sim.boolparam_execunsafeext) then
+        load = nil
+        loadfile = nil
+        dofile = nil
+        io.popen = nil
+        os.execute = nil
+        sim.executeScriptString = nil
+        sim.launchExecutable = nil
+        -- more in zmqRemoteApi.require and zmqRemoteApi.handleRequest
+    end
+
     returnTypes={}
     simZMQ=require'simZMQ'
     simZMQ.__raiseErrors(true) -- so we don't need to check retval with every call
