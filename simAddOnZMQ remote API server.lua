@@ -509,7 +509,7 @@ function sysCall_init()
         io.open = nil
         io.popen = nil
         os.execute = nil
-        os.remove
+        os.remove = nil
         sim.executeScriptString = nil
         sim.launchExecutable = nil
         -- more in zmqRemoteApi.require and zmqRemoteApi.handleRequest
