@@ -100,7 +100,7 @@
                             </environmentVariables>
                             <executable>python3</executable>
                             <commandlineArgs>
-                                ${env.COPPELIASIM_ROOT_DIR}/programming/libPlugin/simStubsGen/external/pycpp/pycpp.py
+                                ${env.COPPELIASIM_ROOT_DIR}/programming/include/simStubsGen/external/pycpp/pycpp.py
                                 -i ${basedir}/templates/RemoteAPIObjects.java
                                 -o src/main/java/com/coppeliarobotics/remoteapi/zmq/RemoteAPIObjects.java
                                 -P ${basedir}

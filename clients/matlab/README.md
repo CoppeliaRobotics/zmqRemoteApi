@@ -4,7 +4,7 @@ This library contains ZMQ Remote API client for MATLAB.
 
 ## Requirements
 
- - **MATLAB R2019b**
+ - **MATLAB R2019b** (or later)
  - **JeroMQ** (bundled)
 
 ## Examples

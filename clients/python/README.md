@@ -19,7 +19,7 @@ from coppeliasim_zmqremoteapi_client import *
 client = RemoteAPIClient()
 
 # get a remote object:
-sim = client.require('sim')
+sim = require('sim')
 
 # call API function:
 h = sim.getObject('/Floor')
@@ -35,7 +35,7 @@ client = RemoteAPIClient()
 
 async def main():
     async with RemoteAPIClient() as client:
-        sim = await client.require('sim')
+        sim = await require('sim')
         h = await sim.getObject('/Floor')
         print(h)
 
