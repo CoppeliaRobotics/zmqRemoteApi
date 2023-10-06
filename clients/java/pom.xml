@@ -64,10 +64,10 @@
                                 <PYTHONPATH>${basedir}/../python</PYTHONPATH>
                             </environmentVariables>
                             <executable>python3</executable>
-                            <commandlineArgs>
-                                ${basedir}/../../tools/get_raw_calltips.py
-                                ${basedir}/calltips.json
-                            </commandlineArgs>
+                            <arguments>
+                                <argument>${basedir}/../../tools/get_raw_calltips.py</argument>
+                                <argument>${basedir}/calltips.json</argument>
+                            </arguments>
                         </configuration>
                     </execution>
                     <execution>
@@ -82,10 +82,10 @@
                                 <PYTHONPATH>${basedir}/../python</PYTHONPATH>
                             </environmentVariables>
                             <executable>python3</executable>
-                            <commandlineArgs>
-                                ${basedir}/../../tools/get_constants.py
-                                ${basedir}/constants.json
-                            </commandlineArgs>
+                            <arguments>
+                                <argument>${basedir}/../../tools/get_constants.py</argument>
+                                <argument>${basedir}/constants.json</argument>
+                            </arguments>
                         </configuration>
                     </execution>
                     <execution>
@@ -99,16 +99,23 @@
                                 <PYTHONPATH>${basedir}/../python</PYTHONPATH>
                             </environmentVariables>
                             <executable>python3</executable>
-                            <commandlineArgs>
-                                ${env.COPPELIASIM_ROOT_DIR}/programming/include/simStubsGen/external/pycpp/pycpp.py
-                                -i ${basedir}/templates/RemoteAPIObjects.java
-                                -o src/main/java/com/coppeliarobotics/remoteapi/zmq/RemoteAPIObjects.java
-                                -P ${basedir}
-                                -p calltips_json=${basedir}/calltips.json
-                                -p constants_json=${basedir}/constants.json
-                                -P ${basedir}/../../tools
-                                -P ${basedir}
-                            </commandlineArgs>
+                            <arguments>
+                                <argument>${env.COPPELIASIM_ROOT_DIR}/programming/include/simStubsGen/external/pycpp/pycpp.py</argument>
+                                <argument>-i</argument>
+                                <argument>${basedir}/templates/RemoteAPIObjects.java</argument>
+                                <argument>-o</argument>
+                                <argument>src/main/java/com/coppeliarobotics/remoteapi/zmq/RemoteAPIObjects.java</argument>
+                                <argument>-P</argument>
+                                <argument>${basedir}</argument>
+                                <argument>-p</argument>
+                                <argument>calltips_json=${basedir}/calltips.json</argument>
+                                <argument>-p</argument>
+                                <argument>constants_json=${basedir}/constants.json</argument>
+                                <argument>-P</argument>
+                                <argument>${basedir}/../../tools</argument>
+                                <argument>-P</argument>
+                                <argument>${basedir}</argument>
+                            </arguments>
                         </configuration>
                     </execution>
                 </executions>
