@@ -421,8 +421,11 @@ function zmqRemoteApi.handleQueue()
         if dataPresent then
             msgCnt = msgCnt + 1
             local req = zmqRemoteApi.receive()
-            if req.ver then
-                auxFunc('stts', 'zmqRemoteApiConnection-'..req.lang)
+            if req.uuid then
+                -- req.ver currently 2. Is sent only for the first contact
+                if req.lang then
+                    auxFunc('stts', 'zmqRemoteApiConnection-'..req.lang)
+                end
                 if req.func == '_*end*_' then
                     zmqRemoteApi.send({})
                     allClients[req.uuid] = nil -- the client left

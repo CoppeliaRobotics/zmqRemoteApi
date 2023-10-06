@@ -7,8 +7,11 @@ Connect a [`REQ`](https://zeromq.org/socket-api/#req-socket) socket to the endpo
 #### Request
 
 A request is an object with fields:
-- `func` (string) the function name to call;
-- `args` (array) the arguments to the function;
+- `func` (string) the function name to call, or "_*executed*_" when a CoppeliaSim callback or command was executed;
+- `args` (array) the arguments to the function, or the return values of a CoppeliaSim callback;
+- `uuid` (string) the client's unique identifier;
+- `ver` (int) the client's protocol version (currently 2). Can be omitted after the first contact;
+- `lang` (string) the client's language. Not required, or can be omitted after the first contact;
 
 Example:
 
@@ -16,30 +19,31 @@ Example:
 {
     "func": "sim.getObject",
     "args": ["/Floor"]
+    "uuid": "c06b3832-5008-4cbb-b372-46ff92cacfe5",
+    "ver": 2,
+    "lang": "python",
 }
 ```
 
 #### Response
 
 A response is an object with fields:
-- `success` (boolean) `true` if the call succeeded, in which case the `ret` field will be set, or `false` if the call failed, in which case the `error` field will be set;
-- `ret` (array) the return values of the function;
-- `error` (string) the error message;
+- `err` (string) the error message, in case of an error;
+- `func` (string) a possible wait request ("_*wait*_") or callback function name to execute;
+- `ret` (array) the return values of the function previously called, if none of above `err` or `func` field was returned;
 
 Example:
 
 ```json
 {
-    "success": true,
     "ret": [37]
 }
 ```
 
-In case of error, the exception message will be present:
+In case of an error:
 
 ```json
 {
-    "success": false,
-    "error": "Object does not exist. (in function 'sim.getObject')"
+    "err": "Object does not exist. (in function 'sim.getObject')"
 }
 ```
