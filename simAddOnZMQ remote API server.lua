@@ -320,9 +320,8 @@ function zmqRemoteApi.handleRequest(req)
                 trace=string.gsub(trace,"\t","_=TB=_")
                 return trace
             end
-
             local status,retvals=xpcall(function()
-                local ret={func(unpack(args))}
+                local ret={func(unpack(args,1,req.argsL))}
                 -- Try to assign correct types to text and buffers:
                 local args=returnTypes[req['func']]
                 if args then
@@ -379,7 +378,7 @@ function zmqRemoteApi.receive()
         receiveIsNext=false
         rc,retVal=pcall(cbor.decode,dat)
         if not rc then
-            error('CBOR decode error: '..sim.transformBuffer(dat,sim.buffer_uint8,1,0,sim.buffer_base64))
+            error(retVal.."\n"..sim.transformBuffer(dat,sim.buffer_uint8,1,0,sim.buffer_base64))
         end
     else
         error('Trying to receive data from Python where a send is expected')
@@ -392,7 +391,7 @@ function zmqRemoteApi.send(reply)
         local dat=reply
         status,reply=pcall(cbor.encode,reply)
         if not status then
-            error('CBOR encode error: '..getAsString(dat))
+            error(reply.."\n"..getAsString(dat))
         end
         currentClientInfo.idleSince=sim.getSystemTime()
         simZMQ.send(rpcSocket,reply,0)

@@ -61,7 +61,7 @@ classdef RemoteAPIClient
         end
 
         function outputArgs = call(obj, fn, inputArgs)
-            req = struct('func', fn, 'args', {inputArgs}, 'uuid', {obj.uuid}, 'ver', {obj.VERSION}, 'lang', 'octave');
+            req = struct('func', fn, 'args', {inputArgs}, 'uuid', {obj.uuid}, 'ver', {obj.VERSION}, 'lang', 'octave', 'argsL', numel(inputArgs));
             req_raw = cbor.encode(req);
             zmq_send(obj.socket, req_raw);
 
@@ -83,7 +83,7 @@ classdef RemoteAPIClient
                         end
                     end
                 end
-                req2 = struct('func', '_*executed*_', 'args', {args}, 'uuid', {obj.uuid}, 'ver', {obj.VERSION}, 'lang', 'octave');
+                req2 = struct('func', '_*executed*_', 'args', {args}, 'uuid', {obj.uuid}, 'ver', {obj.VERSION}, 'lang', 'octave', 'argsL', numel(args));
                 req2_raw = cbor.encode(req2);
                 zmq_send(obj.socket, req2_raw);
 

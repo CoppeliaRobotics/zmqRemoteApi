@@ -25,9 +25,6 @@ def _getFuncIfExists(name):
         pass
     return method
 
-def require(name):
-    client.require(name)
-
 class RemoteAPIClient:
     """Client to connect to CoppeliaSim's ZMQ Remote API."""
 
@@ -63,6 +60,7 @@ class RemoteAPIClient:
                         funcStr = m.group(1)
                         self.callbackFuncs[funcStr] = req['args'][i]
                         req['args'][i] = funcStr + "@func"
+            req['argsL'] = len(req['args'])
         req['uuid']=self.uuid
         req['ver']=self.VERSION
         req['lang']='python'

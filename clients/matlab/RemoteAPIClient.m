@@ -82,8 +82,7 @@ classdef RemoteAPIClient
         function outputArgs = call(obj, fn, inputArgs)
             % Call function with specified arguments. Is Reentrant
             import org.zeromq.*;
-
-            req = struct('func', fn, 'args', {inputArgs}, 'uuid', {obj.uuid}, 'ver', {obj.VERSION}, 'lang', 'matlab');
+            req = struct('func', fn, 'args', {inputArgs}, 'uuid', {obj.uuid}, 'ver', {obj.VERSION}, 'lang', 'matlab', 'argsL', numel(inputArgs));
             req_raw = cbor.encode(req);
             req_frame = ZFrame(req_raw);
             req_msg = ZMsg();
@@ -110,7 +109,7 @@ classdef RemoteAPIClient
                         end
                     end
                 end
-                req2 = struct('func', '_*executed*_', 'args', {args}, 'uuid', {obj.uuid}, 'ver', {obj.VERSION}, 'lang', 'matlab');
+                req2 = struct('func', '_*executed*_', 'args', {args}, 'uuid', {obj.uuid}, 'ver', {obj.VERSION}, 'lang', 'matlab', 'argsL', numel(args));
                 req2_raw = cbor.encode(req2);
                 req2_frame = ZFrame(req2_raw);
                 req2_msg = ZMsg();

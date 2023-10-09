@@ -126,7 +126,7 @@ json RemoteAPIClient::call(const std::string &func, const json &args)
             else
             {
                 call("_*executed*_", json::array());
-                rep["args"] = json::array();;
+                rep["args"] = json::array();
             }
             send(rep);
         }
@@ -171,6 +171,12 @@ void RemoteAPIClient::send(json &j)
     j["uuid"] = uuid;
     j["ver"] = VERSION;
     j["lang"] = "c++";
+    if (j.contains("args"))
+    {
+        auto a = j["args"];
+        j["argsL"] = a.size();
+    }
+
 
     std::vector<uint8_t> data;
     cbor::encode_cbor(j, data);

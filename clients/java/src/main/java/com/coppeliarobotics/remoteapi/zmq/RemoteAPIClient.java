@@ -69,7 +69,8 @@ public class RemoteAPIClient
                  k_uuid = convertArg("uuid"),
                  k_ver = convertArg("ver"),
                  k_lang = convertArg("lang"),
-                 k_ret = convertArg("ret");
+                 k_ret = convertArg("ret"),
+                 k_argsl = convertArg("argsL");
 
         co.nstant.in.cbor.model.Map req = new co.nstant.in.cbor.model.Map();
         req.put(k_func, convertArg("_*end*_"));
@@ -124,7 +125,8 @@ public class RemoteAPIClient
                  k_uuid = convertArg("uuid"),
                  k_ver = convertArg("ver"),
                  k_lang = convertArg("lang"),
-                 k_ret = convertArg("ret");
+                 k_ret = convertArg("ret"),
+                 k_argsl = convertArg("argsL");
 
         co.nstant.in.cbor.model.Map req = new co.nstant.in.cbor.model.Map();
         req.put(k_func, convertArg(func));
@@ -134,6 +136,7 @@ public class RemoteAPIClient
         req.put(k_args, v_args);
         req.put(k_uuid, convertArg(this.uuid));
         req.put(k_ver, convertArg(this.VERSION));
+        req.put(k_argsl, convertArg(args.size()));
         req.put(k_lang, convertArg("java"));
         if(this.verbose >= 1)
             System.out.println("Sending: " + req.toString());
@@ -164,6 +167,7 @@ public class RemoteAPIClient
             req2.put(k_uuid, convertArg(this.uuid));
             req2.put(k_lang, convertArg("java"));
             req2.put(k_ver, convertArg(this.VERSION));
+            req2.put(k_argsl, convertArg(callbackResults.size()));
             if(this.verbose >= 1)
                 System.out.println("Sending: " + req2.toString());
             this.send(req2);
