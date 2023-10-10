@@ -139,7 +139,7 @@ json RemoteAPIClient::call(const std::string &func, const json &args)
         resp = recv();
     }
     if (resp.contains("err"))
-        throw std::runtime_error(resp["error"].as<std::string>());
+        throw std::runtime_error(resp["err"].as<std::string>());
     const auto &ret = resp["ret"];
     return ret;
 }
