@@ -12,6 +12,7 @@ A request is an object with fields:
 - `uuid` (string) the client's unique identifier;
 - `ver` (int) the client's protocol version (currently 2). Can be omitted after the first contact;
 - `lang` (string) the client's language. Not required, or can be omitted after the first contact;
+- `argsL` (int) an indication of args size. Useful since None, NULL, etc. are ignored by Lua;
 
 Example:
 
@@ -22,6 +23,7 @@ Example:
     "uuid": "c06b3832-5008-4cbb-b372-46ff92cacfe5",
     "ver": 2,
     "lang": "python",
+    "argsL": 1,
 }
 ```
 
