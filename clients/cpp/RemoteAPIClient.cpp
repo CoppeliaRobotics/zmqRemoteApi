@@ -104,6 +104,8 @@ json RemoteAPIClient::call(const std::string &func, const json &args)
     send(req);
 
     json resp = recv();
+    // std::cout << pretty_print(resp) << "\n\n";
+
     while (resp.contains("func"))
     { // We have a callback or a wait:
         if (resp["func"].as<std::string>().compare("_*wait*_")==0)
@@ -120,14 +122,18 @@ json RemoteAPIClient::call(const std::string &func, const json &args)
             rep["func"] = "_*executed*_";
             if(funcToRun)
             {
-                auto args = funcToRun(resp["func"].as<const char*>(), resp["args"]);
-                rep["args"] = args;
+                auto r = funcToRun(resp["args"]);
+                if (!r.is_array())
+                {
+                    auto arr = json::array();
+                    arr.push_back(r);
+                    rep["args"] = arr;
+                }
+                else
+                    rep["args"] = r;
             }
             else
-            {
-                call("_*executed*_", json::array());
                 rep["args"] = json::array();
-            }
             send(rep);
         }
         resp = recv();

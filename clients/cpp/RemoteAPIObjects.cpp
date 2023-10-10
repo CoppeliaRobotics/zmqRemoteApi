@@ -4136,6 +4136,17 @@ namespace RemoteAPIObject
         return _ret[0].as<int64_t>();
     }
 
+    int64_t sim::testCB(int64_t a, std::string cb, int64_t b)
+    {
+        bool _brk = false;
+        json _args(json_array_arg);
+        _args.push_back(a);
+        _args.push_back(cb);
+        _args.push_back(b);
+        auto _ret = this->_client->call("sim.testCB", _args);
+        return _ret[0].as<int64_t>();
+    }
+
     std::tuple<std::string, std::vector<int64_t>, std::vector<int64_t>> sim::textEditorClose(int64_t handle)
     {
         bool _brk = false;
@@ -7797,12 +7808,12 @@ namespace RemoteAPIObject
         return _ret[0].as<std::string>();
     }
 
-    void simROS2::imageTransportPublish(std::string publisherHandle, std::string data, int64_t width, int64_t height, std::string frame_id)
+    void simROS2::imageTransportPublish(std::string publisherHandle, std::vector<uint8_t> data, int64_t width, int64_t height, std::string frame_id)
     {
         bool _brk = false;
         json _args(json_array_arg);
         _args.push_back(publisherHandle);
-        _args.push_back(data);
+        _args.push_back(bin(data));
         _args.push_back(width);
         _args.push_back(height);
         _args.push_back(frame_id);
@@ -8844,7 +8855,7 @@ namespace RemoteAPIObject
         auto _ret = this->_client->call("simVision.addWorkImgToBuffer1", _args);
     }
 
-    std::tuple<bool, std::string> simVision::binaryWorkImg(int64_t visionSensorHandle, double threshold, double oneProportion, double oneTol, double xCenter, double xCenterTol, double yCenter, double yCenterTol, double orient, double orientTol, double roundness, bool enableTrigger, std::optional<std::vector<double>> overlayColor)
+    std::tuple<bool, std::vector<uint8_t>> simVision::binaryWorkImg(int64_t visionSensorHandle, double threshold, double oneProportion, double oneTol, double xCenter, double xCenterTol, double yCenter, double yCenterTol, double orient, double orientTol, double roundness, bool enableTrigger, std::optional<std::vector<double>> overlayColor)
     {
         bool _brk = false;
         json _args(json_array_arg);
@@ -8867,10 +8878,10 @@ namespace RemoteAPIObject
         }
         else _brk = true;
         auto _ret = this->_client->call("simVision.binaryWorkImg", _args);
-        return std::make_tuple(_ret[0].as<bool>(), _ret[1].as<std::string>());
+        return std::make_tuple(_ret[0].as<bool>(), _ret[1].as<std::vector<uint8_t>>());
     }
 
-    std::tuple<bool, std::string> simVision::blobDetectionOnWorkImg(int64_t visionSensorHandle, double threshold, double minBlobSize, bool modifyWorkImage, std::optional<std::vector<double>> overlayColor)
+    std::tuple<bool, std::vector<uint8_t>> simVision::blobDetectionOnWorkImg(int64_t visionSensorHandle, double threshold, double minBlobSize, bool modifyWorkImage, std::optional<std::vector<double>> overlayColor)
     {
         bool _brk = false;
         json _args(json_array_arg);
@@ -8885,7 +8896,7 @@ namespace RemoteAPIObject
         }
         else _brk = true;
         auto _ret = this->_client->call("simVision.blobDetectionOnWorkImg", _args);
-        return std::make_tuple(_ret[0].as<bool>(), _ret[1].as<std::string>());
+        return std::make_tuple(_ret[0].as<bool>(), _ret[1].as<std::vector<uint8_t>>());
     }
 
     void simVision::buffer1ToWorkImg(int64_t visionSensorHandle)
@@ -8904,14 +8915,14 @@ namespace RemoteAPIObject
         auto _ret = this->_client->call("simVision.buffer2ToWorkImg", _args);
     }
 
-    std::tuple<bool, std::string> simVision::changedPixelsOnWorkImg(int64_t visionSensorHandle, double threshold)
+    std::tuple<bool, std::vector<uint8_t>> simVision::changedPixelsOnWorkImg(int64_t visionSensorHandle, double threshold)
     {
         bool _brk = false;
         json _args(json_array_arg);
         _args.push_back(visionSensorHandle);
         _args.push_back(threshold);
         auto _ret = this->_client->call("simVision.changedPixelsOnWorkImg", _args);
-        return std::make_tuple(_ret[0].as<bool>(), _ret[1].as<std::string>());
+        return std::make_tuple(_ret[0].as<bool>(), _ret[1].as<std::vector<uint8_t>>());
     }
 
     void simVision::circularCutWorkImg(int64_t visionSensorHandle, double radius, bool copyToBuffer1)
@@ -8933,7 +8944,7 @@ namespace RemoteAPIObject
         auto _ret = this->_client->call("simVision.colorSegmentationOnWorkImg", _args);
     }
 
-    std::tuple<bool, std::string, std::string> simVision::coordinatesFromWorkImg(int64_t visionSensorHandle, std::vector<int64_t> xyPointCount, bool evenlySpacedInAngularSpace, std::optional<bool> returnColorData)
+    std::tuple<bool, std::vector<uint8_t>, std::vector<uint8_t>> simVision::coordinatesFromWorkImg(int64_t visionSensorHandle, std::vector<int64_t> xyPointCount, bool evenlySpacedInAngularSpace, std::optional<bool> returnColorData)
     {
         bool _brk = false;
         json _args(json_array_arg);
@@ -8947,7 +8958,7 @@ namespace RemoteAPIObject
         }
         else _brk = true;
         auto _ret = this->_client->call("simVision.coordinatesFromWorkImg", _args);
-        return std::make_tuple(_ret[0].as<bool>(), _ret[1].as<std::string>(), _ret[2].as<std::string>());
+        return std::make_tuple(_ret[0].as<bool>(), _ret[1].as<std::vector<uint8_t>>(), _ret[2].as<std::vector<uint8_t>>());
     }
 
     int64_t simVision::createVelodyneHDL64E(std::vector<int64_t> visionSensorHandles, double frequency, std::optional<int64_t> options, std::optional<int64_t> pointSize, std::optional<std::vector<double>> coloring_closeFarDist, std::optional<double> displayScalingFactor)
@@ -9099,24 +9110,24 @@ namespace RemoteAPIObject
         return _ret[0].as<int64_t>();
     }
 
-    std::tuple<std::vector<double>, std::string> simVision::handleVelodyneHDL64E(int64_t velodyneHandle, double dt)
+    std::tuple<std::vector<uint8_t>, std::vector<uint8_t>> simVision::handleVelodyneHDL64E(int64_t velodyneHandle, double dt)
     {
         bool _brk = false;
         json _args(json_array_arg);
         _args.push_back(velodyneHandle);
         _args.push_back(dt);
         auto _ret = this->_client->call("simVision.handleVelodyneHDL64E", _args);
-        return std::make_tuple(_ret[0].as<std::vector<double>>(), _ret[1].as<std::string>());
+        return std::make_tuple(_ret[0].as<std::vector<uint8_t>>(), _ret[1].as<std::vector<uint8_t>>());
     }
 
-    std::tuple<std::vector<double>, std::string> simVision::handleVelodyneVPL16(int64_t velodyneHandle, double dt)
+    std::tuple<std::vector<uint8_t>, std::vector<uint8_t>> simVision::handleVelodyneVPL16(int64_t velodyneHandle, double dt)
     {
         bool _brk = false;
         json _args(json_array_arg);
         _args.push_back(velodyneHandle);
         _args.push_back(dt);
         auto _ret = this->_client->call("simVision.handleVelodyneVPL16", _args);
-        return std::make_tuple(_ret[0].as<std::vector<double>>(), _ret[1].as<std::string>());
+        return std::make_tuple(_ret[0].as<std::vector<uint8_t>>(), _ret[1].as<std::vector<uint8_t>>());
     }
 
     void simVision::horizontalFlipWorkImg(int64_t visionSensorHandle)
@@ -9314,7 +9325,7 @@ namespace RemoteAPIObject
         auto _ret = this->_client->call("simVision.uniformImgToWorkImg", _args);
     }
 
-    std::tuple<bool, std::string, std::string> simVision::velodyneDataFromWorkImg(int64_t visionSensorHandle, std::vector<int64_t> xyPointCount, double vAngle, std::optional<bool> returnColorData)
+    std::tuple<bool, std::vector<uint8_t>, std::vector<uint8_t>> simVision::velodyneDataFromWorkImg(int64_t visionSensorHandle, std::vector<int64_t> xyPointCount, double vAngle, std::optional<bool> returnColorData)
     {
         bool _brk = false;
         json _args(json_array_arg);
@@ -9328,7 +9339,7 @@ namespace RemoteAPIObject
         }
         else _brk = true;
         auto _ret = this->_client->call("simVision.velodyneDataFromWorkImg", _args);
-        return std::make_tuple(_ret[0].as<bool>(), _ret[1].as<std::string>(), _ret[2].as<std::string>());
+        return std::make_tuple(_ret[0].as<bool>(), _ret[1].as<std::vector<uint8_t>>(), _ret[2].as<std::vector<uint8_t>>());
     }
 
     void simVision::verticalFlipWorkImg(int64_t visionSensorHandle)

@@ -22,7 +22,7 @@ json bin(const std::vector<uint8_t> &v);
 
 class RemoteAPIClient
 {
-    using CallbackType = std::function<json(const char*, const json &)>;
+    using CallbackType = std::function<json(const json&)>;
 
 public:
     RemoteAPIClient(const std::string host = "localhost", int rpcPort = 23000, int cntPort = -1, int verbose_ = -1);

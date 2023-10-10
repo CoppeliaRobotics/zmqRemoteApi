@@ -356,6 +356,7 @@ namespace RemoteAPIObject
         int64_t stopSimulation();
         int64_t subtractObjectFromOctree(int64_t octreeHandle, int64_t objectHandle, int64_t options);
         int64_t subtractObjectFromPointCloud(int64_t pointCloudHandle, int64_t objectHandle, int64_t options, double tolerance);
+        int64_t testCB(int64_t a, std::string cb, int64_t b);
         std::tuple<std::string, std::vector<int64_t>, std::vector<int64_t>> textEditorClose(int64_t handle);
         std::tuple<std::string, std::vector<int64_t>, std::vector<int64_t>, bool> textEditorGetInfo(int64_t handle);
         int64_t textEditorOpen(std::string initText, std::string properties);
@@ -526,6 +527,12 @@ namespace RemoteAPIObject
 #endif
 #ifndef boolparam_dynamics_handling_enabled
         const int boolparam_dynamics_handling_enabled = 6;
+#endif
+#ifndef boolparam_execunsafe
+        const int boolparam_execunsafe = 58;
+#endif
+#ifndef boolparam_execunsafeext
+        const int boolparam_execunsafeext = 59;
 #endif
 #ifndef boolparam_exit_request
         const int boolparam_exit_request = 41;
@@ -3338,6 +3345,9 @@ namespace RemoteAPIObject
 #ifndef stringparam_resourcesdir
         const int stringparam_resourcesdir = 141;
 #endif
+#ifndef stringparam_sandboxlang
+        const int stringparam_sandboxlang = 144;
+#endif
 #ifndef stringparam_scene_name
         const int stringparam_scene_name = 15;
 #endif
@@ -4421,7 +4431,7 @@ namespace RemoteAPIObject
         bool hasParam(std::string name);
         std::string imageTransportCreatePublisher(std::string topicName, std::optional<int64_t> queueSize = {});
         std::string imageTransportCreateSubscription(std::string topicName, std::string topicCallback, std::optional<int64_t> queueSize = {});
-        void imageTransportPublish(std::string publisherHandle, std::string data, int64_t width, int64_t height, std::string frame_id);
+        void imageTransportPublish(std::string publisherHandle, std::vector<uint8_t> data, int64_t width, int64_t height, std::string frame_id);
         void imageTransportShutdownPublisher(std::string publisherHandle);
         void imageTransportShutdownSubscription(std::string subscriptionHandle);
         void importInterface(std::string name);
@@ -4569,14 +4579,14 @@ namespace RemoteAPIObject
 
         void addBuffer1ToWorkImg(int64_t visionSensorHandle);
         void addWorkImgToBuffer1(int64_t visionSensorHandle);
-        std::tuple<bool, std::string> binaryWorkImg(int64_t visionSensorHandle, double threshold, double oneProportion, double oneTol, double xCenter, double xCenterTol, double yCenter, double yCenterTol, double orient, double orientTol, double roundness, bool enableTrigger, std::optional<std::vector<double>> overlayColor = {});
-        std::tuple<bool, std::string> blobDetectionOnWorkImg(int64_t visionSensorHandle, double threshold, double minBlobSize, bool modifyWorkImage, std::optional<std::vector<double>> overlayColor = {});
+        std::tuple<bool, std::vector<uint8_t>> binaryWorkImg(int64_t visionSensorHandle, double threshold, double oneProportion, double oneTol, double xCenter, double xCenterTol, double yCenter, double yCenterTol, double orient, double orientTol, double roundness, bool enableTrigger, std::optional<std::vector<double>> overlayColor = {});
+        std::tuple<bool, std::vector<uint8_t>> blobDetectionOnWorkImg(int64_t visionSensorHandle, double threshold, double minBlobSize, bool modifyWorkImage, std::optional<std::vector<double>> overlayColor = {});
         void buffer1ToWorkImg(int64_t visionSensorHandle);
         void buffer2ToWorkImg(int64_t visionSensorHandle);
-        std::tuple<bool, std::string> changedPixelsOnWorkImg(int64_t visionSensorHandle, double threshold);
+        std::tuple<bool, std::vector<uint8_t>> changedPixelsOnWorkImg(int64_t visionSensorHandle, double threshold);
         void circularCutWorkImg(int64_t visionSensorHandle, double radius, bool copyToBuffer1);
         void colorSegmentationOnWorkImg(int64_t visionSensorHandle, double maxColorColorDistance);
-        std::tuple<bool, std::string, std::string> coordinatesFromWorkImg(int64_t visionSensorHandle, std::vector<int64_t> xyPointCount, bool evenlySpacedInAngularSpace, std::optional<bool> returnColorData = {});
+        std::tuple<bool, std::vector<uint8_t>, std::vector<uint8_t>> coordinatesFromWorkImg(int64_t visionSensorHandle, std::vector<int64_t> xyPointCount, bool evenlySpacedInAngularSpace, std::optional<bool> returnColorData = {});
         int64_t createVelodyneHDL64E(std::vector<int64_t> visionSensorHandles, double frequency, std::optional<int64_t> options = {}, std::optional<int64_t> pointSize = {}, std::optional<std::vector<double>> coloring_closeFarDist = {}, std::optional<double> displayScalingFactor = {});
         int64_t createVelodyneVPL16(std::vector<int64_t> visionSensorHandles, double frequency, std::optional<int64_t> options = {}, std::optional<int64_t> pointSize = {}, std::optional<std::vector<double>> coloring_closeFarDist = {}, std::optional<double> displayScalingFactor = {});
         int64_t destroyVelodyneHDL64E(int64_t velodyneHandle);
@@ -4585,8 +4595,8 @@ namespace RemoteAPIObject
         void edgeDetectionOnWorkImg(int64_t visionSensorHandle, double threshold);
         int64_t handleAnaglyphStereo(int64_t passiveVisionSensorHandle, std::vector<int64_t> activeVisionSensorHandles, std::optional<std::vector<double>> leftAndRightColors = {});
         int64_t handleSpherical(int64_t passiveVisionSensorHandleForRGB, std::vector<int64_t> activeVisionSensorHandles, double horizontalAngle, double verticalAngle, std::optional<int64_t> passiveVisionSensorHandleForDepth = {});
-        std::tuple<std::vector<double>, std::string> handleVelodyneHDL64E(int64_t velodyneHandle, double dt);
-        std::tuple<std::vector<double>, std::string> handleVelodyneVPL16(int64_t velodyneHandle, double dt);
+        std::tuple<std::vector<uint8_t>, std::vector<uint8_t>> handleVelodyneHDL64E(int64_t velodyneHandle, double dt);
+        std::tuple<std::vector<uint8_t>, std::vector<uint8_t>> handleVelodyneVPL16(int64_t velodyneHandle, double dt);
         void horizontalFlipWorkImg(int64_t visionSensorHandle);
         void intensityScaleOnWorkImg(int64_t visionSensorHandle, double start, double end, bool greyScale);
         void matrix3x3OnWorkImg(int64_t visionSensorHandle, int64_t passes, double multiplier, std::optional<std::vector<double>> matrix = {});
@@ -4607,7 +4617,7 @@ namespace RemoteAPIObject
         void swapBuffers(int64_t visionSensorHandle);
         void swapWorkImgWithBuffer1(int64_t visionSensorHandle);
         void uniformImgToWorkImg(int64_t visionSensorHandle, std::vector<double> color);
-        std::tuple<bool, std::string, std::string> velodyneDataFromWorkImg(int64_t visionSensorHandle, std::vector<int64_t> xyPointCount, double vAngle, std::optional<bool> returnColorData = {});
+        std::tuple<bool, std::vector<uint8_t>, std::vector<uint8_t>> velodyneDataFromWorkImg(int64_t visionSensorHandle, std::vector<int64_t> xyPointCount, double vAngle, std::optional<bool> returnColorData = {});
         void verticalFlipWorkImg(int64_t visionSensorHandle);
         void workImgToBuffer1(int64_t visionSensorHandle);
         void workImgToBuffer2(int64_t visionSensorHandle);
