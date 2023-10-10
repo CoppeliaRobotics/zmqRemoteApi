@@ -1,4 +1,4 @@
-classdef RemoteAPIClient
+classdef RemoteAPIClient < handle
     properties (Access = protected)
         verbose
         ctx
@@ -52,12 +52,16 @@ classdef RemoteAPIClient
         end
 
         function delete(obj)
-            req = struct('func', '_*end*_', 'args', {inputArgs}, 'uuid', {obj.uuid}, 'ver', {obj.VERSION}, 'lang', 'octave');
+            req = struct('func', '_*end*_', 'args', {{}}, 'uuid', {obj.uuid}, 'ver', {obj.VERSION}, 'lang', 'octave');
             req_raw = cbor.encode(req);
             zmq_send(obj.socket, req_raw);
             zmq_recv(obj.socket, obj.max_recv_sz);
 
             zmq_close(obj.socket);
+        end
+
+        function addCallback(obj, func, name)
+            obj.callbacks.(name) = func;
         end
 
         function outputArgs = call(obj, fn, inputArgs)
@@ -71,15 +75,15 @@ classdef RemoteAPIClient
             while isfield(resp, 'func')
                 args = {};
                 if ~strcmp(resp.func, '_*wait*_')
-                    if isfield(obj.callbacks, resp.func) % we cannot raise an error: e.g. a custom UI async callback cannot be assigned to a specific client
-                        callback = obj.callbacks(resp.func);
+                    if isfield(obj.callbacks, resp.func) % we cannot raise an error if not present: e.g. a custom UI async callback cannot be assigned to a specific client
+                        callback = obj.callbacks.(resp.func);
                         try
-                            a = callback(resp.func, resp.args);
+                            a = callback(resp.args);
                             if ~isempty(a)
                                 args = a;
                             end
-                        catch
-                            error('Error in callback: %s', lasterr());
+                        catch ME
+                            error('Error in callback: %s', ME.message);
                         end
                     end
                 end
@@ -90,7 +94,6 @@ classdef RemoteAPIClient
                 resp_raw = zmq_recv(obj.socket, obj.max_recv_sz);
                 resp = cbor.decode(resp_raw);
             end
-
             if isfield(resp, 'err')
                 error(resp.err);
             end

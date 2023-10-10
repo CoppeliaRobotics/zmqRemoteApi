@@ -79,6 +79,10 @@ classdef RemoteAPIClient
             obj.ctx.close();
         end
 
+        function addCallback(obj, func, name)
+            obj.callbacks(name) = func;
+        end
+
         function outputArgs = call(obj, fn, inputArgs)
             % Call function with specified arguments. Is Reentrant
             import org.zeromq.*;
@@ -97,10 +101,10 @@ classdef RemoteAPIClient
             while isfield(resp, 'func')
                 args = {};
                 if ~strcmp(resp.func, '_*wait*_')
-                    if isKey(obj.callbacks, resp.func) % we cannot raise an error: e.g. a custom UI async callback cannot be assigned to a specific client
+                    if isKey(obj.callbacks, resp.func) % we cannot raise an error if not present: e.g. a custom UI async callback cannot be assigned to a specific client
                         callback = obj.callbacks(resp.func);
                         try
-                            a = callback(resp.func, resp.args);
+                            a = callback(resp.args);
                             if ~isempty(a)
                                 args = a;
                             end
