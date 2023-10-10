@@ -75,6 +75,9 @@ function sim.setStepping(enabled)
     if currentFunction == sim.setStepping then
         retVal = currentClientInfo.steppingLevel
         if enabled then
+            if currentClientInfo.steppingLevel == 0 then
+                currentClientInfo.desiredStep = currentStep
+            end
             currentClientInfo.steppingLevel = currentClientInfo.steppingLevel + 1
         else
             if currentClientInfo.steppingLevel > 0 then

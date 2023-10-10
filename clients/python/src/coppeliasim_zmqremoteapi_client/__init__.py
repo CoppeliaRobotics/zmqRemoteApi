@@ -107,6 +107,8 @@ class RemoteAPIClient:
                         args=funcToRun(*reply['args'])
                 if args == None:
                     args = []
+                if not isinstance(args,list):
+                    args = [args]
                 self._send({'func': '_*executed*_', 'args': args})
             reply = self._recv()
         if 'err' in reply:
