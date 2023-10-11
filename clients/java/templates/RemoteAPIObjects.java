@@ -1,7 +1,7 @@
 #py from calltip import FuncDef
 #py from java_utils import *
 #py import json
-#py all_func_defs = FuncDef.from_calltips_json(pycpp.params['calltips_json'])
+#py all_func_defs = FuncDef.from_calltips_json(pycpp.params['calltips_json'], pycpp.params['include_objects'], pycpp.params['exclude_objects'], pycpp.params['exclude_methods'])
 #py f = open(pycpp.params['constants_json'], 'rt')
 #py all_constants = json.load(f)
 #py f.close()

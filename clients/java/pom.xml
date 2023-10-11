@@ -111,6 +111,12 @@
                                 <argument>calltips_json=${basedir}/calltips.json</argument>
                                 <argument>-p</argument>
                                 <argument>constants_json=${basedir}/constants.json</argument>
+                                <argument>-p</argument>
+                                <argument>include_objects=${GENERATE_INCLUDE_OBJECTS}</argument>
+                                <argument>-p</argument>
+                                <argument>exclude_objects=${GENERATE_EXCLUDE_OBJECTS}</argument>
+                                <argument>-p</argument>
+                                <argument>exclude_methods=${GENERATE_EXCLUDE_METHODS}</argument>
                                 <argument>-P</argument>
                                 <argument>${basedir}/../../tools</argument>
                                 <argument>-P</argument>
