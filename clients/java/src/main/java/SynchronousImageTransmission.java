@@ -25,7 +25,7 @@ public class SynchronousImageTransmission
         sim.setStepping(true);
         sim.startSimulation();
 
-        float startTime = sim.getSimulationTime();
+        double startTime = sim.getSimulationTime();
         while(sim.getSimulationTime() - startTime < 5)
         {
             Object[] r = sim.getVisionSensorImg(visionSensorHandle);

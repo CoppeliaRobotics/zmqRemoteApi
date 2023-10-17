@@ -13,7 +13,7 @@ public class Example
         sim.setStepping(true);
         sim.startSimulation();
 
-        float simTime = 0.0f;
+        double simTime = 0.0f;
         while((simTime = sim.getSimulationTime()) < 3)
         {
             System.out.println("Simulation time: " + simTime + " [s]");

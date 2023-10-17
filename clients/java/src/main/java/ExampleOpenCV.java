@@ -55,7 +55,7 @@ public class ExampleOpenCV
         sim.setStepping(true);
         sim.startSimulation();
 
-        float startTime = sim.getSimulationTime();
+        double startTime = sim.getSimulationTime();
         int skip = 2;
         while(sim.getSimulationTime() - startTime < 5)
         {
