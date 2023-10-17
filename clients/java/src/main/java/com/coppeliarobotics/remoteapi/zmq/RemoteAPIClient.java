@@ -61,7 +61,7 @@ public class RemoteAPIClient
         this.uuid = UUID.randomUUID().toString();
     }
 
-    public void close()
+    public void close() throws CborException
     {
         DataItem k_func = convertArg("func"),
                  k_args = convertArg("args"),
@@ -146,12 +146,12 @@ public class RemoteAPIClient
         if(this.verbose >= 1)
             System.out.println("Received: " + rep.toString());
 
-        while (rep.getKeys().contains(k_func))
+        while(rep.getKeys().contains(k_func))
         {
             // Check if the function name is "_*wait*_", in which case we just wait
             List<DataItem> callbackResults = new ArrayList<DataItem>();
-            UnicodeString respFunc = (UnicodeString) rep.get(k_func);
-            if (respFunc != null && !"_*wait*_".equals(respFunc.getString()))
+            co.nstant.in.cbor.model.UnicodeString respFunc = (co.nstant.in.cbor.model.UnicodeString)rep.get(k_func);
+            if(respFunc != null && !"_*wait*_".equals(respFunc.getString()))
             {
                 List<DataItem> callbackArgs = ((co.nstant.in.cbor.model.Array)rep.get(k_args)).getDataItems();
 
@@ -160,10 +160,10 @@ public class RemoteAPIClient
 
             co.nstant.in.cbor.model.Map req2 = new co.nstant.in.cbor.model.Map();
             req2.put(k_func, convertArg("_*executed*_"));
-            co.nstant.in.cbor.model.Array v_args = new co.nstant.in.cbor.model.Array();
+            co.nstant.in.cbor.model.Array v_args1 = new co.nstant.in.cbor.model.Array();
             for(int i = 0; i < callbackResults.size(); i++)
-                v_args.add(callbackResults.get(i));
-            req2.put(k_args, v_args);
+                v_args1.add(callbackResults.get(i));
+            req2.put(k_args, v_args1);
             req2.put(k_uuid, convertArg(this.uuid));
             req2.put(k_lang, convertArg("java"));
             req2.put(k_ver, convertArg(this.VERSION));
@@ -177,7 +177,7 @@ public class RemoteAPIClient
                 System.out.println("Received: " + rep.toString());
         }
 
-        if (rep.getKeys().contains(k_err))
+        if(rep.getKeys().contains(k_err))
         {
             DataItem error = rep.get(k_err);
             throw new RuntimeException(error != null ? toString(error) : "Unknown error");
@@ -193,14 +193,14 @@ public class RemoteAPIClient
 
     public void registerCallback(String funcName, Function<List<DataItem>, List<DataItem>> callback)
     {
-        if (callbacks.containsKey(funcName))
+        if(callbacks.containsKey(funcName))
             throw new RuntimeException("A callback is already registered for function: " + funcName);
         callbacks.put(funcName, callback);
     }
 
     private List<DataItem> executeCallback(String funcName, List<DataItem> args)
     {
-        if (callbacks.containsKey(funcName))
+        if(callbacks.containsKey(funcName))
         {
             Function<List<DataItem>, List<DataItem>> callback = callbacks.get(funcName);
             return callback.apply(args);
