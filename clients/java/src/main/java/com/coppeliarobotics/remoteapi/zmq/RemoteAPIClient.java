@@ -352,7 +352,7 @@ public class RemoteAPIClient
         return toBigInteger(item).longValue();
     }
 
-    public float toFloat(DataItem item)
+    public double toFloat(DataItem item)
     {
         return ((co.nstant.in.cbor.model.AbstractFloat)item).getValue();
     }
