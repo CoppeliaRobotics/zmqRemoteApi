@@ -51,6 +51,11 @@
                 <artifactId>exec-maven-plugin</artifactId>
                 <version>3.0.0</version>
                 <groupId>org.codehaus.mojo</groupId>
+                <!-- 
+                <configuration>
+                    <mainClass>Example</mainClass>
+                </configuration>
+                -->
                 <executions>
                     <execution>
                         <id>Extract calltips.json</id>

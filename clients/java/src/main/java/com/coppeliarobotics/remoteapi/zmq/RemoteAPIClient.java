@@ -79,6 +79,8 @@ public class RemoteAPIClient
         req.put(k_ver, convertArg(this.VERSION));
         this.send(req);
         this.recv();
+        this.rpcSocket.close();
+        this.context.close();
     }
 
     protected void send(DataItem req) throws CborException
@@ -191,7 +193,7 @@ public class RemoteAPIClient
 
     }
 
-    public void registerCallback(String funcName, Function<List<DataItem>, List<DataItem>> callback)
+    public void registerCallback(String funcName, Function<Object[], Object[]> callback)
     {
         if(callbacks.containsKey(funcName))
             throw new RuntimeException("A callback is already registered for function: " + funcName);
@@ -202,8 +204,8 @@ public class RemoteAPIClient
     {
         if(callbacks.containsKey(funcName))
         {
-            Function<List<DataItem>, List<DataItem>> callback = callbacks.get(funcName);
-            return callback.apply(args);
+            Function<Object[], Object[]> callback = callbacks.get(funcName);
+            return convertArgs(callback.apply(toObjects(args).toArray()));
         }
         else
             return new ArrayList<DataItem>(); // we cannot raise an error: e.g. a custom UI async callback cannot be assigned to a specific client
@@ -443,8 +445,8 @@ public class RemoteAPIClient
             objs = new RemoteAPIObjects(this);
         return objs;
     }
-
-    private Map<String, Function<List<DataItem>, List<DataItem>>> callbacks = new HashMap<>();
+    
+    private Map<String, Function<Object[], Object[]>> callbacks = new HashMap<>();
     private int verbose = -1;
     ZContext context;
     ZMQ.Socket rpcSocket;

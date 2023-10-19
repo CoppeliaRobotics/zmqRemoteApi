@@ -54,6 +54,7 @@ for h in handles:
 print('Program ended')
 
 ''' test callback on CoppeliaSim side:
+int ret = sim.testCB(int a, func cb, int b)
 function sim.testCB(a, cb, b)
     for i = 1, 99, 1 do
         cb(a, b)
