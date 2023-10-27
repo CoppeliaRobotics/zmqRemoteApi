@@ -1,4 +1,5 @@
-# Make sure to have CoppeliaSim running, with followig scene loaded:
+# Make sure to have the add-on "ZMQ remote API" running in
+# CoppeliaSim and have following scene loaded:
 #
 # scenes/messaging/pControllerViaRemoteApi.ttt
 #
