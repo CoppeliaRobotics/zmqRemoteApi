@@ -7,7 +7,10 @@ import uuid
 
 from contextlib import contextmanager
 
-import cbor
+try:
+    import cbor2 as cbor
+except ModuleNotFoundError:
+    import cbor
 
 import zmq
 import zmq.asyncio
@@ -30,6 +33,16 @@ def b64(b):
     return base64.b64encode(b).decode('ascii')
 
 
+def cbor_encode_anything(encoder, value):
+    if 'numpy' in sys.modules:
+        import numpy as np
+        if np.issubdtype(type(value), np.floating):
+            value = float(value)
+        if isinstance(value, np.ndarray):
+            value = value.tolist()
+    return encoder.encode(value)
+
+
 class RemoteAPIClient:
     """Client to connect to CoppeliaSim's ZMQ Remote API."""
 
@@ -38,7 +51,7 @@ class RemoteAPIClient:
         self.verbose = int(os.environ.get('VERBOSE', '0')) if verbose is None else verbose
         self.host, self.port, self.cntport = host, port, cntport or port + 1
         self.cntsocket = None
-        self.uuid=str(uuid.uuid4())
+        self.uuid = str(uuid.uuid4())
         # multiple sockets will be created for multiple concurrent requests, as needed
         self.sockets = []
 
@@ -77,7 +90,11 @@ class RemoteAPIClient:
     async def _send(self, socket, req):
         if self.verbose > 0:
             print('Sending:', req, socket)
-        rawReq = cbor.dumps(req)
+        kwargs = {}
+        if cbor.__package__ == 'cbor2':
+            # only 'cbor2' has a 'default' kwarg:
+            kwargs['default'] = cbor_encode_anything
+        rawReq = cbor.dumps(req, **kwargs)
         if self.verbose > 1:
             print(f'Sending raw len={len(rawReq)}, base64={b64(rawReq)}')
         await socket.send(rawReq)
@@ -127,7 +144,7 @@ class RemoteAPIClient:
         return await self.getObject(name)
 
     async def setStepping(self, enable=True):
-        return await self.call('setStepping', [enable,self.uuid])
+        return await self.call('setStepping', [enable, self.uuid])
 
     async def step(self, *, wait=True):
         await self.getStepCount(False)
