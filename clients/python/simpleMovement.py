@@ -1,9 +1,5 @@
 # Make sure to have the add-on "ZMQ remote API" running in
-# CoppeliaSim and have following scene loaded:
-#
-# scenes/messaging/movementViaRemoteApi.ttt
-#
-# Do not launch simulation, but run this script
+# CoppeliaSim. Do not launch simulation, but run this script
 
 import threading
 import math
@@ -28,7 +24,7 @@ def blueRobot():
     maxAccel = [accel, accel, accel, accel, accel, accel, accel]
     maxJerk = [jerk, jerk, jerk, jerk, jerk, jerk, jerk]
 
-    for i in range(2):
+    for i in range(1):
         targetPos1 = [90 * math.pi / 180, 90 * math.pi / 180, 170 * math.pi / 180, -90 * math.pi / 180, 90 * math.pi / 180, 90 * math.pi / 180, 0]
         moveToConfig(robotColor, jointHandles, maxVel, maxAccel, maxJerk, targetPos1)
 
@@ -59,7 +55,7 @@ def redRobot():
     maxAccel = [accel, accel, accel, accel, accel, accel, accel]
     maxJerk = [jerk, jerk, jerk, jerk, jerk, jerk, jerk]
 
-    for i in range(2):
+    for i in range(1):
         targetPos1 = [90 * math.pi / 180, 90 * math.pi / 180, 170 * math.pi / 180, -90 * math.pi / 180, 90 * math.pi / 180, 90 * math.pi / 180, 0]
         moveToConfig(robotColor, jointHandles, maxVel, maxAccel, maxJerk, targetPos1)
 
@@ -90,7 +86,7 @@ def greenRobot():
     
     initTr = sim.getObjectPose(targetHandle)
 
-    for i in range(2):
+    for i in range(1):
         goalTr = initTr.copy()
         goalTr[2] = goalTr[2] + 0.2
         sim.moveToPose(-1, initTr, maxVel, maxAccel, maxJerk, goalTr, poseCallback, {'robotColor': robotColor, 'handle': targetHandle})
@@ -132,6 +128,8 @@ def moveToConfig(robotColor, handles, maxVel, maxAccel, maxJerk, targetConf):
 print('Program started')
 client = RemoteAPIClient()
 sim = client.require('sim')
+
+sim.loadScene(sim.getStringParam(sim.stringparam_scenedefaultdir) + '/messaging/movementViaRemoteApi.ttt')
 
 global sims
 sims = {}

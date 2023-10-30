@@ -1,9 +1,5 @@
 # Make sure to have the add-on "ZMQ remote API" running in
-# CoppeliaSim and have following scene loaded:
-#
-# scenes/messaging/pControllerViaRemoteApi.ttt
-#
-# Do not launch simulation, but run this script
+# CoppeliaSim. Do not launch simulation, but run this script
 
 import math
 
@@ -16,6 +12,7 @@ maxForce = 100
 client = RemoteAPIClient()
 sim = client.require('sim')
 
+sim.loadScene(sim.getStringParam(sim.stringparam_scenedefaultdir) + '/messaging/pControllerViaRemoteApi.ttt')
 
 def moveToAngle(targetAngle):
     global jointAngle
