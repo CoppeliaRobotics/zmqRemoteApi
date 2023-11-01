@@ -33,3 +33,17 @@ std::optional<double> sim::getFloatSignal(std::string signalName)
         retVal=std::make_optional<double>(r[0].as<double>());
     return retVal;
 }
+
+json sim::callScriptFunction(std::string functionName, int64_t scriptHandle, json inArgs)
+{
+    bool _brk = false;
+    json _args(json_array_arg);
+    _args.push_back(functionName);
+    _args.push_back(scriptHandle);
+    if(!inArgs.is_array())
+        throw std::runtime_error("inArgs must be an array");
+    for(const auto& inArg : inArgs.array_range())
+        _args.push_back(inArg);
+    auto _ret = this->_client->call("sim.callScriptFunction", _args);
+    return _ret;
+}
