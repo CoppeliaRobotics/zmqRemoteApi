@@ -576,6 +576,7 @@ function sysCall_init()
     -- allClients.uuidXXX.holdCalls
     -- allClients.uuidXXX.callDepth
     -- allClients.uuidXXX.ignoreCallDepth
+    initSuccessful = true
 end
 
 function pythonCallback1(...)
@@ -599,6 +600,9 @@ function zmqRemoteApi.callRemoteFunction(functionName, _args)
 end
 
 function sysCall_cleanup()
+    if initSuccessful then
+        sim.setScriptInt32Param(sim.handle_self, sim.scriptintparam_autorestartonerror, 1)
+    end
     if simZMQ then
         simZMQ.close(rpcSocket)
         simZMQ.ctx_term(context)
