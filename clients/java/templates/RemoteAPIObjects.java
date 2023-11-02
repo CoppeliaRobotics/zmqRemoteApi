@@ -15,7 +15,7 @@ import co.nstant.in.cbor.*;
 
 public class RemoteAPIObjects
 {
-    private RemoteAPIClient client;
+    private final RemoteAPIClient client;
 
     public RemoteAPIObjects(RemoteAPIClient client)
     {
@@ -23,8 +23,13 @@ public class RemoteAPIObjects
     }
 
 #py for obj, func_defs in all_func_defs.items():
-    public class _`obj`
+    public class _`obj` extends `f"com.coppeliarobotics.remoteapi.zmq.objects.special._{obj}" if obj in ('sim', ) else "RemoteAPIObject"`
     {
+        public _`obj`(RemoteAPIClient client)
+        {
+            super(client);
+        }
+
 #py for func, func_def in func_defs.items():
 #py if func_def.in_args.is_variadic() or func_def.out_args.is_variadic():
 #py continue
@@ -32,9 +37,9 @@ public class RemoteAPIObjects
         public `java_rets(func_def.out_args)` `func`(Object... args) throws CborException
         {
 #py if len(func_def.out_args) == 0:
-            RemoteAPIObjects.this.client.call("`obj`.`func`", args);
+            this.client.call("`obj`.`func`", args);
 #py else:
-            Object[] rets = RemoteAPIObjects.this.client.call("`obj`.`func`", args);
+            Object[] rets = this.client.call("`obj`.`func`", args);
 #py if len(func_def.out_args) > 1:
             return rets;
 #py else:
@@ -60,7 +65,7 @@ public class RemoteAPIObjects
     }
 
     public _`obj` `obj`() {
-        return new _`obj`();
+        return new _`obj`(this.client);
     }
 
 #py endfor
