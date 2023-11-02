@@ -3,6 +3,7 @@
 import asyncio
 import sys
 import os
+import re
 import uuid
 
 from contextlib import contextmanager
@@ -33,6 +34,16 @@ def b64(b):
     return base64.b64encode(b).decode('ascii')
 
 
+def _getFuncIfExists(name):
+    method = None
+    try:
+        main_globals = sys.modules['__main__'].__dict__
+        method = main_globals[name]
+    except BaseException:
+        pass
+    return method
+
+
 def cbor_encode_anything(encoder, value):
     if 'numpy' in sys.modules:
         import numpy as np
@@ -50,25 +61,36 @@ class RemoteAPIClient:
         """Create client and connect to the ZMQ Remote API server."""
         self.verbose = int(os.environ.get('VERBOSE', '0')) if verbose is None else verbose
         self.host, self.port, self.cntport = host, port, cntport or port + 1
-        self.cntsocket = None
         self.uuid = str(uuid.uuid4())
+        self.callbackFuncs = {}
+        self.requiredItems = {}
+        self.VERSION = 2
+        main_globals = sys.modules['__main__'].__dict__
+        main_globals['require'] = self.require
         # multiple sockets will be created for multiple concurrent requests, as needed
         self.sockets = []
+
+    def __del__(self):
+        """Disconnect and destroy client."""
+        context = zmq.Context()
+        socket = context.socket(zmq.REQ)
+        socket.connect(f'tcp://{self.host}:{self.port}')
+        req = {'func': '_*end*_', 'args': [], 'uuid': self.uuid, 'ver': self.VERSION, 'lang': 'python'}
+        rawReq = cbor.dumps(req)
+        socket.send(rawReq)
+        socket.recv()
+        socket.close()
+        context.term()
 
     async def __aenter__(self):
         """Add one socket to the pool."""
         self.context = zmq.asyncio.Context()
-        self.cntsocket = self.context.socket(zmq.SUB)
-        self.cntsocket.setsockopt(zmq.SUBSCRIBE, b'')
-        self.cntsocket.setsockopt(zmq.CONFLATE, 1)
-        self.cntsocket.connect(f'tcp://{self.host}:{self.cntport}')
         return self
 
     async def __aexit__(self, *excinfo):
         """Disconnect and destroy client."""
         for socket in self.sockets:
             socket.close()
-        self.cntsocket.close()
         self.context.term()
 
     @contextmanager
@@ -88,13 +110,31 @@ class RemoteAPIClient:
             self.sockets.append(socket)
 
     async def _send(self, socket, req):
+        # convert a possible function to string:
+        if 'args' in req and isinstance(req['args'], (tuple, list)):
+            req['args'] = list(req['args'])
+            for i, arg in enumerate(req['args']):
+                if callable(arg):
+                    funcStr = str(arg)
+                    m = re.search(r"<function (.+) at ", funcStr)
+                    if m:
+                        funcStr = m.group(1)
+                        self.callbackFuncs[funcStr] = arg
+                        req['args'][i] = funcStr + "@func"
+            req['argsL'] = len(req['args'])
+        req['uuid'] = self.uuid
+        req['ver'] = self.VERSION
+        req['lang'] = 'python'
         if self.verbose > 0:
             print('Sending:', req, socket)
-        kwargs = {}
-        if cbor.__package__ == 'cbor2':
-            # only 'cbor2' has a 'default' kwarg:
-            kwargs['default'] = cbor_encode_anything
-        rawReq = cbor.dumps(req, **kwargs)
+        try:
+            kwargs = {}
+            if cbor.__package__ == 'cbor2':
+                # only 'cbor2' has a 'default' kwarg:
+                kwargs['default'] = cbor_encode_anything
+            rawReq = cbor.dumps(req, **kwargs)
+        except Exception as err:
+            raise Exception("illegal argument " + str(err))  # __EXCEPTION__
         if self.verbose > 1:
             print(f'Sending raw len={len(rawReq)}, base64={b64(rawReq)}')
         await socket.send(rawReq)
@@ -109,8 +149,6 @@ class RemoteAPIClient:
         return resp
 
     def _process_response(self, resp):
-        if not resp.get('success', False):
-            raise Exception(resp.get('error'))
         ret = resp['ret']
         if len(ret) == 1:
             return ret[0]
@@ -118,10 +156,31 @@ class RemoteAPIClient:
             return tuple(ret)
 
     async def call(self, func, args):
-        """Call function with specified arguments."""
+        # Call function with specified arguments. Is reentrant
         with self._socket() as socket:
             await self._send(socket, {'func': func, 'args': args})
-            return self._process_response(await self._recv(socket))
+            reply = await self._recv(socket)
+            
+            while isinstance(reply, dict) and 'func' in reply:
+                # We have a callback or a wait:
+                if reply['func'] == '_*wait*_':
+                    await self._send(socket, {'func': '_*executed*_', 'args': []})
+                else:
+                    if reply['func'] in self.callbackFuncs:
+                        args = self.callbackFuncs[reply['func']](*reply['args'])
+                    else:
+                        funcToRun = _getFuncIfExists(reply['func'])
+                        if funcToRun is not None:  # we cannot raise an error: e.g. a custom UI async callback cannot be assigned to a specific client
+                            args = funcToRun(*reply['args'])
+                    if args is None:
+                        args = []
+                    if not isinstance(args, list):
+                        args = [args]
+                    await self._send(socket, {'func': '_*executed*_', 'args': args})
+                reply = await self._recv(socket)
+            if 'err' in reply:
+                raise Exception(reply.get('err'))  # __EXCEPTION__
+            return self._process_response(reply)
 
     async def getObject(self, name, _info=None):
         """Retrieve remote object from server."""
@@ -137,25 +196,46 @@ class RemoteAPIClient:
                 setattr(ret, k, v['const'])
             else:
                 setattr(ret, k, self.getObject(f'{name}.{k}', _info=v))
+        if name == 'sim':
+            ret.getScriptFunctions = self.getScriptFunctions
         return ret
 
     async def require(self, name):
-        await self.call('zmqRemoteApi.require', [name])
-        return await self.getObject(name)
+        if name in self.requiredItems:
+            ret = self.requiredItems[name]
+        else:
+            await self.call('zmqRemoteApi.require', [name])
+            ret = await self.getObject(name)
+        return ret
 
-    async def setStepping(self, enable=True):
-        return await self.call('setStepping', [enable, self.uuid])
+    async def getScriptFunctions(self, scriptHandle):
 
-    async def step(self, *, wait=True):
-        await self.getStepCount(False)
-        await self.call('step', [self.uuid])
-        await self.getStepCount(wait)
+        async def inner_function(func, *args):
+            return await self.call('sim.callScriptFunction', (func, scriptHandle) + args)
 
-    async def getStepCount(self, wait):
-        try:
-            await self.cntsocket.recv(0 if wait else zmq.NOBLOCK)
-        except zmq.ZMQError:
-            pass
+        async def outer_function(func):
+            async def wrapper(*args):
+                return await inner_function(func, *args)
+            return wrapper
+
+        def custom_getattr(d, func):
+            return outer_function(func)
+
+        return type('ScriptFunctionWrapper', (object,), {'__getattr__': custom_getattr})()
+        
+    def getScriptFunctions(self, scriptHandle):
+        return type('', (object,), {
+            '__getattr__':
+                lambda _, func:
+                    lambda *args:
+                        self.call('sim.callScriptFunction', (func, scriptHandle) + args)
+        })()
+
+    async def setStepping(self, enable=True):  # for backw. comp., now via sim.setStepping
+        return await self.call('sim.setStepping', [enable])
+
+    async def step(self, *, wait=True):  # for backw. comp., now via sim.step
+        await self.call('sim.step', [wait])
 
 
 __all__ = ['RemoteAPIClient']
