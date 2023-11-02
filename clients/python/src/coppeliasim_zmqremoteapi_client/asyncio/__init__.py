@@ -213,7 +213,7 @@ class RemoteAPIClient:
         async def inner_function(func, *args):
             return await self.call('sim.callScriptFunction', (func, scriptHandle) + args)
 
-        async def outer_function(func):
+        def outer_function(func):
             async def wrapper(*args):
                 return await inner_function(func, *args)
             return wrapper
@@ -223,14 +223,6 @@ class RemoteAPIClient:
 
         return type('ScriptFunctionWrapper', (object,), {'__getattr__': custom_getattr})()
         
-    def getScriptFunctions(self, scriptHandle):
-        return type('', (object,), {
-            '__getattr__':
-                lambda _, func:
-                    lambda *args:
-                        self.call('sim.callScriptFunction', (func, scriptHandle) + args)
-        })()
-
     async def setStepping(self, enable=True):  # for backw. comp., now via sim.setStepping
         return await self.call('sim.setStepping', [enable])
 
