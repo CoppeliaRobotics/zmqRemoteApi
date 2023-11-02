@@ -203,12 +203,12 @@ namespace RemoteAPIObject
         return _ret[0].as<int64_t>();
     }
 
-    int64_t sim::adjustView(int64_t viewHandleOrIndex, int64_t associatedViewableObjectHandle, int64_t options, std::optional<std::string> viewLabel)
+    int64_t sim::adjustView(int64_t viewHandleOrIndex, int64_t objectHandle, int64_t options, std::optional<std::string> viewLabel)
     {
         bool _brk = false;
         json _args(json_array_arg);
         _args.push_back(viewHandleOrIndex);
-        _args.push_back(associatedViewableObjectHandle);
+        _args.push_back(objectHandle);
         _args.push_back(options);
         if(viewLabel)
         {
@@ -384,22 +384,6 @@ namespace RemoteAPIObject
         else _brk = true;
         auto _ret = this->_client->call("sim.buildPose", _args);
         return _ret[0].as<std::vector<double>>();
-    }
-
-    json sim::callScriptFunction(std::string functionName, int64_t scriptHandle, std::optional<json> inArg)
-    {
-        bool _brk = false;
-        json _args(json_array_arg);
-        _args.push_back(functionName);
-        _args.push_back(scriptHandle);
-        if(inArg)
-        {
-            if(_brk) throw std::runtime_error("no gaps allowed");
-            else _args.push_back(*inArg);
-        }
-        else _brk = true;
-        auto _ret = this->_client->call("sim.callScriptFunction", _args);
-        return _ret[0].as<json>();
     }
 
     int64_t sim::cameraFitToView(int64_t viewHandleOrIndex, std::optional<std::vector<int64_t>> objectHandles, std::optional<int64_t> options, std::optional<double> scaling)
@@ -1920,6 +1904,14 @@ namespace RemoteAPIObject
         return _ret[0].as<double>();
     }
 
+    bool sim::getRealTimeSimulation()
+    {
+        bool _brk = false;
+        json _args(json_array_arg);
+        auto _ret = this->_client->call("sim.getRealTimeSimulation", _args);
+        return _ret[0].as<bool>();
+    }
+
     std::vector<int64_t> sim::getReferencedHandles(int64_t objectHandle)
     {
         bool _brk = false;
@@ -2344,6 +2336,13 @@ namespace RemoteAPIObject
         _args.push_back(callType);
         auto _ret = this->_client->call("sim.handleEmbeddedScripts", _args);
         return _ret[0].as<int64_t>();
+    }
+
+    void sim::handleExtCalls()
+    {
+        bool _brk = false;
+        json _args(json_array_arg);
+        auto _ret = this->_client->call("sim.handleExtCalls", _args);
     }
 
     void sim::handleGraph(int64_t objectHandle, double simulationTime)
@@ -2908,12 +2907,11 @@ namespace RemoteAPIObject
         return _ret[0].as<std::vector<uint8_t>>();
     }
 
-    int64_t sim::pauseSimulation()
+    void sim::pauseSimulation()
     {
         bool _brk = false;
         json _args(json_array_arg);
         auto _ret = this->_client->call("sim.pauseSimulation", _args);
-        return _ret[0].as<int64_t>();
     }
 
     std::vector<uint8_t> sim::persistentDataRead(std::string dataTag)
@@ -4090,12 +4088,11 @@ namespace RemoteAPIObject
         auto _ret = this->_client->call("sim.setVisionSensorImg", _args);
     }
 
-    int64_t sim::startSimulation()
+    void sim::startSimulation()
     {
         bool _brk = false;
         json _args(json_array_arg);
         auto _ret = this->_client->call("sim.startSimulation", _args);
-        return _ret[0].as<int64_t>();
     }
 
     void sim::step()
@@ -4105,12 +4102,11 @@ namespace RemoteAPIObject
         auto _ret = this->_client->call("sim.step", _args);
     }
 
-    int64_t sim::stopSimulation()
+    void sim::stopSimulation()
     {
         bool _brk = false;
         json _args(json_array_arg);
         auto _ret = this->_client->call("sim.stopSimulation", _args);
-        return _ret[0].as<int64_t>();
     }
 
     int64_t sim::subtractObjectFromOctree(int64_t octreeHandle, int64_t objectHandle, int64_t options)
@@ -7415,6 +7411,57 @@ namespace RemoteAPIObject
         return std::make_tuple(_ret[0].as<std::vector<double>>(), _ret[1].as<std::vector<int64_t>>());
     }
 
+    simPython::simPython(RemoteAPIClient *client)
+        : _client(client)
+    {
+        _client->require("simPython");
+    }
+
+    json simPython::call(std::string scriptStateHandle, std::string func, json args)
+    {
+        bool _brk = false;
+        json _args(json_array_arg);
+        _args.push_back(scriptStateHandle);
+        _args.push_back(func);
+        _args.push_back(args);
+        auto _ret = this->_client->call("simPython.call", _args);
+        return _ret[0].as<json>();
+    }
+
+    std::string simPython::create()
+    {
+        bool _brk = false;
+        json _args(json_array_arg);
+        auto _ret = this->_client->call("simPython.create", _args);
+        return _ret[0].as<std::string>();
+    }
+
+    void simPython::destroy(std::string scriptStateHandle)
+    {
+        bool _brk = false;
+        json _args(json_array_arg);
+        _args.push_back(scriptStateHandle);
+        auto _ret = this->_client->call("simPython.destroy", _args);
+    }
+
+    std::vector<int64_t> simPython::getVersion()
+    {
+        bool _brk = false;
+        json _args(json_array_arg);
+        auto _ret = this->_client->call("simPython.getVersion", _args);
+        return _ret[0].as<std::vector<int64_t>>();
+    }
+
+    json simPython::run(std::string scriptStateHandle, std::string code)
+    {
+        bool _brk = false;
+        json _args(json_array_arg);
+        _args.push_back(scriptStateHandle);
+        _args.push_back(code);
+        auto _ret = this->_client->call("simPython.run", _args);
+        return _ret[0].as<json>();
+    }
+
     simQHull::simQHull(RemoteAPIClient *client)
         : _client(client)
     {
@@ -9469,6 +9516,11 @@ RemoteAPIObject::simMujoco RemoteAPIObjects::simMujoco()
 RemoteAPIObject::simOpenMesh RemoteAPIObjects::simOpenMesh()
 {
     return RemoteAPIObject::simOpenMesh(this->client);
+}
+
+RemoteAPIObject::simPython RemoteAPIObjects::simPython()
+{
+    return RemoteAPIObject::simPython(this->client);
 }
 
 RemoteAPIObject::simQHull RemoteAPIObjects::simQHull()

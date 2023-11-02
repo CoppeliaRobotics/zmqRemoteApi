@@ -26,7 +26,7 @@ namespace RemoteAPIObject
         void addParticleObjectItem(int64_t objectHandle, std::vector<double> itemData);
         void addReferencedHandle(int64_t objectHandle, int64_t referencedHandle);
         int64_t addScript(int64_t scriptType);
-        int64_t adjustView(int64_t viewHandleOrIndex, int64_t associatedViewableObjectHandle, int64_t options, std::optional<std::string> viewLabel = {});
+        int64_t adjustView(int64_t viewHandleOrIndex, int64_t objectHandle, int64_t options, std::optional<std::string> viewLabel = {});
         int64_t alignShapeBB(int64_t shapeHandle, std::vector<double> pose);
         std::tuple<double, double, double> alphaBetaGammaToYawPitchRoll(double alphaAngle, double betaAngle, double gammaAngle);
         int64_t announceSceneContentChange();
@@ -40,7 +40,6 @@ namespace RemoteAPIObject
         std::vector<double> buildMatrix(std::vector<double> position, std::vector<double> eulerAngles);
         std::vector<double> buildMatrixQ(std::vector<double> position, std::vector<double> quaternion);
         std::vector<double> buildPose(std::vector<double> position, std::vector<double> eulerAnglesOrAxis, std::optional<int64_t> mode = {}, std::optional<std::vector<double>> axis2 = {});
-        json callScriptFunction(std::string functionName, int64_t scriptHandle, std::optional<json> inArg = {});
         int64_t cameraFitToView(int64_t viewHandleOrIndex, std::optional<std::vector<int64_t>> objectHandles = {}, std::optional<int64_t> options = {}, std::optional<double> scaling = {});
         std::vector<json> changeEntityColor(int64_t entityHandle, std::vector<double> newColor, std::optional<int64_t> colorComponent = {});
         std::tuple<int64_t, std::vector<int64_t>> checkCollision(int64_t entity1Handle, int64_t entity2Handle);
@@ -167,6 +166,7 @@ namespace RemoteAPIObject
         std::tuple<std::vector<double>, std::vector<int64_t>> getQHull(std::vector<double> verticesIn);
         std::vector<double> getQuaternionFromMatrix(std::vector<double> matrix);
         double getRandom(std::optional<int64_t> seed = {});
+        bool getRealTimeSimulation();
         std::vector<int64_t> getReferencedHandles(int64_t objectHandle);
         std::tuple<std::vector<double>, double> getRotationAxis(std::vector<double> matrixStart, std::vector<double> matrixGoal);
         std::tuple<std::vector<uint8_t>, std::vector<int64_t>> getScaledImage(std::vector<uint8_t> imageIn, std::vector<int64_t> resolutionIn, std::vector<int64_t> desiredResolutionOut, int64_t options);
@@ -207,6 +207,7 @@ namespace RemoteAPIObject
         int64_t handleChildScripts(int64_t callType);
         int64_t handleDynamics(double deltaTime);
         int64_t handleEmbeddedScripts(int64_t callType);
+        void handleExtCalls();
         void handleGraph(int64_t objectHandle, double simulationTime);
         void handleJointMotion();
         std::tuple<int64_t, double, std::vector<double>, int64_t, std::vector<double>> handleProximitySensor(int64_t sensorHandle);
@@ -245,7 +246,7 @@ namespace RemoteAPIObject
         std::vector<uint8_t> packUInt16Table(std::vector<int64_t> uint16Numbers, std::optional<int64_t> startUint16Index = {}, std::optional<int64_t> uint16Count = {});
         std::vector<uint8_t> packUInt32Table(std::vector<int64_t> uint32Numbers, std::optional<int64_t> startUInt32Index = {}, std::optional<int64_t> uint32Count = {});
         std::vector<uint8_t> packUInt8Table(std::vector<int64_t> uint8Numbers, std::optional<int64_t> startUint8Index = {}, std::optional<int64_t> uint8count = {});
-        int64_t pauseSimulation();
+        void pauseSimulation();
         std::vector<uint8_t> persistentDataRead(std::string dataTag);
         void persistentDataWrite(std::string dataTag, std::vector<uint8_t> dataValue, std::optional<int64_t> options = {});
         std::vector<double> poseToMatrix(std::vector<double> pose);
@@ -351,9 +352,9 @@ namespace RemoteAPIObject
         void setStringParam(int64_t parameter, std::string stringState);
         void setStringSignal(std::string signalName, std::vector<uint8_t> signalValue);
         void setVisionSensorImg(int64_t sensorHandle, std::vector<uint8_t> image, std::optional<int64_t> options = {}, std::optional<std::vector<int64_t>> pos = {}, std::optional<std::vector<int64_t>> size = {});
-        int64_t startSimulation();
+        void startSimulation();
         void step();
-        int64_t stopSimulation();
+        void stopSimulation();
         int64_t subtractObjectFromOctree(int64_t octreeHandle, int64_t objectHandle, int64_t options);
         int64_t subtractObjectFromPointCloud(int64_t pointCloudHandle, int64_t objectHandle, int64_t options, double tolerance);
         int64_t testCB(int64_t a, std::string cb, int64_t b);
@@ -4380,6 +4381,21 @@ namespace RemoteAPIObject
 
     };
 
+    class simPython
+    {
+    protected:
+        RemoteAPIClient *_client;
+    public:
+        simPython(RemoteAPIClient *client);
+
+        json call(std::string scriptStateHandle, std::string func, json args);
+        std::string create();
+        void destroy(std::string scriptStateHandle);
+        std::vector<int64_t> getVersion();
+        json run(std::string scriptStateHandle, std::string code);
+
+    };
+
     class simQHull
     {
     protected:
@@ -4646,6 +4662,7 @@ public:
     RemoteAPIObject::simMTB simMTB();
     RemoteAPIObject::simMujoco simMujoco();
     RemoteAPIObject::simOpenMesh simOpenMesh();
+    RemoteAPIObject::simPython simPython();
     RemoteAPIObject::simQHull simQHull();
     RemoteAPIObject::simROS2 simROS2();
     RemoteAPIObject::simRRS1 simRRS1();
