@@ -27,9 +27,17 @@ public class Example
         while((simTime = sim.getSimulationTime()) < 3)
         {
             System.out.printf("Simulation time: %.2f [s]%n", simTime);
-            // Long retVal = sim.testCB(21,"myFunc@func",42);
+            // Long retVal = sim.testCB(21,"myFunc@func",42); // sim.testCB is calling back above "myFunc"
             sim.step();
         }
+        
+        // e.g. calling a child script function (make sure the child script is running!):
+        /*
+        Long sceneObject = sim.getObject("/path/to/object");
+        Long script = sim.getScript(sim.scripttype_childscript, sceneObject);
+        var reply = sim.callScriptFunction("functionName", script, "Hello", "Paul", 21);
+        */
+        
         sim.stopSimulation();
     }
 }

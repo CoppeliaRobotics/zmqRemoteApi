@@ -2,12 +2,12 @@
 #include <iostream>
 #include <iomanip>
 
-json func(const json& input)
+json myFunc(const json& input)
 {
     // std::cout << pretty_print(input) << "\n\n";
     return 21;
 }
-std::function<json(const json &)> myCallback = func;
+std::function<json(const json &)> myCallback = myFunc;
 
 int main()
 {
@@ -20,9 +20,21 @@ int main()
     while((simTime = sim.getSimulationTime()) < 3)
     {
         std::cout << "Simulation time: " << std::setprecision(3) << simTime << " [s]" << std::endl;
-        // auto retVal = sim.testCB(21, "myCallback@func", 42);
+        // auto retVal = sim.testCB(21, "myCallback@myFunc", 42); // sim.testCB is calling back above "myFunc"
         sim.step();
     }
+    
+    // e.g. calling a child script function (make sure the child script is running!):
+    /*
+    int sceneObject = sim.getObject("/path/to/object");
+    int script = sim.getScript(sim.scripttype_childscript, sceneObject);
+    auto args = json::array();
+    args.push_back("Hello");
+    args.push_back("Paul");
+    args.push_back(21);
+    auto reply = sim.callScriptFunction("functionName", script, args);
+    */
+    
     sim.stopSimulation();
     return 0;
 }

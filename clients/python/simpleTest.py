@@ -9,7 +9,7 @@ import time
 
 from coppeliasim_zmqremoteapi_client import RemoteAPIClient
 
-def func(input1, input2):
+def myFunc(input1, input2):
     print('Hello', input1, input2)
     return 21
 
@@ -30,7 +30,22 @@ while (t := sim.getSimulationTime()) < 3:
         'to client, i.e. non-stepping)'
     print(s)
     sim.addLog(sim.verbosity_scriptinfos, s)
-    # sim.testCB(21,func,42) # see below
+    # sim.testCB(21,myFunc,42) # see below. sim.testCB is calling back above "myFunc"
+
+# e.g. calling a child script function (make sure the child script is running!):
+'''    
+sceneObject = sim.getObject('/path/to/object')
+script = sim.getScript(sim.scripttype_childscript, sceneObject)
+reply = sim.callScriptFunction('functionName', script, 'Hello', 'Paul', 21)
+'''
+#or
+'''
+sceneObject = sim.getObject('/path/to/object')
+script = sim.getScript(sim.scripttype_childscript, sceneObject)
+funcs = client.getScriptFunctions(script)
+reply = funcs.functionName('Hello', 'Paul', 21)
+'''    
+    
 sim.stopSimulation()
 # If you need to make sure we really stopped:
 while sim.getSimulationState() != sim.simulation_stopped:

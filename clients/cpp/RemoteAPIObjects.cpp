@@ -2427,13 +2427,12 @@ namespace RemoteAPIObject
         return _ret[0].as<int64_t>();
     }
 
-    bool sim::initScript(int64_t scriptHandle)
+    void sim::initScript(int64_t scriptHandle)
     {
         bool _brk = false;
         json _args(json_array_arg);
         _args.push_back(scriptHandle);
         auto _ret = this->_client->call("sim.initScript", _args);
-        return _ret[0].as<bool>();
     }
 
     int64_t sim::insertObjectIntoOctree(int64_t octreeHandle, int64_t objectHandle, int64_t options, std::optional<std::vector<double>> color, std::optional<int64_t> tag)

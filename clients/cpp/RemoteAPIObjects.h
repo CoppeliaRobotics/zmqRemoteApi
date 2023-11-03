@@ -217,7 +217,7 @@ namespace RemoteAPIObject
         std::tuple<int64_t, std::vector<double>, std::vector<double>> handleVisionSensor(int64_t sensorHandle);
         std::tuple<std::vector<double>, std::vector<int64_t>> importMesh(int64_t fileformat, std::string pathAndFilename, int64_t options, double identicalVerticeTolerance, double scalingFactor);
         int64_t importShape(int64_t fileformat, std::string pathAndFilename, int64_t options, double identicalVerticeTolerance, double scalingFactor);
-        bool initScript(int64_t scriptHandle);
+        void initScript(int64_t scriptHandle);
         int64_t insertObjectIntoOctree(int64_t octreeHandle, int64_t objectHandle, int64_t options, std::optional<std::vector<double>> color = {}, std::optional<int64_t> tag = {});
         int64_t insertObjectIntoPointCloud(int64_t pointCloudHandle, int64_t objectHandle, int64_t options, double gridSize, std::optional<std::vector<double>> color = {}, std::optional<double> duplicateTolerance = {});
         int64_t insertPointsIntoPointCloud(int64_t pointCloudHandle, int64_t options, std::vector<double> points, std::optional<std::vector<double>> color = {}, std::optional<double> duplicateTolerance = {});
@@ -3027,6 +3027,9 @@ namespace RemoteAPIObject
 #endif
 #ifndef scriptexecorder_normal
         const int scriptexecorder_normal = 1;
+#endif
+#ifndef scriptintparam_autorestartonerror
+        const int scriptintparam_autorestartonerror = 7;
 #endif
 #ifndef scriptintparam_enabled
         const int scriptintparam_enabled = 4;
