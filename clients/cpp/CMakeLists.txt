@@ -21,7 +21,7 @@ find_package(Python3 REQUIRED COMPONENTS Interpreter)
 set(GENERATE OFF CACHE BOOL "Generate wrappers for objects and methods (requires CoppeliaSim to be running).")
 set(GENERATE_INCLUDE_OBJECTS "" CACHE STRING "Include only given objects (e.g.: \"sim,simIK\") or leave blank to include all objects in wrapper code generation.")
 set(GENERATE_EXCLUDE_OBJECTS "simEigen,simB0,simRemoteApi,simQML,simOMPL,simUI,simIM,simIGL,simURDF,simSkel,simBWF,simCmd,simSubprocess,simURLDrop,simWS,simZMQ" CACHE STRING "Exclude given objects (e.g.: \"simUI,simIM\") from being generated. Note: option GENERATE_INCLUDE_OBJECTS, if different from \"\", has precedence over this.")
-set(GENERATE_EXCLUDE_METHODS "sim.test,sim.auxFunc,sim.getStringSignal,sim.getInt32Signal,sim.getFloatSignal,sim.callScriptFunction" CACHE STRING "Exclude given methods (e.g.: \"sim.test,simUI.foo\") from being generated.")
+set(GENERATE_EXCLUDE_METHODS "sim.test,sim.auxFunc,sim.getStringSignal,sim.getInt32Signal,sim.getFloatSignal" CACHE STRING "Exclude given methods (e.g.: \"sim.test,simUI.foo\") from being generated.")
 
 include(FetchContent)
 
