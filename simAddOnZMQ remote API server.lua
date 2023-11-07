@@ -339,13 +339,11 @@ function zmqRemoteApi.handleRequest(req)
                             ret[i] = totxt(ret[i])
                         elseif args[i] == 2 then
                             ret[i] = tobin(ret[i])
-                        else
-                            if type(ret[i]) == 'table' and next(ret[i]) == nil then
-                                if args[i] == 3 then
-                                    ret[i] = tomap(ret[i])
-                                else
-                                    ret[i] = toarray(ret[i])
-                                end
+                        elseif type(ret[i]) == 'table' then
+                            if table.isarray(ret[i]) then
+                                ret[i] = toarray(ret[i])
+                            else
+                                ret[i] = tomap(ret[i])
                             end
                         end
                     end
