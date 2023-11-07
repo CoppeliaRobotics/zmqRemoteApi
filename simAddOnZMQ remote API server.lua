@@ -560,6 +560,7 @@ function sysCall_init()
 
     setAutoYield(false)
     currentStep = 0
+    insideExtCall = 0
     receiveIsNext = true
     pythonCallbacks = {pythonCallback1, pythonCallback2, pythonCallback3}
     asyncFuncCalls = {}
@@ -578,22 +579,41 @@ function sysCall_init()
 end
 
 function pythonCallback1(...)
-    return zmqRemoteApi.callRemoteFunction(currentClientInfo.pythonCallbackStrs[1], {...})
+    return zmqRemoteApi.callRemoteFunction(currentClientInfo.pythonCallbackStrs[1], {...}, true)
 end
 
 function pythonCallback2(...)
-    return zmqRemoteApi.callRemoteFunction(currentClientInfo.pythonCallbackStrs[2], {...})
+    return zmqRemoteApi.callRemoteFunction(currentClientInfo.pythonCallbackStrs[2], {...}, true)
 end
 
 function pythonCallback3(...)
-    return zmqRemoteApi.callRemoteFunction(currentClientInfo.pythonCallbackStrs[3], {...})
+    return zmqRemoteApi.callRemoteFunction(currentClientInfo.pythonCallbackStrs[3], {...}, true)
 end
 
-function zmqRemoteApi.callRemoteFunction(functionName, _args)
+function zmqRemoteApi.callRemoteFunction(functionName, _args, cb)
     -- This is called when a CoppeliaSim function (e.g. sim.moveToConfig) calls a callback
     zmqRemoteApi.send({func = functionName, args = _args})
-    currentClientInfo.replySent = true
-    _yield() -- Stays in here until '_*executed*_' received
+    if insideExtCall > 0 and cb then
+        -- Yielding has no effect, since we might be in a callback from a c routine (after a lua - c-boundary crossing, yieling doesn't work)
+        while true do
+            if zmqRemoteApi.poll() then
+                local req = zmqRemoteApi.receive()
+                if currentClientInfo == allClients[req.uuid] then
+                    if req.func == '_*executed*_' then
+                        currentClientInfo.lastReq = {args = req.args}
+                        break
+                    end
+                    local reply = zmqRemoteApi.handleRequest(req)
+                    zmqRemoteApi.send(reply)
+                else
+                    error('Multiple clients not allowed when lock acquired and in a callback')
+                end
+            end
+        end
+    else
+        currentClientInfo.replySent = true
+        _yield() -- Stays in here until '_*executed*_' received
+    end
     return unpack(currentClientInfo.lastReq.args)
 end
 
@@ -660,12 +680,16 @@ function sysCall_actuation()
 end
 
 function sysCall_ext(funcName, ...)
+    local retVal
+    insideExtCall = insideExtCall + 1
     local _args = {...}
     if _G[funcName] then -- for now ignore functions in tables
-        return _G[funcName](_args)
+        retVal = _G[funcName](_args)
     else
         asyncFuncCalls[#asyncFuncCalls + 1] = {func = funcName, args = _args}
     end
+    insideExtCall = insideExtCall - 1
+    return retVal
 end
 
 function sysCall_afterSimulation()
