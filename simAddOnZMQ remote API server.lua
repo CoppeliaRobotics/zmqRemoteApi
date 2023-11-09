@@ -7,35 +7,38 @@ function sim.setThreadAutomaticSwitch()
     -- Shadow the original function
 end
 
-originalStopSimulation = sim.stopSimulation
-function sim.stopSimulation()
-    for k, v in pairs(allClients) do
-        v.steppingLevel = 0
-        v.holdCalls = 0
-        v.desiredStep = currentStep + 10
-    end
-    originalStopSimulation()
-end
-
-originalAcquireLock = sim.acquireLock
-function sim.acquireLock()
-    if currentFunction == sim.acquireLock then
-        currentClientInfo.holdCalls = currentClientInfo.holdCalls + 1
-    else
-        originalAcquireLock()
-    end
-end
-
-originalReleaseLock = sim.releaseLock
-function sim.releaseLock()
-    if currentFunction == sim.releaseLock then
-        if currentClientInfo.holdCalls > 0 then
-            currentClientInfo.holdCalls = currentClientInfo.holdCalls - 1
+sim.stopSimulation = wrap(sim.stopSimulation, function(origFunc)
+    return function()
+        for k, v in pairs(allClients) do
+            v.steppingLevel = 0
+            v.holdCalls = 0
+            v.desiredStep = currentStep + 10
         end
-    else
-        originalReleaseLock()
+        origFunc()
     end
-end
+end)
+
+sim.acquireLock = wrap(sim.acquireLock, function(origFunc)
+    return function()
+        if currentFunction == 'sim.acquireLock' then
+            currentClientInfo.holdCalls = currentClientInfo.holdCalls + 1
+        else
+            origFunc()
+        end
+    end
+end)
+
+sim.releaseLock = wrap(sim.releaseLock, function(origFunc)
+    return function()
+        if currentFunction == 'sim.releaseLock' then
+            if currentClientInfo.holdCalls > 0 then
+                currentClientInfo.holdCalls = currentClientInfo.holdCalls - 1
+            end
+        else
+            origFunc()
+        end
+    end
+end)
 
 function sim.restartServer()
     leaveRequest = true
@@ -52,61 +55,67 @@ function sim.setThreadSwitchTiming(switchTiming)
     end
 end
 
-originalWait = sim.wait
-function sim.wait(dt, simTime)
-    if not simTime then
-        local st = sim.getSystemTime()
-        while sim.getSystemTime() - st < dt do _yield() end
-    else
-        originalWait(dt, true)
+sim.wait = wrap(sim.wait, function(origFunc)
+    return function(dt, simTime)
+        if not simTime then
+            local st = sim.getSystemTime()
+            while sim.getSystemTime() - st < dt do _yield() end
+        else
+            origFunc(dt, true)
+        end
     end
-end
+end)
 
-originalSetStepping = sim.setStepping
-function sim.setStepping(enabled)
+sim.setStepping = wrap(sim.setStepping, function(origFunc)
     -- Shadow original function:
     -- When stepping is true, CoppeliaSim ALWAYS blocks while Python runs some code
     -- When stepping is false, CoppeliaSim run concurently to Python, i.e. Python is "free" (until a request from Python comes)
-    local retVal = 0
-    if currentFunction == sim.setStepping then
-        retVal = currentClientInfo.steppingLevel
-        if enabled then
-            if currentClientInfo.steppingLevel == 0 then
-                currentClientInfo.desiredStep = currentStep
+    return function(enabled)
+        local retVal = 0
+        if currentFunction == 'sim.setStepping' then
+            retVal = currentClientInfo.steppingLevel
+            if enabled then
+                if currentClientInfo.steppingLevel == 0 then
+                    currentClientInfo.desiredStep = currentStep
+                end
+                currentClientInfo.steppingLevel = currentClientInfo.steppingLevel + 1
+            else
+                if currentClientInfo.steppingLevel > 0 then
+                    currentClientInfo.steppingLevel = currentClientInfo.steppingLevel - 1
+                end
             end
-            currentClientInfo.steppingLevel = currentClientInfo.steppingLevel + 1
         else
-            if currentClientInfo.steppingLevel > 0 then
-                currentClientInfo.steppingLevel = currentClientInfo.steppingLevel - 1
-            end
+            retVal = origFunc(enabled)
         end
-    else
-        retVal = originalSetStepping(enabled)
+        return retVal
     end
-    return retVal
-end
+end)
 
-originalStep = sim.step
-function sim.step()
-    if currentFunction == sim.step then -- when called from external client
-        if currentClientInfo.steppingLevel > 0 then
-            currentClientInfo.desiredStep = currentClientInfo.desiredStep + 1
-            while currentClientInfo.desiredStep > currentStep do
-                _yield() -- by default we wait for the simulation time to increase before returning
+sim.step = wrap(sim.step, function(origFunc)
+    return function()
+        if currentFunction == 'sim.step' then -- when called from external client
+            if sim.getSimulationState() ~= sim.simulation_stopped then
+                if currentClientInfo.steppingLevel > 0 then
+                    currentClientInfo.desiredStep = currentClientInfo.desiredStep + 1
+                    while currentClientInfo.desiredStep > currentStep do
+                        _yield() -- by default we wait for the simulation time to increase before returning
+                    end
+                end
             end
+        else
+            origFunc()
         end
-    else
-        originalStep()
     end
-end
+end)
 
--- via the remote API, we should always return a string:
-_S.readCustomDataBlock = sim.readCustomDataBlock
-function sim.readCustomDataBlock(obj, tag)
-    local retVal = _S.readCustomDataBlock(obj, tag)
-    if retVal == nil then retVal = '' end
-    return retVal
-end
+sim.readCustomDataBlock = wrap(sim.readCustomDataBlock, function(origFunc)
+    -- via the remote API, we should always return a string:
+    return function(obj, tag)
+        local retVal = origFunc(obj, tag)
+        if retVal == nil then retVal = '' end
+        return retVal
+    end
+end)
 
 -- Special handling of sim.yield:
 originalYield = sim.yield
@@ -292,7 +301,7 @@ function zmqRemoteApi.handleRequest(req)
         else
             if func == sim.switchThread or func == sim.yield then func = sim.step end
 
-            currentFunction = func
+            currentFunction = req['func']
 
             if func == sim.callScriptFunction then
                 if #args > 0 and (args[1] == '_evalExec' or args[1] == '_evalExecRet') and
@@ -303,14 +312,11 @@ function zmqRemoteApi.handleRequest(req)
             end
 
             -- Handle function arguments and possible nil values:
-            local cbi = 1
             for i = 1, #args, 1 do
                 if type(args[i]) == 'string' then
                     if args[i]:sub(-5) == "@func" then
                         local nm = args[i]:sub(1, -6)
-                        args[i] = pythonCallbacks[cbi]
-                        currentClientInfo.pythonCallbackStrs[cbi] = nm
-                        cbi = cbi + 1
+                        args[i] = function(...) return zmqRemoteApi.callRemoteFunction(nm, {...}, true) end
                     elseif args[i] == '_*NIL*_' then
                         args[i] = nil
                     end
@@ -476,7 +482,6 @@ function zmqRemoteApi.setClientInfoFromUUID(uuid)
         local cor = coroutine.create(coroutineMain)
         currentClientInfo = {
             corout = cor,
-            pythonCallbackStrs = {'', '', ''},
             idleSince = systTime,
             lastReq = nil,
             steppingLevel = 0,
@@ -562,12 +567,10 @@ function sysCall_init()
     currentStep = 0
     insideExtCall = 0
     receiveIsNext = true
-    pythonCallbacks = {pythonCallback1, pythonCallback2, pythonCallback3}
     asyncFuncCalls = {}
     currentClientInfo = nil
     allClients = {} -- uuid is the key, e.g.:
     -- allClients.uuidXXX.corout
-    -- allClients.uuidXXX.pythonCallbackStrs[3]
     -- allClients.uuidXXX.idleSince
     -- allClients.uuidXXX.lastReq
     -- allClients.uuidXXX.steppingLevel
@@ -576,18 +579,6 @@ function sysCall_init()
     -- allClients.uuidXXX.callDepth
     -- allClients.uuidXXX.ignoreCallDepth
     initSuccessful = true
-end
-
-function pythonCallback1(...)
-    return zmqRemoteApi.callRemoteFunction(currentClientInfo.pythonCallbackStrs[1], {...}, true)
-end
-
-function pythonCallback2(...)
-    return zmqRemoteApi.callRemoteFunction(currentClientInfo.pythonCallbackStrs[2], {...}, true)
-end
-
-function pythonCallback3(...)
-    return zmqRemoteApi.callRemoteFunction(currentClientInfo.pythonCallbackStrs[3], {...}, true)
 end
 
 function zmqRemoteApi.callRemoteFunction(functionName, _args, cb)
@@ -682,11 +673,19 @@ end
 function sysCall_ext(funcName, ...)
     local retVal
     insideExtCall = insideExtCall + 1
-    local _args = {...}
-    if _G[funcName] then -- for now ignore functions in tables
-        retVal = _G[funcName](_args)
+    
+    local fun = _G
+    if string.find(funcName, "%.") then
+        for w in funcName:gmatch("[^%.]+") do -- handle cases like sim.func or similar too
+            if fun[w] then fun = fun[w] end
+        end
     else
-        asyncFuncCalls[#asyncFuncCalls + 1] = {func = funcName, args = _args}
+        fun = fun[funcName]
+    end
+    if type(fun) == 'function' then
+        retVal = fun(...)
+    else
+        asyncFuncCalls[#asyncFuncCalls + 1] = {func = funcName, args = {...}}
     end
     insideExtCall = insideExtCall - 1
     return retVal
