@@ -49,3 +49,12 @@ In case of an error:
     "err": "Object does not exist. (in function 'sim.getObject')"
 }
 ```
+
+## Versions
+
+This table shows the protocol versions introduced with CoppeliaSim releases.
+
+| Protocol version  | CoppeliaSim version |
+| ----------------- | ------------------- |
+| 1                 | 4.5.1 and earlier   |
+| 2                 | 4.6.0 or later      |

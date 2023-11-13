@@ -4,11 +4,11 @@ build-backend = "hatchling.build"
 
 [project]
 name = "coppeliasim_zmqremoteapi_client"
-version = "0.1.0"
+version = "2.0.0"
 authors = [
     { name="Federico Ferri (Coppelia Robotics)", email="federico@coppeliarobotics.com" },
 ]
-description = "Client for the CoppeliaSim's zmqRemoteApi"
+description = "Client for the CoppeliaSim's zmqRemoteApi (protocol version 2)"
 readme = "README.md"
 requires-python = ">=3.8"
 classifiers = [

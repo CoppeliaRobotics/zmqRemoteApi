@@ -1,6 +1,6 @@
 # CoppeliaSim zmqRemoteApi Python client
 
-Python client for the zmqRemoteApi.
+Python client for the zmqRemoteApi, [protocol verison 2](https://github.com/CoppeliaRobotics/zmqRemoteApi/blob/master/PROTOCOL.md#versions) (note: starting from pip package version 2.x, the major version number (e.g. 2) matches with the protocol version used by CoppeliaSim).
 
 ## Installing:
 
