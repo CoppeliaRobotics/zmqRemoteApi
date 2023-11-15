@@ -7,6 +7,27 @@
     <version>1.0-SNAPSHOT</version>
     <name>coppeliaSim-zmqRemoteApi-java</name>
 
+    <profiles>
+        <profile>
+            <id>unix</id>
+            <activation>
+                <os><family>!Windows</family></os>
+            </activation>
+            <properties>
+                <Python3_EXECUTABLE>python3</Python3_EXECUTABLE>
+            </properties>
+        </profile>
+        <profile>
+            <id>win</id>
+            <activation>
+                <os><family>Windows</family></os>
+            </activation>
+            <properties>
+                <Python3_EXECUTABLE>py</Python3_EXECUTABLE>
+            </properties>
+        </profile>
+    </profiles>
+
     <properties>
         <!-- https://maven.apache.org/general.html#encoding-warning -->
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -68,7 +89,7 @@
                             <environmentVariables>
                                 <PYTHONPATH>${basedir}/../python/src</PYTHONPATH>
                             </environmentVariables>
-                            <executable>python3</executable>
+                            <executable>${Python3_EXECUTABLE}</executable>
                             <arguments>
                                 <argument>${basedir}/../../tools/get_raw_calltips.py</argument>
                                 <argument>${basedir}/calltips.json</argument>
@@ -86,7 +107,7 @@
                             <environmentVariables>
                                 <PYTHONPATH>${basedir}/../python/src</PYTHONPATH>
                             </environmentVariables>
-                            <executable>python3</executable>
+                            <executable>${Python3_EXECUTABLE}</executable>
                             <arguments>
                                 <argument>${basedir}/../../tools/get_constants.py</argument>
                                 <argument>${basedir}/constants.json</argument>
@@ -103,7 +124,7 @@
                             <environmentVariables>
                                 <PYTHONPATH>${basedir}/../python/src</PYTHONPATH>
                             </environmentVariables>
-                            <executable>python3</executable>
+                            <executable>${Python3_EXECUTABLE}</executable>
                             <arguments>
                                 <argument>${env.COPPELIASIM_ROOT_DIR}/programming/include/simStubsGen/external/pycpp/pycpp.py</argument>
                                 <argument>-i</argument>
