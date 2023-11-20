@@ -392,10 +392,12 @@ function zmqRemoteApi.receive()
         receiveIsNext = false
         rc, retVal = pcall(cbor.decode, dat)
         if not rc then
-            error(
-                retVal .. "\n" ..
-                    sim.transformBuffer(dat, sim.buffer_uint8, 1, 0, sim.buffer_base64)
-            )
+            if #dat < 2000 then
+                error(retVal .. "\n" .. sim.transformBuffer(dat, sim.buffer_uint8, 1, 0, sim.buffer_base64))
+            else
+                error('Error trying to decode received data:\n' .. retVal)
+            end
+        
         end
     else
         error('Trying to receive data from Python where a send is expected')
@@ -406,8 +408,15 @@ end
 function zmqRemoteApi.send(reply)
     if not receiveIsNext then
         local dat = reply
-        status, reply = pcall(cbor.encode, reply)
-        if not status then error(reply .. "\n" .. getAsString(dat)) end
+        local status, reply = pcall(cbor.encode, reply)
+        if not status then 
+            local s2, rep2 = pcall(getAsString, dat)
+            if s2 then
+                error(reply .. "\n" .. rep2)
+            else
+                error('Error while trying to encode data to send:\n' .. reply)
+            end
+        end
         currentClientInfo.idleSince = sim.getSystemTime()
         simZMQ.send(rpcSocket, reply, 0)
         receiveIsNext = true
