@@ -153,6 +153,7 @@ public class RemoteAPIClient
             // Check if the function name is "_*wait*_", in which case we just wait
             List<DataItem> callbackResults = new ArrayList<DataItem>();
             co.nstant.in.cbor.model.UnicodeString respFunc = (co.nstant.in.cbor.model.UnicodeString)rep.get(k_func);
+            // _*repeat*_ not yet implemented!
             if(respFunc != null && !"_*wait*_".equals(respFunc.getString()))
             {
                 List<DataItem> callbackArgs = ((co.nstant.in.cbor.model.Array)rep.get(k_args)).getDataItems();

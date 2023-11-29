@@ -8,13 +8,13 @@ function sim.setThreadAutomaticSwitch()
 end
 
 sim.stopSimulation = wrap(sim.stopSimulation, function(origFunc)
-    return function()
+    return function(wait)
         for k, v in pairs(allClients) do
             v.steppingLevel = 0
             v.holdCalls = 0
             v.desiredStep = currentStep + 10
         end
-        origFunc()
+        origFunc(wait)
     end
 end)
 
@@ -55,16 +55,18 @@ function sim.setThreadSwitchTiming(switchTiming)
     end
 end
 
+--[[
 sim.wait = wrap(sim.wait, function(origFunc)
     return function(dt, simTime)
         if not simTime then
             local st = sim.getSystemTime()
-            while sim.getSystemTime() - st < dt do _yield() end
+            while sim.getSystemTime() - st < dt do sim.step() end
         else
             origFunc(dt, true)
         end
     end
 end)
+--]]
 
 sim.setStepping = wrap(sim.setStepping, function(origFunc)
     -- Shadow original function:
@@ -91,22 +93,39 @@ sim.setStepping = wrap(sim.setStepping, function(origFunc)
     end
 end)
 
-sim.step = wrap(sim.step, function(origFunc)
-    return function()
-        if currentFunction == 'sim.step' then -- when called from external client
-            if sim.getSimulationState() ~= sim.simulation_stopped then
-                if currentClientInfo.steppingLevel > 0 then
-                    currentClientInfo.desiredStep = currentClientInfo.desiredStep + 1
-                    while currentClientInfo.desiredStep > currentStep do
-                        _yield() -- by default we wait for the simulation time to increase before returning
-                    end
-                end
-            end
-        else
-            origFunc()
+nakedYield = sim.yield
+function sim.step()
+    currentClientInfo.ignoreCallDepth = true
+    local running = ( sim.getSimulationState() ~= sim.simulation_stopped and sim.getSimulationState() ~= sim.simulation_paused )
+    if running then
+        if currentClientInfo.steppingLevel > 0 then
+            currentClientInfo.desiredStep = currentStep + 1
         end
     end
-end)
+    local cs = currentStep
+    while cs == currentStep do
+        -- stays inside here until we are ready with next simulation step (if running)
+
+        -- Handle buffered async calls first:
+        insideExtCall = insideExtCall + 1
+        local tmp = currentClientInfo.asyncFuncCalls
+        currentClientInfo.asyncFuncCalls = {}
+        for i = 1, #tmp, 1 do 
+            zmqRemoteApi.callRemoteFunction(tmp[i].func, tmp[i].args, true) 
+        end
+        insideExtCall = insideExtCall - 1
+        
+        zmqRemoteApi.send({func = '_*wait*_', args = {}}) -- Tell the client to wait and send '_*executed*_' back
+        nakedYield()
+        -- if we arrived here, we have received the '_*executed*_' reply from the same client
+        if not running then
+            break
+        end
+    end
+    currentClientInfo.ignoreCallDepth = false
+end
+sim.switchThread = sim.step
+sim.yield = sim.step
 
 sim.readCustomDataBlock = wrap(sim.readCustomDataBlock, function(origFunc)
     -- via the remote API, we should always return a string:
@@ -116,51 +135,6 @@ sim.readCustomDataBlock = wrap(sim.readCustomDataBlock, function(origFunc)
         return retVal
     end
 end)
-
--- Special handling of sim.yield:
-originalYield = sim.yield
-function sim.yield()
-    currentClientInfo.ignoreCallDepth = true
-    if sim.getSimulationState() ~= sim.simulation_stopped and sim.getSimulationState() ~=
-        sim.simulation_paused then
-        if currentClientInfo.steppingLevel > 0 then
-            currentClientInfo.desiredStep = currentStep + 1
-        end
-        local cs = currentStep
-        while cs == currentStep do
-            -- stays inside here until we are ready with next simulation step
-            _yield()
-        end
-    else
-        _yield()
-    end
-    currentClientInfo.ignoreCallDepth = false
-end
-
-function _yield()
-    -- Reentrant. Stays in here until the client returned '_*executed*_'
-    if not currentClientInfo.replySent then
-        -- We are switching before we sent a reply. This is a blocking command and
-        -- we need the Python client to wait:
-        zmqRemoteApi.send({func = '_*wait*_', args = {}}) -- Tell the client to wait and send '_*executed*_' back
-    end
-    currentClientInfo.replySent = false
-    originalYield()
-    -- The coroutine is resuming from here exactly. A new command must have arrived
-    while currentClientInfo.lastReq.func ~= '_*executed*_' do
-        local req = currentClientInfo.lastReq
-        currentClientInfo.lastReq = nil
-        local reply = zmqRemoteApi.handleRequest(req)
-        zmqRemoteApi.send(reply)
-        currentClientInfo.replySent = true
-        _yield()
-    end
-end
-
--- Special handling of sim.switchThread:
-function sim.switchThread()
-    sim.yield() -- using the modified version above
-end
 
 function tobin(data)
     local d = {data = data}
@@ -287,21 +261,25 @@ end
 function zmqRemoteApi.handleRequest(req)
     currentClientInfo.callDepth = currentClientInfo.callDepth + 1
     -- Handle buffered async calls first:
-    local tmp = asyncFuncCalls
-    asyncFuncCalls = {}
-    for i = 1, #tmp, 1 do zmqRemoteApi.callRemoteFunction(tmp[i].func, tmp[i].args) end
+
+    insideExtCall = insideExtCall + 1
+    local tmp = currentClientInfo.asyncFuncCalls
+    currentClientInfo.asyncFuncCalls = {}
+    for i = 1, #tmp, 1 do 
+        zmqRemoteApi.callRemoteFunction(tmp[i].func, tmp[i].args, true) 
+    end
+    insideExtCall = insideExtCall - 1
 
     if zmqRemoteApi.verbose() > 1 then print('Received request:', req) end
     local resp = {}
     if req['func'] ~= nil and req['func'] ~= '' then
-        local func = zmqRemoteApi.getField(req['func'])
+        local reqFunc = req['func']
+        local func = zmqRemoteApi.getField(reqFunc)
         local args = req['args'] or {}
         if not func then
-            resp['err'] = 'No such function: ' .. req['func']
+            resp['err'] = 'No such function: ' .. reqFunc
         else
-            if func == sim.switchThread or func == sim.yield then func = sim.step end
-
-            currentFunction = req['func']
+            currentFunction = reqFunc
 
             if func == sim.callScriptFunction then
                 if #args > 0 and (args[1] == '_evalExec' or args[1] == '_evalExecRet') and
@@ -337,7 +315,7 @@ function zmqRemoteApi.handleRequest(req)
             local status, retvals = xpcall(function()
                 local ret = {func(unpack(args, 1, req.argsL))}
                 -- Try to assign correct types to text and buffers:
-                local args = returnTypes[req['func']]
+                local args = returnTypes[reqFunc]
                 if args then
                     local cnt = math.min(#ret, #args)
                     for i = 1, cnt, 1 do
@@ -427,10 +405,13 @@ end
 
 function zmqRemoteApi.handleQueue()
     local startTime = sim.getSystemTime()
-
     -- First remove old clients:
     for k, v in pairs(allClients) do
-        if startTime - v.idleSince > 10 * 60 then
+        local to = 10 * 60
+        if v.timeout then
+            to =v.timeout
+        end
+        if startTime - v.idleSince > to then
             allClients[k] = nil
             break
         end
@@ -453,7 +434,7 @@ function zmqRemoteApi.handleQueue()
                     zmqRemoteApi.send({})
                     allClients[req.uuid] = nil -- the client left
                 else
-                    zmqRemoteApi.setClientInfoFromUUID(req.uuid)
+                    zmqRemoteApi.setClientInfoFromUUID(req.uuid, req.timeout)
                     currentClientInfo.lastReq = req
                     zmqRemoteApi.resumeCoroutine() -- simZMQ.send in there
                     if clients[req.uuid] == nil then
@@ -485,7 +466,7 @@ function zmqRemoteApi.handleQueue()
     end
 end
 
-function zmqRemoteApi.setClientInfoFromUUID(uuid)
+function zmqRemoteApi.setClientInfoFromUUID(uuid, optionalTimeoutInSecs)
     currentClientInfo = allClients[uuid]
     if currentClientInfo == nil then
         local cor = coroutine.create(coroutineMain)
@@ -497,6 +478,8 @@ function zmqRemoteApi.setClientInfoFromUUID(uuid)
             desiredStep = currentStep,
             callDepth = 0,
             holdCalls = 0,
+            timeout = optionalTimeoutInSecs,
+            asyncFuncCalls = {}
         }
 
         allClients[uuid] = currentClientInfo
@@ -507,24 +490,26 @@ function zmqRemoteApi.resumeCoroutine()
     if coroutine.status(currentClientInfo.corout) ~= 'dead' then
         local ok, errorMsg = coroutine.resume(currentClientInfo.corout)
         currentClientInfo.idleSince = sim.getSystemTime()
-        if errorMsg then error(debug.traceback(currentClientInfo.corout, errorMsg), 2) end
+        if errorMsg then 
+            error(debug.traceback(currentClientInfo.corout, errorMsg), 2)
+        end
     end
 end
 
-function sim.testCB(a, cb, b)
-    for i = 1, 99, 1 do cb(a, b) end
+function sim.testCB(a, cb, b, iterations)
+    iterations = iterations or 99
+    for i = 1, iterations, 1 do cb(a, b) end
     return cb(a, b)
 end
 
 function coroutineMain()
+    -- each client stays in here until timeout. Socket reads always happend in the 'handleQueue' (with an exception in callRemoteFunction)
     while true do
-        -- We resume the coroutine here, if no blocking function is underway
+        -- Here we always have a request pending that we need to process and answer
         local req = currentClientInfo.lastReq
-        currentClientInfo.lastReq = nil
-        local reply = zmqRemoteApi.handleRequest(req) -- We might switchThread in there, with blocking functions or callback functions
+        local reply = zmqRemoteApi.handleRequest(req) -- We might yield in there, with blocking functions or callback functions
         zmqRemoteApi.send(reply)
-        currentClientInfo.replySent = true
-        _yield()
+        nakedYield() -- we only resume once a new request has arrived from the same client
     end
 end
 
@@ -576,7 +561,6 @@ function sysCall_init()
     currentStep = 0
     insideExtCall = 0
     receiveIsNext = true
-    asyncFuncCalls = {}
     currentClientInfo = nil
     allClients = {} -- uuid is the key, e.g.:
     -- allClients.uuidXXX.corout
@@ -587,34 +571,48 @@ function sysCall_init()
     -- allClients.uuidXXX.holdCalls
     -- allClients.uuidXXX.callDepth
     -- allClients.uuidXXX.ignoreCallDepth
+    -- allClients.uuidXXX.timeout
+    -- allClients.uuidXXX.asyncFuncCalls
     initSuccessful = true
 end
 
 function zmqRemoteApi.callRemoteFunction(functionName, _args, cb)
     -- This is called when a CoppeliaSim function (e.g. sim.moveToConfig) calls a callback
     zmqRemoteApi.send({func = functionName, args = _args})
+    local retVal
     if insideExtCall > 0 and cb then
         -- Yielding has no effect, since we might be in a callback from a c routine (after a lua - c-boundary crossing, yieling doesn't work)
         while true do
             if zmqRemoteApi.poll() then
                 local req = zmqRemoteApi.receive()
                 if currentClientInfo == allClients[req.uuid] then
-                    if req.func == '_*executed*_' then
-                        currentClientInfo.lastReq = {args = req.args}
+                    if req.func ~= '_*executed*_' then
+                        local reply = zmqRemoteApi.handleRequest(req)
+                        zmqRemoteApi.send(reply)
+                    else
+                        retVal = req.args
                         break
                     end
-                    local reply = zmqRemoteApi.handleRequest(req)
-                    zmqRemoteApi.send(reply)
                 else
-                    error('Multiple clients not allowed when lock acquired and in a callback')
+                    zmqRemoteApi.send({func = '_*repeat*_', args = {}}) -- Tell the client to repeat the request, since we are busy now
                 end
             end
         end
     else
-        currentClientInfo.replySent = true
-        _yield() -- Stays in here until '_*executed*_' received
+        while true do
+            nakedYield()
+            -- if we arrived here, we have received a reply from the client, either the '_*executed*_' reply or a request to call a function
+            local req = currentClientInfo.lastReq
+            if req.func ~= '_*executed*_' then
+                local reply = zmqRemoteApi.handleRequest(req)
+                zmqRemoteApi.send(reply)
+            else
+                retVal = req.args
+                break
+            end
+        end
     end
-    return unpack(currentClientInfo.lastReq.args)
+    return unpack(retVal)
 end
 
 function sysCall_cleanup()
@@ -694,7 +692,9 @@ function sysCall_ext(funcName, ...)
     if type(fun) == 'function' then
         retVal = fun(...)
     else
-        asyncFuncCalls[#asyncFuncCalls + 1] = {func = funcName, args = {...}}
+        for k,v in pairs(allClients) do
+            v.asyncFuncCalls[#v.asyncFuncCalls + 1] = {func = funcName, args = {...}}
+        end
     end
     insideExtCall = insideExtCall - 1
     return retVal

@@ -70,18 +70,6 @@ class RemoteAPIClient:
         # multiple sockets will be created for multiple concurrent requests, as needed
         self.sockets = []
 
-    def __del__(self):
-        """Disconnect and destroy client."""
-        context = zmq.Context()
-        socket = context.socket(zmq.REQ)
-        socket.connect(f'tcp://{self.host}:{self.port}')
-        req = {'func': '_*end*_', 'args': [], 'uuid': self.uuid, 'ver': self.VERSION, 'lang': 'python'}
-        rawReq = cbor.dumps(req)
-        socket.send(rawReq)
-        socket.recv()
-        socket.close()
-        context.term()
-
     async def __aenter__(self):
         """Add one socket to the pool."""
         self.context = zmq.asyncio.Context()
@@ -169,9 +157,13 @@ class RemoteAPIClient:
             reply = await self._recv(socket)
             
             while isinstance(reply, dict) and 'func' in reply:
-                # We have a callback or a wait:
+                # We have a callback or a wait/repeat:
                 if reply['func'] == '_*wait*_':
-                    await self._send(socket, {'func': '_*executed*_', 'args': []})
+                    func = '_*executed*_'
+                    args = []
+                    await self._send(socket, {'func': func, 'args': args})
+                else if reply['func'] == '_*repeat*_':
+                    await self._send(socket, {'func': func, 'args': args})
                 else:
                     if reply['func'] in self.callbackFuncs:
                         args = self.callbackFuncs[reply['func']](*reply['args'])
@@ -183,8 +175,10 @@ class RemoteAPIClient:
                         args = []
                     if not isinstance(args, list):
                         args = [args]
-                    await self._send(socket, {'func': '_*executed*_', 'args': args})
+                    func = '_*executed*_'
+                    await self._send(socket, {'func': func, 'args': args})
                 reply = await self._recv(socket)
+                
             if 'err' in reply:
                 raise Exception(reply.get('err'))  # __EXCEPTION__
             return self._process_response(reply)

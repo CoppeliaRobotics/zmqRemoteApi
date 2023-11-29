@@ -1,13 +1,5 @@
 # Make sure to have the add-on "ZMQ remote API" running in
-# CoppeliaSim and have following scene loaded:
-#
-# scenes/messaging/synchronousImageTransmissionViaRemoteApi.ttt
-#
-# Do not launch simulation, but run this script
-#
-# All CoppeliaSim commands will run in blocking mode (block
-# until a reply from CoppeliaSim is received). For a non-
-# blocking example, see simpleTest-nonBlocking.py
+# CoppeliaSim. Do not launch simulation, but run this script
 
 import time
 
@@ -21,6 +13,8 @@ print('Program started')
 
 client = RemoteAPIClient()
 sim = client.require('sim')
+
+sim.loadScene(sim.getStringParam(sim.stringparam_scenedefaultdir) + '/messaging/synchronousImageTransmissionViaRemoteApi.ttt')
 
 visionSensorHandle = sim.getObject('/VisionSensor')
 passiveVisionSensorHandle = sim.getObject('/PassiveVisionSensor')

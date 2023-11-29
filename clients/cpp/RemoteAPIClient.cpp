@@ -44,7 +44,7 @@ namespace uuid {
 
 json bin(const char *s, int size)
 {
-    if(size == -1) size = strlen(s);
+    if(size == -1) size = int(strlen(s));
     return bin(reinterpret_cast<const uint8_t *>(s), size);
 }
 
@@ -55,7 +55,7 @@ json bin(const uint8_t *b, int size)
 
 json bin(const std::string &s)
 {
-    return bin(s.data(), s.length());
+    return bin(s.data(), int(s.length()));
 }
 
 json bin(const std::vector<uint8_t> &v)
@@ -96,50 +96,62 @@ json RemoteAPIClient::call(const std::string &func, std::initializer_list<json> 
     return call(func, json::make_array(args));
 }
 
-json RemoteAPIClient::call(const std::string &func, const json &args)
+json RemoteAPIClient::call(const std::string &_func, const json &_args)
 { // call function with specified arguments. Is reentrant
+    std::string func(_func);
+    json args = _args;
     json req;
     req["func"] = func;
     req["args"] = args;
     send(req);
-
     json resp = recv();
-    // std::cout << pretty_print(resp) << "\n\n";
 
     while (resp.contains("func"))
     { // We have a callback or a wait:
         if (resp["func"].as<std::string>().compare("_*wait*_")==0)
         {
+            func = "_*executed*_";
+            args = json::array();
             json req2;
-            req2["func"] = "_*executed*_";
-            req2["args"] = json::array();
+            req2["func"] = func;
+            req2["args"] = args;
+            send(req2);
+        }
+        else if (resp["func"].as<std::string>().compare("_*repeat*_")==0)
+        {
+            json req2;
+            req2["func"] = func;
+            req2["args"] = args;
             send(req2);
         }
         else
         { // call a callback
             auto funcToRun = _getFunctionPointerByName(resp["func"].as<std::string>());
             json rep;
-            rep["func"] = "_*executed*_";
-            if(funcToRun)
+            func = "_*executed*_";
+            if (funcToRun)
             {
                 auto r = funcToRun(resp["args"]);
                 if (!r.is_array())
                 {
                     auto arr = json::array();
                     arr.push_back(r);
-                    rep["args"] = arr;
+                    args = arr;
                 }
                 else
-                    rep["args"] = r;
+                    args = r;
             }
             else
-                rep["args"] = json::array();
+                args = json::array();
+            rep["func"] = func;
+            rep["args"] = args;
             send(rep);
         }
         resp = recv();
     }
+
     if (resp.contains("err"))
-        throw std::runtime_error(resp["err"].as<std::string>());
+        throw std::runtime_error(resp["err"].as<std::string>().c_str());
     const auto &ret = resp["ret"];
     return ret;
 }

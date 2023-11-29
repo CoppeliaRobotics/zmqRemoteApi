@@ -74,6 +74,7 @@ classdef RemoteAPIClient < handle
 
             while isfield(resp, 'func')
                 args = {};
+                % _*repeat*_ not yet implemented!
                 if ~strcmp(resp.func, '_*wait*_')
                     if isfield(obj.callbacks, resp.func) % we cannot raise an error if not present: e.g. a custom UI async callback cannot be assigned to a specific client
                         callback = obj.callbacks.(resp.func);

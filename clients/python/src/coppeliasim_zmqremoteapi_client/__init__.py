@@ -51,18 +51,20 @@ class RemoteAPIClient:
         self.callbackFuncs = {}
         self.requiredItems = {}
         self.VERSION = 2
+        self.timeout = 10 * 60
+        self.sendCnt = 0
         main_globals = sys.modules['__main__'].__dict__
         main_globals['require'] = self.require
 
     def __del__(self):
         """Disconnect and destroy client."""
-        self._send({'func': '_*end*_', 'args': []})
-        self._recv()
+        # here we can't use self.socket anymore (i.e. sending). Instead we have a timeout on the CoppeliaSim side
         self.socket.close()
         self.context.term()
-
+        
     def _send(self, req):
         # convert a possible function to string:
+        self.sendCnt = self.sendCnt + 1
         if 'args' in req and isinstance(req['args'], (tuple, list)):
             req['args'] = list(req['args'])
             for i, arg in enumerate(req['args']):
@@ -82,8 +84,10 @@ class RemoteAPIClient:
                         req['args'][i] = funcStr + "@func"
             req['argsL'] = len(req['args'])
         req['uuid'] = self.uuid
-        req['ver'] = self.VERSION
-        req['lang'] = 'python'
+        if self.sendCnt == 1:
+            req['ver'] = self.VERSION
+            req['lang'] = 'python'
+            req['timeout'] = self.timeout
         if self.verbose > 0:
             print('Sending:', req)
         try:
@@ -119,21 +123,27 @@ class RemoteAPIClient:
         self._send({'func': func, 'args': args})
         reply = self._recv()
         while isinstance(reply, dict) and 'func' in reply:
-            # We have a callback or a wait:
+            # We have a callback or a wait/repeat:
             if reply['func'] == '_*wait*_':
-                self._send({'func': '_*executed*_', 'args': []})
+                func = '_*executed*_'
+                args = []
+                self._send({'func': func, 'args': args})
             else:
-                if reply['func'] in self.callbackFuncs:
-                    args = self.callbackFuncs[reply['func']](*reply['args'])
+                if reply['func'] == '_*repeat*_':
+                    self._send({'func': func, 'args': args})
                 else:
-                    funcToRun = _getFuncIfExists(reply['func'])
-                    if funcToRun is not None:  # we cannot raise an error: e.g. a custom UI async callback cannot be assigned to a specific client
-                        args = funcToRun(*reply['args'])
-                if args is None:
-                    args = []
-                if not isinstance(args, list):
-                    args = [args]
-                self._send({'func': '_*executed*_', 'args': args})
+                    if reply['func'] in self.callbackFuncs:
+                        args = self.callbackFuncs[reply['func']](*reply['args'])
+                    else:
+                        funcToRun = _getFuncIfExists(reply['func'])
+                        if funcToRun is not None:  # we cannot raise an error: e.g. a custom UI async callback cannot be assigned to a specific client
+                            args = funcToRun(*reply['args'])
+                    if args is None:
+                        args = []
+                    if not isinstance(args, list):
+                        args = [args]
+                    func = '_*executed*_'
+                    self._send({'func': func, 'args': args})
             reply = self._recv()
         if 'err' in reply:
             raise Exception(reply.get('err'))  # __EXCEPTION__
