@@ -14,7 +14,7 @@ set(CMAKE_MODULE_PATH
     ${COPPELIASIM_INCLUDE_DIR}/cmake)
 find_package(CoppeliaSim 4.5.1.7 REQUIRED)
 
-coppeliasim_add_addon("simAddOnZMQ remote API server.lua")
+coppeliasim_add_addon("addOns/simAddOnZMQ remote API server.lua")
 
 coppeliasim_add_resource_directory(clients SUBDIR programming/zmqRemoteApi)
 coppeliasim_add_resource_directory(tools SUBDIR programming/zmqRemoteApi)
