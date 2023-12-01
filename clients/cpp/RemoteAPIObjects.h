@@ -354,7 +354,7 @@ namespace RemoteAPIObject
         void setVisionSensorImg(int64_t sensorHandle, std::vector<uint8_t> image, std::optional<int64_t> options = {}, std::optional<std::vector<int64_t>> pos = {}, std::optional<std::vector<int64_t>> size = {});
         void startSimulation();
         void step();
-        void stopSimulation();
+        void stopSimulation(std::optional<bool> wait = {});
         int64_t subtractObjectFromOctree(int64_t octreeHandle, int64_t objectHandle, int64_t options);
         int64_t subtractObjectFromPointCloud(int64_t pointCloudHandle, int64_t objectHandle, int64_t options, double tolerance);
         int64_t testCB(int64_t a, std::string cb, int64_t b);
@@ -1222,6 +1222,9 @@ namespace RemoteAPIObject
 #ifndef dummyfloatparam_size
         const int dummyfloatparam_size = 10003;
 #endif
+#ifndef dummyintparam_dummytype
+        const int dummyintparam_dummytype = 10000;
+#endif
 #ifndef dummyintparam_follow_path
         const int dummyintparam_follow_path = 10001;
 #endif
@@ -1233,6 +1236,21 @@ namespace RemoteAPIObject
 #endif
 #ifndef dummylink_dyntendon
         const int dummylink_dyntendon = 7;
+#endif
+#ifndef dummystringparam_assemblytag
+        const int dummystringparam_assemblytag = 10004;
+#endif
+#ifndef dummytype_assembly
+        const int dummytype_assembly = 9;
+#endif
+#ifndef dummytype_default
+        const int dummytype_default = 8;
+#endif
+#ifndef dummytype_dynloopclosure
+        const int dummytype_dynloopclosure = 0;
+#endif
+#ifndef dummytype_dyntendon
+        const int dummytype_dyntendon = 7;
 #endif
 #ifndef dynmat_default
         const int dynmat_default = 2310013;
@@ -2539,6 +2557,9 @@ namespace RemoteAPIObject
 #ifndef objectproperty_dontshowasinsidemodel
         const int objectproperty_dontshowasinsidemodel = 256;
 #endif
+#ifndef objectproperty_hiddenforsimulation
+        const int objectproperty_hiddenforsimulation = 65536;
+#endif
 #ifndef objectproperty_hierarchyhiddenmodelchild
         const int objectproperty_hierarchyhiddenmodelchild = 32768;
 #endif
@@ -3454,6 +3475,9 @@ namespace RemoteAPIObject
 #ifndef syscb_customcallback4
         const int syscb_customcallback4 = 23;
 #endif
+#ifndef syscb_data
+        const int syscb_data = 45;
+#endif
 #ifndef syscb_dyn
         const int syscb_dyn = 40;
 #endif
@@ -3592,6 +3616,9 @@ namespace RemoteAPIObject
 #ifndef visionfloatparam_pov_blur_distance
         const int visionfloatparam_pov_blur_distance = 1014;
 #endif
+#ifndef visionintparam_depthignored
+        const int visionintparam_depthignored = 1020;
+#endif
 #ifndef visionintparam_disabled_light_components
         const int visionintparam_disabled_light_components = 1006;
 #endif
@@ -3618,6 +3645,9 @@ namespace RemoteAPIObject
 #endif
 #ifndef visionintparam_resolution_y
         const int visionintparam_resolution_y = 1003;
+#endif
+#ifndef visionintparam_rgbignored
+        const int visionintparam_rgbignored = 1020;
 #endif
 #ifndef visionintparam_windowed_pos_x
         const int visionintparam_windowed_pos_x = 1011;

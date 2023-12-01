@@ -4101,10 +4101,16 @@ namespace RemoteAPIObject
         auto _ret = this->_client->call("sim.step", _args);
     }
 
-    void sim::stopSimulation()
+    void sim::stopSimulation(std::optional<bool> wait)
     {
         bool _brk = false;
         json _args(json_array_arg);
+        if(wait)
+        {
+            if(_brk) throw std::runtime_error("no gaps allowed");
+            else _args.push_back(*wait);
+        }
+        else _brk = true;
         auto _ret = this->_client->call("sim.stopSimulation", _args);
     }
 
