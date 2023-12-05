@@ -224,6 +224,65 @@ class RemoteAPIClient:
 
         return type('ScriptFunctionWrapper', (object,), {'__getattr__': custom_getattr})()
         
+    def copyTable(self, table):
+        import copy 
+        return copy.deepcopy(table)
+        
+    def _packXTable(self, table, w, start, cnt):
+        import array
+        if cnt == 0:
+            cnt = len(table) - start
+        arr = array.array(w, table[start:(start + cnt)])
+        return arr.tobytes()
+
+    def _unpackXTable(self, data, w, start, cnt, off):
+        import array
+        arr = array.array(w)
+        start *= arr.itemsize
+        start += off
+        if cnt == 0:
+            cnt =  len(data) - start
+        else:
+            cnt *= arr.itemsize
+        arr.frombytes(data[start:(start + cnt)])
+        return list(arr)
+
+    def packUInt8Table(self, table, start=0, cnt=0):
+        return self._packXTable(table, 'B', start, cnt)
+
+    def unpackUInt8Table(self, data, start=0, cnt=0, off=0):
+        return self._unpackXTable(data, 'B', start, cnt, off)
+        
+    def packUInt16Table(self, table, start=0, cnt=0):
+        return self._packXTable(table, 'H', start, cnt)
+        
+    def unpackUInt16Table(self, data, start=0, cnt=0, off=0):
+        return self._unpackXTable(data, 'H', start, cnt, off)
+        
+    def packUInt32Table(self, table, start=0, cnt=0):
+        return self._packXTable(table, 'L', start, cnt)
+        
+    def unpackUInt32Table(self, data, start=0, cnt=0, off=0):
+        return self._unpackXTable(data, 'L', start, cnt, off)
+        
+    def packInt32Table(self, table, start=0, cnt=0):
+        return self._packXTable(table, 'l', start, cnt)
+        
+    def unpackInt32Table(self, data, start=0, cnt=0, off=0):
+        return self._unpackXTable(data, 'l', start, cnt, off)
+        
+    def packFloatTable(self, table, start=0, cnt=0):
+        return self._packXTable(table, 'f', start, cnt)
+        
+    def unpackFloatTable(self, data, start=0, cnt=0, off=0):
+        return self._unpackXTable(data, 'f', start, cnt, off)
+        
+    def packDoubleTable(self, table, start=0, cnt=0):
+        return self._packXTable(table, 'd', start, cnt)
+
+    def unpackDoubleTable(self, data, start=0, cnt=0, off=0):
+        return self._unpackXTable(data, 'd', start, cnt, off)
+        
     async def setStepping(self, enable=True):  # for backw. comp., now via sim.setStepping
         return await self.call('sim.setStepping', [enable])
 

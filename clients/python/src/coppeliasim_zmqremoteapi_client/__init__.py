@@ -166,6 +166,19 @@ class RemoteAPIClient:
 
         if name == 'sim':
             ret.getScriptFunctions = self.getScriptFunctions
+            ret.copyTable = self.copyTable
+            ret.packUInt8Table = self.packUInt8Table
+            ret.unpackUInt8Table = self.unpackUInt8Table
+            ret.packUInt16Table = self.packUInt16Table
+            ret.unpackUInt16Table = self.unpackUInt16Table
+            ret.packUInt32Table = self.packUInt32Table
+            ret.unpackUInt32Table = self.unpackUInt32Table
+            ret.packInt32Table = self.packInt32Table
+            ret.unpackInt32Table = self.unpackInt32Table
+            ret.packFloatTable = self.packFloatTable
+            ret.unpackFloatTable = self.unpackFloatTable
+            ret.packDoubleTable = self.packDoubleTable
+            ret.unpackDoubleTable = self.unpackDoubleTable
 
         return ret
 
@@ -185,12 +198,70 @@ class RemoteAPIClient:
                         self.call('sim.callScriptFunction', (func, scriptHandle) + args)
         })()
 
+    def copyTable(self, table):
+        import copy 
+        return copy.deepcopy(table)
+        
+    def _packXTable(self, table, w, start, cnt):
+        import array
+        if cnt == 0:
+            cnt = len(table) - start
+        arr = array.array(w, table[start:(start + cnt)])
+        return arr.tobytes()
+
+    def _unpackXTable(self, data, w, start, cnt, off):
+        import array
+        arr = array.array(w)
+        start *= arr.itemsize
+        start += off
+        if cnt == 0:
+            cnt =  len(data) - start
+        else:
+            cnt *= arr.itemsize
+        arr.frombytes(data[start:(start + cnt)])
+        return list(arr)
+
+    def packUInt8Table(self, table, start=0, cnt=0):
+        return self._packXTable(table, 'B', start, cnt)
+
+    def unpackUInt8Table(self, data, start=0, cnt=0, off=0):
+        return self._unpackXTable(data, 'B', start, cnt, off)
+        
+    def packUInt16Table(self, table, start=0, cnt=0):
+        return self._packXTable(table, 'H', start, cnt)
+        
+    def unpackUInt16Table(self, data, start=0, cnt=0, off=0):
+        return self._unpackXTable(data, 'H', start, cnt, off)
+        
+    def packUInt32Table(self, table, start=0, cnt=0):
+        return self._packXTable(table, 'L', start, cnt)
+        
+    def unpackUInt32Table(self, data, start=0, cnt=0, off=0):
+        return self._unpackXTable(data, 'L', start, cnt, off)
+        
+    def packInt32Table(self, table, start=0, cnt=0):
+        return self._packXTable(table, 'l', start, cnt)
+        
+    def unpackInt32Table(self, data, start=0, cnt=0, off=0):
+        return self._unpackXTable(data, 'l', start, cnt, off)
+        
+    def packFloatTable(self, table, start=0, cnt=0):
+        return self._packXTable(table, 'f', start, cnt)
+        
+    def unpackFloatTable(self, data, start=0, cnt=0, off=0):
+        return self._unpackXTable(data, 'f', start, cnt, off)
+        
+    def packDoubleTable(self, table, start=0, cnt=0):
+        return self._packXTable(table, 'd', start, cnt)
+
+    def unpackDoubleTable(self, data, start=0, cnt=0, off=0):
+        return self._unpackXTable(data, 'd', start, cnt, off)
+        
     def setStepping(self, enable=True):  # for backw. comp., now via sim.setStepping
         return self.call('sim.setStepping', [enable])
 
     def step(self, *, wait=True):  # for backw. comp., now via sim.step
         self.call('sim.step', [wait])
-
 
 if __name__ == '__console__':
     client = RemoteAPIClient()

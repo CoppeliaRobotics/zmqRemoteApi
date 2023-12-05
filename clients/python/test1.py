@@ -30,6 +30,12 @@ client.timeout = 5
 sim = client.require('sim')
 simIK = client.require('simIK')
 
+a = [1,2,3]
+b = sim.packFloatTable(a)
+c = sim.unpackFloatTable(b)
+print(a)
+print(c)
+
 sim.loadScene('')
 
 simIK.createEnvironment()
