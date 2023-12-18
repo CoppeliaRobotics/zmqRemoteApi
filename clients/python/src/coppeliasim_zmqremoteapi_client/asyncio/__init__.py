@@ -162,7 +162,7 @@ class RemoteAPIClient:
                     func = '_*executed*_'
                     args = []
                     await self._send(socket, {'func': func, 'args': args})
-                else if reply['func'] == '_*repeat*_':
+                elif reply['func'] == '_*repeat*_':
                     await self._send(socket, {'func': func, 'args': args})
                 else:
                     if reply['func'] in self.callbackFuncs:
