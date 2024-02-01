@@ -144,6 +144,8 @@
                                 <argument>-p</argument>
                                 <argument>exclude_methods=${GENERATE_EXCLUDE_METHODS}</argument>
                                 <argument>-P</argument>
+                                <argument>${env.COPPELIASIM_ROOT_DIR}/programming/include/python</argument>
+                                <argument>-P</argument>
                                 <argument>${basedir}/../../tools</argument>
                                 <argument>-P</argument>
                                 <argument>${basedir}</argument>
