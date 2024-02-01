@@ -86,7 +86,7 @@ foreach(templateFile ${templateFiles})
             -p "exclude_methods=${GENERATE_EXCLUDE_METHODS}"
             -i "${CMAKE_CURRENT_SOURCE_DIR}/templates/${templateFile}"
             -o "${CMAKE_CURRENT_BINARY_DIR}/generated/${templateFile}"
-            -P "${COPPELIASIM_INCLUDE_DIR}/python"
+            -P "${COPPELIASIM_PYTHON_DIR}"
             -P "${CMAKE_CURRENT_SOURCE_DIR}/../../tools"
             -P "${CMAKE_CURRENT_SOURCE_DIR}"
         DEPENDS
@@ -95,8 +95,8 @@ foreach(templateFile ${templateFiles})
             "${CMAKE_CURRENT_BINARY_DIR}/generated/calltips.json"
             "${CMAKE_CURRENT_BINARY_DIR}/generated/constants.json"
             "${CMAKE_CURRENT_SOURCE_DIR}/cpp_utils.py"
-            "${COPPELIASIM_INCLUDE_DIR}/python/calltip.py"
-            "${COPPELIASIM_INCLUDE_DIR}/python/calltip.lark"
+            "${COPPELIASIM_PYTHON_DIR}/calltip.py"
+            "${COPPELIASIM_PYTHON_DIR}/calltip.lark"
     )
     list(APPEND generatedFiles "${CMAKE_CURRENT_BINARY_DIR}/generated/${templateFile}")
 endforeach()
