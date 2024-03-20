@@ -368,7 +368,7 @@ function zmqRemoteApi.receive()
     if receiveIsNext then
         local rc, dat = simZMQ.recv(rpcSocket, 0)
         receiveIsNext = false
-        rc, retVal = pcall(cbor.decode, dat)
+        rc, retVal = pcall(cbor.decode, tostring(dat))
         if not rc then
             if #dat < 2000 then
                 error(retVal .. "\n" .. sim.transformBuffer(dat, sim.buffer_uint8, 1, 0, sim.buffer_base64))
