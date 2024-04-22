@@ -301,17 +301,36 @@ function zmqRemoteApi.handleRequest(req)
                 -- more in sysCall_init and zmqRemoteApi.require
             end
 
-            -- Handle function arguments and possible nil values:
+            -- Handle function arguments (up to a depth of 2), and possible nil values:
             for i = 1, #args, 1 do
                 if type(args[i]) == 'string' then
+                    -- depth 1
                     if args[i]:sub(-5) == "@func" then
                         local nm = args[i]:sub(1, -6)
                         args[i] = function(...) return zmqRemoteApi.callRemoteFunction(nm, {...}, true) end
                     elseif args[i] == '_*NIL*_' then
                         args[i] = nil
                     end
+                else
+                    if type(args[i]) == 'table' then
+                        -- depth 2
+                        local cnt = 0
+                        for k, v in pairs(args[i]) do
+                            if type(v) == 'string' and v:sub(-5) == "@func" then
+                                local nm = v:sub(1, -6)
+                                v = function(...) return zmqRemoteApi.callRemoteFunction(nm, {...}, true) end
+                                args[i][k] = v
+                            end
+                            cnt = cnt + 1
+                            if cnt >= 16 then
+                                break -- parse no more than 16 items
+                            end
+                        end
+                    end
                 end
             end
+            
+            
 
             local function errHandler(err)
                 local trace = debug.traceback(err)
