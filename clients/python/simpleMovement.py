@@ -89,41 +89,40 @@ def greenRobot():
     for i in range(1):
         goalTr = initTr.copy()
         goalTr[2] = goalTr[2] + 0.2
-        sim.moveToPose(-1, initTr, maxVel, maxAccel, maxJerk, goalTr, poseCallback, {'robotColor': robotColor, 'handle': targetHandle})
+        params = {}
+        params['object'] = targetHandle
+        params['targetPose'] = goalTr
+        params['maxVel'] = maxVel
+        params['maxAccel'] = maxAccel
+        params['maxJerk'] = maxJerk
+        sim.moveToPose(params) # one could also use sim.moveToPose_init, sim.moveToPose_step and sim.moveToPose_cleanup
         
-        startTr = sim.getObjectPose(targetHandle)
         goalTr[2] = goalTr[2] - 0.2
-        sim.moveToPose(-1, startTr, maxVel, maxAccel, maxJerk, goalTr, poseCallback, {'robotColor': robotColor, 'handle': targetHandle})
+        params['targetPose'] = goalTr
+        sim.moveToPose(params)
         
         startTr = sim.getObjectPose(targetHandle)
         goalTr = sim.rotateAroundAxis(goalTr, [1, 0, 0], [startTr[0], startTr[1], startTr[2]], 90 * math.pi / 180)
-        sim.moveToPose(-1, startTr, maxVel, maxAccel, maxJerk, goalTr, poseCallback, {'robotColor': robotColor, 'handle': targetHandle})
+        params['targetPose'] = goalTr
+        sim.moveToPose(params)
 
-        startTr = sim.getObjectPose(targetHandle)
-        sim.moveToPose(-1, startTr, maxVel, maxAccel, maxJerk, initTr, poseCallback, {'robotColor': robotColor, 'handle': targetHandle})
+        params['targetPose'] = initTr
+        sim.moveToPose(params)
     
     sim.setStepping(False)
     
-def poseCallback(tr, vel, accel, data):
-    sim = sims[data['robotColor']]
-    handle = data['handle']
-    sim.setObjectPose(handle, tr)
-
-def confCallback(config, vel, accel, data):
-    sim = sims[data['robotColor']]
-    handles = data['handles']
-    for i in range(len(handles)):
-        if sim.isDynamicallyEnabled(handles[i]):
-            sim.setJointTargetPosition(handles[i], config[i])
-        else:
-            sim.setJointPosition(handles[i], config[i])
-
 def moveToConfig(robotColor, handles, maxVel, maxAccel, maxJerk, targetConf):
     sim = sims[robotColor]
     currentConf = []
     for i in range(len(handles)):
         currentConf.append(sim.getJointPosition(handles[i]))
-    sim.moveToConfig(-1, currentConf, None, None, maxVel, maxAccel, maxJerk, targetConf, None, confCallback, {'robotColor': robotColor, 'handles': handles}, None)
+    params = {}
+    params['joints'] = handles
+    params['targetPos'] = targetConf
+    params['maxVel'] = maxVel
+    params['maxAccel'] = maxAccel
+    params['maxJerk'] = maxJerk
+    sim.moveToConfig(params) # one could also use sim.moveToConfig_init, sim.moveToConfig_step and sim.moveToConfig_cleanup
 
 print('Program started')
 client = RemoteAPIClient()
