@@ -679,6 +679,10 @@ function sysCall_addOnScriptSuspended()
     return {cmd = 'cleanup'}
 end
 
+function sysCall_suspended()
+    return sysCall_nonSimulation()
+end
+
 function sysCall_nonSimulation()
     local retVal
     local holdCalls = true
