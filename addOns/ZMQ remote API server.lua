@@ -128,7 +128,7 @@ sim.switchThread = sim.step
 sim.yield = sim.step
 
 sim.readCustomDataBlock = wrap(sim.readCustomDataBlock, function(origFunc)
-    -- via the remote API, we should always return a string:
+    -- via the remote API, we should always return a string, for backw. comp.
     return function(obj, tag)
         local retVal = origFunc(obj, tag)
         if retVal == nil then retVal = '' end
