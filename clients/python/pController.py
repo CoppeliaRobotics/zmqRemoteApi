@@ -19,7 +19,7 @@ def moveToAngle(targetAngle):
     while abs(jointAngle - targetAngle) > 0.1 * math.pi / 180:
         vel = computeTargetVelocity(jointAngle, targetAngle)
         sim.setJointTargetVelocity(jointHandle, vel)
-        sim.setJointMaxForce(jointHandle, maxForce)
+        sim.setJointTargetForce(jointHandle, maxForce, False)
         sim.step()
         jointAngle = sim.getJointPosition(jointHandle)
 
