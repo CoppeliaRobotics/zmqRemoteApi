@@ -28,7 +28,7 @@ int main()
         // e.g. calling a child script function (make sure the child script is running!):
         /*
         int sceneObject = sim.getObject("/path/to/object");
-        int script = sim.getScript(sim.scripttype_childscript, sceneObject);
+        int script = sim.getScript(sim.scripttype_simulation, sceneObject);
         auto args = json::array();
         args.push_back("Hello");
         args.push_back("Paul");
