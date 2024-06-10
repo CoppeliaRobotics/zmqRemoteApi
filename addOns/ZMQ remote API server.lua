@@ -660,7 +660,7 @@ end
 
 function sysCall_cleanup()
     if initSuccessful then
-        sim.setScriptInt32Param(sim.handle_self, sim.scriptintparam_autorestartonerror, 1)
+        sim.setObjectInt32Param(sim.getScript(sim.handle_self), sim.scriptintparam_autorestartonerror, 1)
     end
     if simZMQ then
         simZMQ.close(rpcSocket)
