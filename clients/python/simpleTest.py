@@ -32,16 +32,14 @@ while (t := sim.getSimulationTime()) < 3:
     sim.addLog(sim.verbosity_scriptinfos, s)
     # sim.testCB(21,myFunc,42) # see below. sim.testCB is calling back above "myFunc"
 
-# e.g. calling a child script function (make sure the child script is running!):
+# e.g. calling a script object function (make sure the script is running!):
 '''    
-sceneObject = sim.getObject('/path/to/object')
-script = sim.getScript(sim.scripttype_simulation, sceneObject)
+script = sim.getObject('/path/to/scriptObject')
 reply = sim.callScriptFunction('functionName', script, 'Hello', 'Paul', 21)
 '''
 #or
 '''
-sceneObject = sim.getObject('/path/to/object')
-script = sim.getScript(sim.scripttype_simulation, sceneObject)
+script = sim.getObject('/path/to/scriptObject')
 funcs = client.getScriptFunctions(script)
 reply = funcs.functionName('Hello', 'Paul', 21)
 '''    

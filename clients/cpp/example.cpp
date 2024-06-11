@@ -25,17 +25,16 @@ int main()
             // auto retVal = sim.testCB(21, "myCallback@func", 42); // sim.testCB is calling back above "myFunc"
             sim.step();
         }
-        // e.g. calling a child script function (make sure the child script is running!):
+        // e.g. calling a script object function (make sure the script is running!):
         /*
-        int sceneObject = sim.getObject("/path/to/object");
-        int script = sim.getScript(sim.scripttype_simulation, sceneObject);
+        int script = sim.getObject("/path/to/scriptObject");
         auto args = json::array();
         args.push_back("Hello");
         args.push_back("Paul");
         args.push_back(21);
         auto reply = sim.callScriptFunction("functionName", script, args);
         */
-        
+        sim.executeScriptString("print('Hello there')", sim.getScript(sim.scripttype_sandbox));
         sim.stopSimulation();
     } 
     catch (const std::runtime_error& e)
