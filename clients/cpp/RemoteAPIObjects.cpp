@@ -206,15 +206,6 @@ namespace RemoteAPIObject
         auto _ret = this->_client->call("sim.addReferencedHandle", _args);
     }
 
-    int64_t sim::addScript(int64_t scriptType)
-    {
-        bool _brk = false;
-        json _args(json_array_arg);
-        _args.push_back(scriptType);
-        auto _ret = this->_client->call("sim.addScript", _args);
-        return _ret[0].as<int64_t>();
-    }
-
     int64_t sim::adjustView(int64_t viewHandleOrIndex, int64_t objectHandle, int64_t options, std::optional<std::string> viewLabel)
     {
         bool _brk = false;
@@ -259,15 +250,6 @@ namespace RemoteAPIObject
         json _args(json_array_arg);
         auto _ret = this->_client->call("sim.announceSceneContentChange", _args);
         return _ret[0].as<int64_t>();
-    }
-
-    void sim::associateScriptWithObject(int64_t scriptHandle, int64_t objectHandle)
-    {
-        bool _brk = false;
-        json _args(json_array_arg);
-        _args.push_back(scriptHandle);
-        _args.push_back(objectHandle);
-        auto _ret = this->_client->call("sim.associateScriptWithObject", _args);
     }
 
     int64_t sim::auxiliaryConsoleClose(int64_t consoleHandle)
@@ -597,18 +579,6 @@ namespace RemoteAPIObject
         _args.push_back(shapeHandle);
         _args.push_back(density);
         auto _ret = this->_client->call("sim.computeMassAndInertia", _args);
-        return _ret[0].as<int64_t>();
-    }
-
-    int64_t sim::convexDecompose(int64_t shapeHandle, int64_t options, std::vector<int64_t> intParams, std::vector<double> floatParams)
-    {
-        bool _brk = false;
-        json _args(json_array_arg);
-        _args.push_back(shapeHandle);
-        _args.push_back(options);
-        _args.push_back(intParams);
-        _args.push_back(floatParams);
-        auto _ret = this->_client->call("sim.convexDecompose", _args);
         return _ret[0].as<int64_t>();
     }
 
@@ -1178,17 +1148,6 @@ namespace RemoteAPIObject
         _args.push_back(index);
         auto _ret = this->_client->call("sim.getContactInfo", _args);
         return std::make_tuple(_ret[0].as<std::vector<int64_t>>(), _ret[1].as<std::vector<double>>(), _ret[2].as<std::vector<double>>(), _ret[3].as<std::vector<double>>());
-    }
-
-    std::tuple<std::vector<double>, std::vector<int64_t>> sim::getDecimatedMesh(std::vector<double> verticesIn, std::vector<int64_t> indicesIn, double decimationPercentage)
-    {
-        bool _brk = false;
-        json _args(json_array_arg);
-        _args.push_back(verticesIn);
-        _args.push_back(indicesIn);
-        _args.push_back(decimationPercentage);
-        auto _ret = this->_client->call("sim.getDecimatedMesh", _args);
-        return std::make_tuple(_ret[0].as<std::vector<double>>(), _ret[1].as<std::vector<int64_t>>());
     }
 
     bool sim::getEngineBoolParam(int64_t paramId, int64_t objectHandle)
@@ -1922,15 +1881,6 @@ namespace RemoteAPIObject
         return _ret[0].as<std::vector<double>>();
     }
 
-    std::tuple<std::vector<double>, std::vector<int64_t>> sim::getQHull(std::vector<double> verticesIn)
-    {
-        bool _brk = false;
-        json _args(json_array_arg);
-        _args.push_back(verticesIn);
-        auto _ret = this->_client->call("sim.getQHull", _args);
-        return std::make_tuple(_ret[0].as<std::vector<double>>(), _ret[1].as<std::vector<int64_t>>());
-    }
-
     double sim::getRandom(std::optional<int64_t> seed)
     {
         bool _brk = false;
@@ -1999,17 +1949,11 @@ namespace RemoteAPIObject
         return std::make_tuple(_ret[0].as<std::vector<uint8_t>>(), _ret[1].as<std::vector<int64_t>>());
     }
 
-    int64_t sim::getScript(int64_t scriptType, std::optional<int64_t> objectHandle, std::optional<std::string> scriptName)
+    int64_t sim::getScript(int64_t scriptType, std::optional<std::string> scriptName)
     {
         bool _brk = false;
         json _args(json_array_arg);
         _args.push_back(scriptType);
-        if(objectHandle)
-        {
-            if(_brk) throw std::runtime_error("no gaps allowed");
-            else _args.push_back(*objectHandle);
-        }
-        else _brk = true;
         if(scriptName)
         {
             if(_brk) throw std::runtime_error("no gaps allowed");
@@ -2027,26 +1971,6 @@ namespace RemoteAPIObject
         _args.push_back(scriptHandle);
         auto _ret = this->_client->call("sim.getScriptFunctions", _args);
         return _ret[0].as<json>();
-    }
-
-    int64_t sim::getScriptInt32Param(int64_t scriptHandle, int64_t parameterID)
-    {
-        bool _brk = false;
-        json _args(json_array_arg);
-        _args.push_back(scriptHandle);
-        _args.push_back(parameterID);
-        auto _ret = this->_client->call("sim.getScriptInt32Param", _args);
-        return _ret[0].as<int64_t>();
-    }
-
-    std::vector<uint8_t> sim::getScriptStringParam(int64_t scriptHandle, int64_t parameterID)
-    {
-        bool _brk = false;
-        json _args(json_array_arg);
-        _args.push_back(scriptHandle);
-        _args.push_back(parameterID);
-        auto _ret = this->_client->call("sim.getScriptStringParam", _args);
-        return _ret[0].as<std::vector<uint8_t>>();
     }
 
     bool sim::getSettingBool(std::string key)
@@ -2100,13 +2024,13 @@ namespace RemoteAPIObject
         return _ret[0].as<json>();
     }
 
-    std::vector<double> sim::getShapeBB(int64_t shapeHandle)
+    std::tuple<std::vector<double>, std::vector<double>> sim::getShapeBB(int64_t shapeHandle)
     {
         bool _brk = false;
         json _args(json_array_arg);
         _args.push_back(shapeHandle);
         auto _ret = this->_client->call("sim.getShapeBB", _args);
-        return _ret[0].as<std::vector<double>>();
+        return std::make_tuple(_ret[0].as<std::vector<double>>(), _ret[1].as<std::vector<double>>());
     }
 
     std::tuple<int64_t, std::vector<double>> sim::getShapeColor(int64_t shapeHandle, std::string colorName, int64_t colorComponent)
@@ -2382,15 +2306,6 @@ namespace RemoteAPIObject
         return _ret[0].as<int64_t>();
     }
 
-    int64_t sim::handleChildScripts(int64_t callType)
-    {
-        bool _brk = false;
-        json _args(json_array_arg);
-        _args.push_back(callType);
-        auto _ret = this->_client->call("sim.handleChildScripts", _args);
-        return _ret[0].as<int64_t>();
-    }
-
     int64_t sim::handleDynamics(double deltaTime)
     {
         bool _brk = false;
@@ -2454,6 +2369,15 @@ namespace RemoteAPIObject
         bool _brk = false;
         json _args(json_array_arg);
         auto _ret = this->_client->call("sim.handleSensingStart", _args);
+    }
+
+    int64_t sim::handleSimulationScripts(int64_t callType)
+    {
+        bool _brk = false;
+        json _args(json_array_arg);
+        _args.push_back(callType);
+        auto _ret = this->_client->call("sim.handleSimulationScripts", _args);
+        return _ret[0].as<int64_t>();
     }
 
     void sim::handleSimulationStart()
@@ -3243,14 +3167,6 @@ namespace RemoteAPIObject
         }
         else _brk = true;
         auto _ret = this->_client->call("sim.removeReferencedObjects", _args);
-    }
-
-    void sim::removeScript(int64_t scriptHandle)
-    {
-        bool _brk = false;
-        json _args(json_array_arg);
-        _args.push_back(scriptHandle);
-        auto _ret = this->_client->call("sim.removeScript", _args);
     }
 
     int64_t sim::removeVoxelsFromOctree(int64_t octreeHandle, int64_t options, std::vector<double> points)
@@ -4049,26 +3965,6 @@ namespace RemoteAPIObject
         }
         else _brk = true;
         auto _ret = this->_client->call("sim.setReferencedHandles", _args);
-    }
-
-    void sim::setScriptInt32Param(int64_t scriptHandle, int64_t parameterID, int64_t parameter)
-    {
-        bool _brk = false;
-        json _args(json_array_arg);
-        _args.push_back(scriptHandle);
-        _args.push_back(parameterID);
-        _args.push_back(parameter);
-        auto _ret = this->_client->call("sim.setScriptInt32Param", _args);
-    }
-
-    void sim::setScriptStringParam(int64_t scriptHandle, int64_t parameterID, std::vector<uint8_t> parameter)
-    {
-        bool _brk = false;
-        json _args(json_array_arg);
-        _args.push_back(scriptHandle);
-        _args.push_back(parameterID);
-        _args.push_back(bin(parameter));
-        auto _ret = this->_client->call("sim.setScriptStringParam", _args);
     }
 
     int64_t sim::setShapeAppearance(int64_t handle, json savedData, std::optional<json> opts)

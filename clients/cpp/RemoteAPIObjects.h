@@ -25,12 +25,10 @@ namespace RemoteAPIObject
         int64_t addParticleObject(int64_t objectType, double size, double density, std::vector<double> params, double lifeTime, int64_t maxItemCount, std::optional<std::vector<double>> color = {});
         void addParticleObjectItem(int64_t objectHandle, std::vector<double> itemData);
         void addReferencedHandle(int64_t objectHandle, int64_t referencedHandle, std::optional<std::string> tag = {}, std::optional<json> opts = {});
-        int64_t addScript(int64_t scriptType);
         int64_t adjustView(int64_t viewHandleOrIndex, int64_t objectHandle, int64_t options, std::optional<std::string> viewLabel = {});
         int64_t alignShapeBB(int64_t shapeHandle, std::vector<double> pose);
         std::tuple<double, double, double> alphaBetaGammaToYawPitchRoll(double alphaAngle, double betaAngle, double gammaAngle);
         int64_t announceSceneContentChange();
-        void associateScriptWithObject(int64_t scriptHandle, int64_t objectHandle);
         int64_t auxiliaryConsoleClose(int64_t consoleHandle);
         int64_t auxiliaryConsoleOpen(std::string title, int64_t maxLines, int64_t mode, std::optional<std::vector<int64_t>> position = {}, std::optional<std::vector<int64_t>> size = {}, std::optional<std::vector<double>> textColor = {}, std::optional<std::vector<double>> backgroundColor = {});
         int64_t auxiliaryConsolePrint(int64_t consoleHandle, std::string text);
@@ -57,7 +55,6 @@ namespace RemoteAPIObject
         int64_t closeScene();
         std::vector<uint8_t> combineRgbImages(std::vector<uint8_t> img1, std::vector<int64_t> img1Res, std::vector<uint8_t> img2, std::vector<int64_t> img2Res, int64_t operation);
         int64_t computeMassAndInertia(int64_t shapeHandle, double density);
-        int64_t convexDecompose(int64_t shapeHandle, int64_t options, std::vector<int64_t> intParams, std::vector<double> floatParams);
         std::vector<int64_t> copyPasteObjects(std::vector<int64_t> objectHandles, std::optional<int64_t> options = {});
         std::vector<json> copyTable(std::vector<json> original);
         int64_t createCollection(std::optional<int64_t> options = {});
@@ -95,7 +92,6 @@ namespace RemoteAPIObject
         std::vector<int64_t> getCollectionObjects(int64_t collectionHandle);
         double getConfigDistance(std::vector<double> configA, std::vector<double> configB, std::optional<std::vector<double>> metric = {}, std::optional<std::vector<int64_t>> types = {});
         std::tuple<std::vector<int64_t>, std::vector<double>, std::vector<double>, std::vector<double>> getContactInfo(int64_t dynamicPass, int64_t objectHandle, int64_t index);
-        std::tuple<std::vector<double>, std::vector<int64_t>> getDecimatedMesh(std::vector<double> verticesIn, std::vector<int64_t> indicesIn, double decimationPercentage);
         bool getEngineBoolParam(int64_t paramId, int64_t objectHandle);
         double getEngineFloatParam(int64_t paramId, int64_t objectHandle);
         int64_t getEngineInt32Param(int64_t paramId, int64_t objectHandle);
@@ -166,23 +162,20 @@ namespace RemoteAPIObject
         std::tuple<double, int64_t, int64_t, double> getPointCloudOptions(int64_t pointCloudHandle);
         std::vector<double> getPointCloudPoints(int64_t pointCloudHandle);
         std::vector<double> getPoseInverse(std::vector<double> pose);
-        std::tuple<std::vector<double>, std::vector<int64_t>> getQHull(std::vector<double> verticesIn);
         double getRandom(std::optional<int64_t> seed = {});
         bool getRealTimeSimulation();
         std::vector<int64_t> getReferencedHandles(int64_t objectHandle, std::optional<std::string> tag = {});
         std::vector<std::string> getReferencedHandlesTags(int64_t objectHandle);
         std::tuple<std::vector<double>, double> getRotationAxis(std::vector<double> matrixStart, std::vector<double> matrixGoal);
         std::tuple<std::vector<uint8_t>, std::vector<int64_t>> getScaledImage(std::vector<uint8_t> imageIn, std::vector<int64_t> resolutionIn, std::vector<int64_t> desiredResolutionOut, int64_t options);
-        int64_t getScript(int64_t scriptType, std::optional<int64_t> objectHandle = {}, std::optional<std::string> scriptName = {});
+        int64_t getScript(int64_t scriptType, std::optional<std::string> scriptName = {});
         json getScriptFunctions(int64_t scriptHandle);
-        int64_t getScriptInt32Param(int64_t scriptHandle, int64_t parameterID);
-        std::vector<uint8_t> getScriptStringParam(int64_t scriptHandle, int64_t parameterID);
         bool getSettingBool(std::string key);
         double getSettingFloat(std::string key);
         int64_t getSettingInt32(std::string key);
         std::string getSettingString(std::string key);
         json getShapeAppearance(int64_t handle, std::optional<json> opts = {});
-        std::vector<double> getShapeBB(int64_t shapeHandle);
+        std::tuple<std::vector<double>, std::vector<double>> getShapeBB(int64_t shapeHandle);
         std::tuple<int64_t, std::vector<double>> getShapeColor(int64_t shapeHandle, std::string colorName, int64_t colorComponent);
         std::tuple<int64_t, int64_t, std::vector<double>> getShapeGeomInfo(int64_t shapeHandle);
         std::tuple<std::vector<double>, std::vector<double>> getShapeInertia(int64_t shapeHandle);
@@ -208,7 +201,6 @@ namespace RemoteAPIObject
         void getVisionSensorRes(int64_t sensorHandle);
         int64_t groupShapes(std::vector<int64_t> shapeHandles, std::optional<bool> merge = {});
         int64_t handleAddOnScripts(int64_t callType);
-        int64_t handleChildScripts(int64_t callType);
         int64_t handleDynamics(double deltaTime);
         int64_t handleEmbeddedScripts(int64_t callType);
         void handleExtCalls();
@@ -217,6 +209,7 @@ namespace RemoteAPIObject
         std::tuple<int64_t, double, std::vector<double>, int64_t, std::vector<double>> handleProximitySensor(int64_t sensorHandle);
         void handleSandboxScript(int64_t callType);
         void handleSensingStart();
+        int64_t handleSimulationScripts(int64_t callType);
         void handleSimulationStart();
         std::tuple<int64_t, std::vector<double>, std::vector<double>> handleVisionSensor(int64_t sensorHandle);
         std::tuple<std::vector<double>, std::vector<int64_t>> importMesh(int64_t fileformat, std::string pathAndFilename, int64_t options, double identicalVerticeTolerance, double scalingFactor);
@@ -279,7 +272,6 @@ namespace RemoteAPIObject
         void removeParticleObject(int64_t particleObjectHandle);
         int64_t removePointsFromPointCloud(int64_t pointCloudHandle, int64_t options, std::vector<double> points, double tolerance);
         void removeReferencedObjects(int64_t objectHandle, std::optional<std::string> tag = {});
-        void removeScript(int64_t scriptHandle);
         int64_t removeVoxelsFromOctree(int64_t octreeHandle, int64_t options, std::vector<double> points);
         std::vector<double> resamplePath(std::vector<double> path, std::vector<double> pathLengths, int64_t finalConfigCnt, std::optional<json> method = {}, std::optional<std::vector<int64_t>> types = {});
         void resetDynamicObject(int64_t objectHandle);
@@ -352,8 +344,6 @@ namespace RemoteAPIObject
         void setPluginInfo(std::string pluginName, int64_t infoType, std::string info);
         void setPointCloudOptions(int64_t pointCloudHandle, double maxVoxelSize, int64_t maxPtCntPerVoxel, int64_t options, double pointSize);
         void setReferencedHandles(int64_t objectHandle, std::vector<int64_t> referencedHandles, std::optional<std::string> tag = {});
-        void setScriptInt32Param(int64_t scriptHandle, int64_t parameterID, int64_t parameter);
-        void setScriptStringParam(int64_t scriptHandle, int64_t parameterID, std::vector<uint8_t> parameter);
         int64_t setShapeAppearance(int64_t handle, json savedData, std::optional<json> opts = {});
         void setShapeBB(int64_t shapeHandle, std::vector<double> size);
         void setShapeColor(int64_t shapeHandle, std::string colorName, int64_t colorComponent, std::vector<double> rgbData);
@@ -3078,43 +3068,43 @@ namespace RemoteAPIObject
         const int scriptexecorder_normal = 1;
 #endif
 #ifndef scriptintparam_autorestartonerror
-        const int scriptintparam_autorestartonerror = 7;
+        const int scriptintparam_autorestartonerror = 10107;
 #endif
 #ifndef scriptintparam_enabled
-        const int scriptintparam_enabled = 4;
+        const int scriptintparam_enabled = 10104;
 #endif
 #ifndef scriptintparam_execcount
-        const int scriptintparam_execcount = 1;
+        const int scriptintparam_execcount = 10101;
 #endif
 #ifndef scriptintparam_execorder
-        const int scriptintparam_execorder = 0;
+        const int scriptintparam_execorder = 10100;
 #endif
 #ifndef scriptintparam_handle
-        const int scriptintparam_handle = 3;
+        const int scriptintparam_handle = 10103;
 #endif
 #ifndef scriptintparam_lang
-        const int scriptintparam_lang = 6;
+        const int scriptintparam_lang = 10106;
 #endif
 #ifndef scriptintparam_objecthandle
-        const int scriptintparam_objecthandle = 5;
+        const int scriptintparam_objecthandle = 10105;
 #endif
 #ifndef scriptintparam_type
-        const int scriptintparam_type = 2;
+        const int scriptintparam_type = 10102;
 #endif
 #ifndef scriptstringparam_description
-        const int scriptstringparam_description = 0;
+        const int scriptstringparam_description = 10108;
 #endif
 #ifndef scriptstringparam_lang
-        const int scriptstringparam_lang = 4;
+        const int scriptstringparam_lang = 10112;
 #endif
 #ifndef scriptstringparam_name
-        const int scriptstringparam_name = 1;
+        const int scriptstringparam_name = 10109;
 #endif
 #ifndef scriptstringparam_nameext
-        const int scriptstringparam_nameext = 3;
+        const int scriptstringparam_nameext = 10111;
 #endif
 #ifndef scriptstringparam_text
-        const int scriptstringparam_text = 2;
+        const int scriptstringparam_text = 10110;
 #endif
 #ifndef scriptthreadresume_actuation_first
         const int scriptthreadresume_actuation_first = 1;
