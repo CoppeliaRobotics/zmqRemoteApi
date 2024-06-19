@@ -582,7 +582,9 @@ function sysCall_init()
     simZMQ.__raiseErrors(true) -- so we don't need to check retval with every call
     zmqRemoteApi.parseFuncsReturnTypes('sim')
     zmqRemoteApi.parseFuncsReturnTypes('simZMQ')
-    rpcPort = sim.getNamedInt32Param('zmqRemoteApi.rpcPort') or 23000
+    local defaultRpcPort = 23000 + sim.getInt32Param(sim.intparam_processid)
+    local rpcPort = sim.getNamedInt32Param('zmqRemoteApi.rpcPort') or defaultRpcPort
+    sim.setNamedInt32Param('zmqRemoteApi.rpcPort', rpcPort)
     msgQueueTimeout_idle = 0.05
     msgQueueTimeout_running = 0.002
 
