@@ -588,12 +588,12 @@ function sysCall_init()
     msgQueueTimeout_idle = 0.05
     msgQueueTimeout_running = 0.002
 
-    if zmqRemoteApi.verbose() > 0 then
+--    if zmqRemoteApi.verbose() > 0 then
         sim.addLog(
             sim.verbosity_scriptinfos,
             string.format('ZeroMQ Remote API server starting (rpcPort=%d)...', rpcPort)
         )
-    end
+--    end
     cbor = require 'org.conman.cbor'
     context = simZMQ.ctx_new()
     rpcSocket = simZMQ.socket(context, simZMQ.REP)
