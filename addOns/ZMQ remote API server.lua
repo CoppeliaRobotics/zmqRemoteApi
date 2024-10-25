@@ -307,7 +307,12 @@ function zmqRemoteApi.handleRequest(req)
                     -- depth 1
                     if args[i]:sub(-5) == "@func" then
                         local nm = args[i]:sub(1, -6)
-                        args[i] = function(...) return zmqRemoteApi.callRemoteFunction(nm, {...}, true) end
+                        local fff = function(...) return zmqRemoteApi.callRemoteFunction(nm, {...}, true) end
+                        args[i] = fff
+                        if not _S.pythonCallbacks then
+                            _S.pythonCallbacks = {}
+                        end
+                        _S.pythonCallbacks[fff] = true -- so that we can identify a Python callback
                     elseif args[i] == '_*NIL*_' then
                         args[i] = nil
                     end
@@ -319,6 +324,10 @@ function zmqRemoteApi.handleRequest(req)
                             if type(v) == 'string' and v:sub(-5) == "@func" then
                                 local nm = v:sub(1, -6)
                                 v = function(...) return zmqRemoteApi.callRemoteFunction(nm, {...}, true) end
+                                if not _S.pythonCallbacks then
+                                    _S.pythonCallbacks = {}
+                                end
+                                _S.pythonCallbacks[v] = true -- so that we can identify a Python callback
                                 args[i][k] = v
                             end
                             cnt = cnt + 1
@@ -739,14 +748,14 @@ function sysCall_ext(funcName, ...)
         fun = fun[funcName]
     end
     if type(fun) == 'function' then
-        retVal = fun(...)
+        retVal = table.pack(fun(...))
     else
         for k,v in pairs(allClients) do
             v.asyncFuncCalls[#v.asyncFuncCalls + 1] = {func = funcName, args = {...}}
         end
     end
     insideExtCall = insideExtCall - 1
-    return retVal
+    return table.unpack(retVal)
 end
 
 function sysCall_afterSimulation()
