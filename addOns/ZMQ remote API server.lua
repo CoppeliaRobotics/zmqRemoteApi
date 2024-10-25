@@ -736,7 +736,7 @@ function sysCall_actuation()
 end
 
 function sysCall_ext(funcName, ...)
-    local retVal
+    local retVal = table.pack(nil)
     insideExtCall = insideExtCall + 1
     
     local fun = _G
