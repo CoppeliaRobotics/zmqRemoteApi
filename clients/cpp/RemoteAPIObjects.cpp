@@ -397,6 +397,15 @@ namespace RemoteAPIObject
         return _ret[0].as<int64_t>();
     }
 
+    bool sim::cancelScheduledExecution(int64_t id)
+    {
+        bool _brk = false;
+        json _args(json_array_arg);
+        _args.push_back(id);
+        auto _ret = this->_client->call("sim.cancelScheduledExecution", _args);
+        return _ret[0].as<bool>();
+    }
+
     std::vector<json> sim::changeEntityColor(int64_t entityHandle, std::vector<double> newColor, std::optional<int64_t> colorComponent)
     {
         bool _brk = false;
@@ -1088,6 +1097,38 @@ namespace RemoteAPIObject
         return _ret[0].as<bool>();
     }
 
+    bool sim::getBoolProperty(int64_t target, std::string pName, std::optional<json> options)
+    {
+        bool _brk = false;
+        json _args(json_array_arg);
+        _args.push_back(target);
+        _args.push_back(pName);
+        if(options)
+        {
+            if(_brk) throw std::runtime_error("no gaps allowed");
+            else _args.push_back(*options);
+        }
+        else _brk = true;
+        auto _ret = this->_client->call("sim.getBoolProperty", _args);
+        return _ret[0].as<bool>();
+    }
+
+    std::vector<uint8_t> sim::getBufferProperty(int64_t target, std::string pName, std::optional<json> options)
+    {
+        bool _brk = false;
+        json _args(json_array_arg);
+        _args.push_back(target);
+        _args.push_back(pName);
+        if(options)
+        {
+            if(_brk) throw std::runtime_error("no gaps allowed");
+            else _args.push_back(*options);
+        }
+        else _brk = true;
+        auto _ret = this->_client->call("sim.getBufferProperty", _args);
+        return _ret[0].as<std::vector<uint8_t>>();
+    }
+
     std::vector<uint8_t> sim::getBufferSignal(std::string signalName)
     {
         bool _brk = false;
@@ -1115,6 +1156,22 @@ namespace RemoteAPIObject
         _args.push_back(collectionHandle);
         auto _ret = this->_client->call("sim.getCollectionObjects", _args);
         return _ret[0].as<std::vector<int64_t>>();
+    }
+
+    std::vector<double> sim::getColorProperty(int64_t target, std::string pName, std::optional<json> options)
+    {
+        bool _brk = false;
+        json _args(json_array_arg);
+        _args.push_back(target);
+        _args.push_back(pName);
+        if(options)
+        {
+            if(_brk) throw std::runtime_error("no gaps allowed");
+            else _args.push_back(*options);
+        }
+        else _brk = true;
+        auto _ret = this->_client->call("sim.getColorProperty", _args);
+        return _ret[0].as<std::vector<double>>();
     }
 
     double sim::getConfigDistance(std::vector<double> configA, std::vector<double> configB, std::optional<std::vector<double>> metric, std::optional<std::vector<int64_t>> types)
@@ -1214,12 +1271,44 @@ namespace RemoteAPIObject
         return _ret[0].as<std::string>();
     }
 
+    std::vector<double> sim::getFloatArrayProperty(int64_t target, std::string pName, std::optional<json> options)
+    {
+        bool _brk = false;
+        json _args(json_array_arg);
+        _args.push_back(target);
+        _args.push_back(pName);
+        if(options)
+        {
+            if(_brk) throw std::runtime_error("no gaps allowed");
+            else _args.push_back(*options);
+        }
+        else _brk = true;
+        auto _ret = this->_client->call("sim.getFloatArrayProperty", _args);
+        return _ret[0].as<std::vector<double>>();
+    }
+
     double sim::getFloatParam(int64_t parameter)
     {
         bool _brk = false;
         json _args(json_array_arg);
         _args.push_back(parameter);
         auto _ret = this->_client->call("sim.getFloatParam", _args);
+        return _ret[0].as<double>();
+    }
+
+    double sim::getFloatProperty(int64_t target, std::string pName, std::optional<json> options)
+    {
+        bool _brk = false;
+        json _args(json_array_arg);
+        _args.push_back(target);
+        _args.push_back(pName);
+        if(options)
+        {
+            if(_brk) throw std::runtime_error("no gaps allowed");
+            else _args.push_back(*options);
+        }
+        else _brk = true;
+        auto _ret = this->_client->call("sim.getFloatProperty", _args);
         return _ret[0].as<double>();
     }
 
@@ -1257,6 +1346,54 @@ namespace RemoteAPIObject
         json _args(json_array_arg);
         _args.push_back(parameter);
         auto _ret = this->_client->call("sim.getInt32Param", _args);
+        return _ret[0].as<int64_t>();
+    }
+
+    std::vector<int64_t> sim::getIntArray2Property(int64_t target, std::string pName, std::optional<json> options)
+    {
+        bool _brk = false;
+        json _args(json_array_arg);
+        _args.push_back(target);
+        _args.push_back(pName);
+        if(options)
+        {
+            if(_brk) throw std::runtime_error("no gaps allowed");
+            else _args.push_back(*options);
+        }
+        else _brk = true;
+        auto _ret = this->_client->call("sim.getIntArray2Property", _args);
+        return _ret[0].as<std::vector<int64_t>>();
+    }
+
+    std::vector<int64_t> sim::getIntArrayProperty(int64_t target, std::string pName, std::optional<json> options)
+    {
+        bool _brk = false;
+        json _args(json_array_arg);
+        _args.push_back(target);
+        _args.push_back(pName);
+        if(options)
+        {
+            if(_brk) throw std::runtime_error("no gaps allowed");
+            else _args.push_back(*options);
+        }
+        else _brk = true;
+        auto _ret = this->_client->call("sim.getIntArrayProperty", _args);
+        return _ret[0].as<std::vector<int64_t>>();
+    }
+
+    int64_t sim::getIntProperty(int64_t target, std::string pName, std::optional<json> options)
+    {
+        bool _brk = false;
+        json _args(json_array_arg);
+        _args.push_back(target);
+        _args.push_back(pName);
+        if(options)
+        {
+            if(_brk) throw std::runtime_error("no gaps allowed");
+            else _args.push_back(*options);
+        }
+        else _brk = true;
+        auto _ret = this->_client->call("sim.getIntProperty", _args);
         return _ret[0].as<int64_t>();
     }
 
@@ -1384,13 +1521,20 @@ namespace RemoteAPIObject
         return _ret[0].as<int64_t>();
     }
 
-    std::vector<std::string> sim::getMatchingPersistentDataTags(std::string pattern)
+    int64_t sim::getLongProperty(int64_t target, std::string pName, std::optional<json> options)
     {
         bool _brk = false;
         json _args(json_array_arg);
-        _args.push_back(pattern);
-        auto _ret = this->_client->call("sim.getMatchingPersistentDataTags", _args);
-        return _ret[0].as<std::vector<std::string>>();
+        _args.push_back(target);
+        _args.push_back(pName);
+        if(options)
+        {
+            if(_brk) throw std::runtime_error("no gaps allowed");
+            else _args.push_back(*options);
+        }
+        else _brk = true;
+        auto _ret = this->_client->call("sim.getLongProperty", _args);
+        return _ret[0].as<int64_t>();
     }
 
     std::vector<double> sim::getMatrixInverse(std::vector<double> matrix)
@@ -1827,14 +1971,6 @@ namespace RemoteAPIObject
         return std::make_tuple(_ret[0].as<std::vector<double>>(), _ret[1].as<double>());
     }
 
-    std::vector<std::string> sim::getPersistentDataTags()
-    {
-        bool _brk = false;
-        json _args(json_array_arg);
-        auto _ret = this->_client->call("sim.getPersistentDataTags", _args);
-        return _ret[0].as<std::vector<std::string>>();
-    }
-
     std::string sim::getPluginInfo(std::string pluginName, int64_t infoType)
     {
         bool _brk = false;
@@ -1881,6 +2017,125 @@ namespace RemoteAPIObject
         return _ret[0].as<std::vector<double>>();
     }
 
+    std::vector<double> sim::getPoseProperty(int64_t target, std::string pName, std::optional<json> options)
+    {
+        bool _brk = false;
+        json _args(json_array_arg);
+        _args.push_back(target);
+        _args.push_back(pName);
+        if(options)
+        {
+            if(_brk) throw std::runtime_error("no gaps allowed");
+            else _args.push_back(*options);
+        }
+        else _brk = true;
+        auto _ret = this->_client->call("sim.getPoseProperty", _args);
+        return _ret[0].as<std::vector<double>>();
+    }
+
+    json sim::getProperties(int64_t target, std::optional<json> opts)
+    {
+        bool _brk = false;
+        json _args(json_array_arg);
+        _args.push_back(target);
+        if(opts)
+        {
+            if(_brk) throw std::runtime_error("no gaps allowed");
+            else _args.push_back(*opts);
+        }
+        else _brk = true;
+        auto _ret = this->_client->call("sim.getProperties", _args);
+        return _ret[0].as<json>();
+    }
+
+    json sim::getPropertiesInfos(int64_t target, std::optional<json> opts)
+    {
+        bool _brk = false;
+        json _args(json_array_arg);
+        _args.push_back(target);
+        if(opts)
+        {
+            if(_brk) throw std::runtime_error("no gaps allowed");
+            else _args.push_back(*opts);
+        }
+        else _brk = true;
+        auto _ret = this->_client->call("sim.getPropertiesInfos", _args);
+        return _ret[0].as<json>();
+    }
+
+    json sim::getProperty(int64_t target, std::string pName, std::optional<json> options)
+    {
+        bool _brk = false;
+        json _args(json_array_arg);
+        _args.push_back(target);
+        _args.push_back(pName);
+        if(options)
+        {
+            if(_brk) throw std::runtime_error("no gaps allowed");
+            else _args.push_back(*options);
+        }
+        else _brk = true;
+        auto _ret = this->_client->call("sim.getProperty", _args);
+        return _ret[0].as<json>();
+    }
+
+    std::tuple<int64_t, int64_t, std::string> sim::getPropertyInfo(int64_t target, std::string pName, std::optional<json> options)
+    {
+        bool _brk = false;
+        json _args(json_array_arg);
+        _args.push_back(target);
+        _args.push_back(pName);
+        if(options)
+        {
+            if(_brk) throw std::runtime_error("no gaps allowed");
+            else _args.push_back(*options);
+        }
+        else _brk = true;
+        auto _ret = this->_client->call("sim.getPropertyInfo", _args);
+        return std::make_tuple(_ret[0].as<int64_t>(), _ret[1].as<int64_t>(), _ret[2].as<std::string>());
+    }
+
+    std::tuple<std::string, std::string> sim::getPropertyName(int64_t target, int64_t index, std::optional<json> options)
+    {
+        bool _brk = false;
+        json _args(json_array_arg);
+        _args.push_back(target);
+        _args.push_back(index);
+        if(options)
+        {
+            if(_brk) throw std::runtime_error("no gaps allowed");
+            else _args.push_back(*options);
+        }
+        else _brk = true;
+        auto _ret = this->_client->call("sim.getPropertyName", _args);
+        return std::make_tuple(_ret[0].as<std::string>(), _ret[1].as<std::string>());
+    }
+
+    std::string sim::getPropertyTypeString(int64_t pType)
+    {
+        bool _brk = false;
+        json _args(json_array_arg);
+        _args.push_back(pType);
+        auto _ret = this->_client->call("sim.getPropertyTypeString", _args);
+        return _ret[0].as<std::string>();
+    }
+
+    std::vector<double> sim::getQuaternionProperty(int64_t target, std::string pName, std::optional<json> options)
+    {
+        bool _brk = false;
+        json _args(json_array_arg);
+        _args.push_back(target);
+        _args.push_back(pName);
+        if(options)
+        {
+            if(_brk) throw std::runtime_error("no gaps allowed");
+            else _args.push_back(*options);
+        }
+        else _brk = true;
+        auto _ret = this->_client->call("sim.getQuaternionProperty", _args);
+        return _ret[0].as<std::vector<double>>();
+    }
+
     double sim::getRandom(std::optional<int64_t> seed)
     {
         bool _brk = false;
@@ -1901,6 +2156,21 @@ namespace RemoteAPIObject
         json _args(json_array_arg);
         auto _ret = this->_client->call("sim.getRealTimeSimulation", _args);
         return _ret[0].as<bool>();
+    }
+
+    int64_t sim::getReferencedHandle(int64_t objectHandle, std::optional<std::string> tag)
+    {
+        bool _brk = false;
+        json _args(json_array_arg);
+        _args.push_back(objectHandle);
+        if(tag)
+        {
+            if(_brk) throw std::runtime_error("no gaps allowed");
+            else _args.push_back(*tag);
+        }
+        else _brk = true;
+        auto _ret = this->_client->call("sim.getReferencedHandle", _args);
+        return _ret[0].as<int64_t>();
     }
 
     std::vector<int64_t> sim::getReferencedHandles(int64_t objectHandle, std::optional<std::string> tag)
@@ -2172,12 +2442,44 @@ namespace RemoteAPIObject
         return _ret[0].as<std::string>();
     }
 
+    std::string sim::getStringProperty(int64_t target, std::string pName, std::optional<json> options)
+    {
+        bool _brk = false;
+        json _args(json_array_arg);
+        _args.push_back(target);
+        _args.push_back(pName);
+        if(options)
+        {
+            if(_brk) throw std::runtime_error("no gaps allowed");
+            else _args.push_back(*options);
+        }
+        else _brk = true;
+        auto _ret = this->_client->call("sim.getStringProperty", _args);
+        return _ret[0].as<std::string>();
+    }
+
     double sim::getSystemTime()
     {
         bool _brk = false;
         json _args(json_array_arg);
         auto _ret = this->_client->call("sim.getSystemTime", _args);
         return _ret[0].as<double>();
+    }
+
+    json sim::getTableProperty(int64_t target, std::string pName, std::optional<json> options)
+    {
+        bool _brk = false;
+        json _args(json_array_arg);
+        _args.push_back(target);
+        _args.push_back(pName);
+        if(options)
+        {
+            if(_brk) throw std::runtime_error("no gaps allowed");
+            else _args.push_back(*options);
+        }
+        else _brk = true;
+        auto _ret = this->_client->call("sim.getTableProperty", _args);
+        return _ret[0].as<json>();
     }
 
     std::tuple<int64_t, std::vector<int64_t>> sim::getTextureId(std::string textureName)
@@ -2203,6 +2505,38 @@ namespace RemoteAPIObject
         json _args(json_array_arg);
         auto _ret = this->_client->call("sim.getUserVariables", _args);
         return _ret[0].as<std::vector<std::string>>();
+    }
+
+    std::vector<double> sim::getVector2Property(int64_t target, std::string pName, std::optional<json> options)
+    {
+        bool _brk = false;
+        json _args(json_array_arg);
+        _args.push_back(target);
+        _args.push_back(pName);
+        if(options)
+        {
+            if(_brk) throw std::runtime_error("no gaps allowed");
+            else _args.push_back(*options);
+        }
+        else _brk = true;
+        auto _ret = this->_client->call("sim.getVector2Property", _args);
+        return _ret[0].as<std::vector<double>>();
+    }
+
+    std::vector<double> sim::getVector3Property(int64_t target, std::string pName, std::optional<json> options)
+    {
+        bool _brk = false;
+        json _args(json_array_arg);
+        _args.push_back(target);
+        _args.push_back(pName);
+        if(options)
+        {
+            if(_brk) throw std::runtime_error("no gaps allowed");
+            else _args.push_back(*options);
+        }
+        else _brk = true;
+        auto _ret = this->_client->call("sim.getVector3Property", _args);
+        return _ret[0].as<std::vector<double>>();
     }
 
     std::tuple<std::vector<double>, std::vector<double>> sim::getVelocity(int64_t shapeHandle)
@@ -2909,30 +3243,6 @@ namespace RemoteAPIObject
         auto _ret = this->_client->call("sim.pauseSimulation", _args);
     }
 
-    std::vector<uint8_t> sim::persistentDataRead(std::string dataTag)
-    {
-        bool _brk = false;
-        json _args(json_array_arg);
-        _args.push_back(dataTag);
-        auto _ret = this->_client->call("sim.persistentDataRead", _args);
-        return _ret[0].as<std::vector<uint8_t>>();
-    }
-
-    void sim::persistentDataWrite(std::string dataTag, std::vector<uint8_t> dataValue, std::optional<int64_t> options)
-    {
-        bool _brk = false;
-        json _args(json_array_arg);
-        _args.push_back(dataTag);
-        _args.push_back(bin(dataValue));
-        if(options)
-        {
-            if(_brk) throw std::runtime_error("no gaps allowed");
-            else _args.push_back(*options);
-        }
-        else _brk = true;
-        auto _ret = this->_client->call("sim.persistentDataWrite", _args);
-    }
-
     std::vector<double> sim::poseToMatrix(std::vector<double> pose)
     {
         bool _brk = false;
@@ -3155,6 +3465,21 @@ namespace RemoteAPIObject
         return _ret[0].as<int64_t>();
     }
 
+    void sim::removeProperty(int64_t target, std::string pName, std::optional<json> options)
+    {
+        bool _brk = false;
+        json _args(json_array_arg);
+        _args.push_back(target);
+        _args.push_back(pName);
+        if(options)
+        {
+            if(_brk) throw std::runtime_error("no gaps allowed");
+            else _args.push_back(*options);
+        }
+        else _brk = true;
+        auto _ret = this->_client->call("sim.removeProperty", _args);
+    }
+
     void sim::removeReferencedObjects(int64_t objectHandle, std::optional<std::string> tag)
     {
         bool _brk = false;
@@ -3360,6 +3685,23 @@ namespace RemoteAPIObject
         auto _ret = this->_client->call("sim.scaleObjects", _args);
     }
 
+    int64_t sim::scheduleExecution(std::string f, std::vector<json> args, double timePoint, std::optional<bool> simTime)
+    {
+        bool _brk = false;
+        json _args(json_array_arg);
+        _args.push_back(f);
+        _args.push_back(args);
+        _args.push_back(timePoint);
+        if(simTime)
+        {
+            if(_brk) throw std::runtime_error("no gaps allowed");
+            else _args.push_back(*simTime);
+        }
+        else _brk = true;
+        auto _ret = this->_client->call("sim.scheduleExecution", _args);
+        return _ret[0].as<int64_t>();
+    }
+
     int64_t sim::serialCheck(int64_t portHandle)
     {
         bool _brk = false;
@@ -3446,6 +3788,38 @@ namespace RemoteAPIObject
         auto _ret = this->_client->call("sim.setBoolParam", _args);
     }
 
+    void sim::setBoolProperty(int64_t target, std::string pName, bool pValue, std::optional<json> options)
+    {
+        bool _brk = false;
+        json _args(json_array_arg);
+        _args.push_back(target);
+        _args.push_back(pName);
+        _args.push_back(pValue);
+        if(options)
+        {
+            if(_brk) throw std::runtime_error("no gaps allowed");
+            else _args.push_back(*options);
+        }
+        else _brk = true;
+        auto _ret = this->_client->call("sim.setBoolProperty", _args);
+    }
+
+    void sim::setBufferProperty(int64_t target, std::string pName, std::vector<uint8_t> pValue, std::optional<json> options)
+    {
+        bool _brk = false;
+        json _args(json_array_arg);
+        _args.push_back(target);
+        _args.push_back(pName);
+        _args.push_back(bin(pValue));
+        if(options)
+        {
+            if(_brk) throw std::runtime_error("no gaps allowed");
+            else _args.push_back(*options);
+        }
+        else _brk = true;
+        auto _ret = this->_client->call("sim.setBufferProperty", _args);
+    }
+
     void sim::setBufferSignal(std::string signalName, std::vector<uint8_t> signalValue)
     {
         bool _brk = false;
@@ -3453,6 +3827,22 @@ namespace RemoteAPIObject
         _args.push_back(signalName);
         _args.push_back(bin(signalValue));
         auto _ret = this->_client->call("sim.setBufferSignal", _args);
+    }
+
+    void sim::setColorProperty(int64_t target, std::string pName, std::vector<double> pValue, std::optional<json> options)
+    {
+        bool _brk = false;
+        json _args(json_array_arg);
+        _args.push_back(target);
+        _args.push_back(pName);
+        _args.push_back(pValue);
+        if(options)
+        {
+            if(_brk) throw std::runtime_error("no gaps allowed");
+            else _args.push_back(*options);
+        }
+        else _brk = true;
+        auto _ret = this->_client->call("sim.setColorProperty", _args);
     }
 
     void sim::setEngineBoolParam(int64_t paramId, int64_t objectHandle, bool boolParam)
@@ -3485,6 +3875,19 @@ namespace RemoteAPIObject
         auto _ret = this->_client->call("sim.setEngineInt32Param", _args);
     }
 
+    void sim::setEventFilters(std::optional<json> filters)
+    {
+        bool _brk = false;
+        json _args(json_array_arg);
+        if(filters)
+        {
+            if(_brk) throw std::runtime_error("no gaps allowed");
+            else _args.push_back(*filters);
+        }
+        else _brk = true;
+        auto _ret = this->_client->call("sim.setEventFilters", _args);
+    }
+
     void sim::setExplicitHandling(int64_t objectHandle, int64_t explicitHandlingFlags)
     {
         bool _brk = false;
@@ -3494,6 +3897,22 @@ namespace RemoteAPIObject
         auto _ret = this->_client->call("sim.setExplicitHandling", _args);
     }
 
+    void sim::setFloatArrayProperty(int64_t target, std::string pName, std::vector<double> pValue, std::optional<json> options)
+    {
+        bool _brk = false;
+        json _args(json_array_arg);
+        _args.push_back(target);
+        _args.push_back(pName);
+        _args.push_back(pValue);
+        if(options)
+        {
+            if(_brk) throw std::runtime_error("no gaps allowed");
+            else _args.push_back(*options);
+        }
+        else _brk = true;
+        auto _ret = this->_client->call("sim.setFloatArrayProperty", _args);
+    }
+
     void sim::setFloatParam(int64_t parameter, double floatState)
     {
         bool _brk = false;
@@ -3501,6 +3920,22 @@ namespace RemoteAPIObject
         _args.push_back(parameter);
         _args.push_back(floatState);
         auto _ret = this->_client->call("sim.setFloatParam", _args);
+    }
+
+    void sim::setFloatProperty(int64_t target, std::string pName, double pValue, std::optional<json> options)
+    {
+        bool _brk = false;
+        json _args(json_array_arg);
+        _args.push_back(target);
+        _args.push_back(pName);
+        _args.push_back(pValue);
+        if(options)
+        {
+            if(_brk) throw std::runtime_error("no gaps allowed");
+            else _args.push_back(*options);
+        }
+        else _brk = true;
+        auto _ret = this->_client->call("sim.setFloatProperty", _args);
     }
 
     void sim::setFloatSignal(std::string signalName, double signalValue)
@@ -3566,6 +4001,54 @@ namespace RemoteAPIObject
         _args.push_back(signalName);
         _args.push_back(signalValue);
         auto _ret = this->_client->call("sim.setInt32Signal", _args);
+    }
+
+    void sim::setIntArray2Property(int64_t target, std::string pName, std::vector<int64_t> pValue, std::optional<json> options)
+    {
+        bool _brk = false;
+        json _args(json_array_arg);
+        _args.push_back(target);
+        _args.push_back(pName);
+        _args.push_back(pValue);
+        if(options)
+        {
+            if(_brk) throw std::runtime_error("no gaps allowed");
+            else _args.push_back(*options);
+        }
+        else _brk = true;
+        auto _ret = this->_client->call("sim.setIntArray2Property", _args);
+    }
+
+    void sim::setIntArrayProperty(int64_t target, std::string pName, std::vector<int64_t> pValue, std::optional<json> options)
+    {
+        bool _brk = false;
+        json _args(json_array_arg);
+        _args.push_back(target);
+        _args.push_back(pName);
+        _args.push_back(pValue);
+        if(options)
+        {
+            if(_brk) throw std::runtime_error("no gaps allowed");
+            else _args.push_back(*options);
+        }
+        else _brk = true;
+        auto _ret = this->_client->call("sim.setIntArrayProperty", _args);
+    }
+
+    void sim::setIntProperty(int64_t target, std::string pName, int64_t pValue, std::optional<json> options)
+    {
+        bool _brk = false;
+        json _args(json_array_arg);
+        _args.push_back(target);
+        _args.push_back(pName);
+        _args.push_back(pValue);
+        if(options)
+        {
+            if(_brk) throw std::runtime_error("no gaps allowed");
+            else _args.push_back(*options);
+        }
+        else _brk = true;
+        auto _ret = this->_client->call("sim.setIntProperty", _args);
     }
 
     void sim::setJointDependency(int64_t jointHandle, int64_t masterJointHandle, double offset, double multCoeff)
@@ -3672,6 +4155,22 @@ namespace RemoteAPIObject
         _args.push_back(dummyHandle);
         _args.push_back(linkDummyHandle);
         auto _ret = this->_client->call("sim.setLinkDummy", _args);
+    }
+
+    void sim::setLongProperty(int64_t target, std::string pName, int64_t pValue, std::optional<json> options)
+    {
+        bool _brk = false;
+        json _args(json_array_arg);
+        _args.push_back(target);
+        _args.push_back(pName);
+        _args.push_back(pValue);
+        if(options)
+        {
+            if(_brk) throw std::runtime_error("no gaps allowed");
+            else _args.push_back(*options);
+        }
+        else _brk = true;
+        auto _ret = this->_client->call("sim.setLongProperty", _args);
     }
 
     void sim::setModelProperty(int64_t objectHandle, int64_t property)
@@ -3952,6 +4451,63 @@ namespace RemoteAPIObject
         auto _ret = this->_client->call("sim.setPointCloudOptions", _args);
     }
 
+    void sim::setPoseProperty(int64_t target, std::string pName, std::vector<double> pValue, std::optional<json> options)
+    {
+        bool _brk = false;
+        json _args(json_array_arg);
+        _args.push_back(target);
+        _args.push_back(pName);
+        _args.push_back(pValue);
+        if(options)
+        {
+            if(_brk) throw std::runtime_error("no gaps allowed");
+            else _args.push_back(*options);
+        }
+        else _brk = true;
+        auto _ret = this->_client->call("sim.setPoseProperty", _args);
+    }
+
+    void sim::setProperties(int64_t target, json props)
+    {
+        bool _brk = false;
+        json _args(json_array_arg);
+        _args.push_back(target);
+        _args.push_back(props);
+        auto _ret = this->_client->call("sim.setProperties", _args);
+    }
+
+    void sim::setProperty(int64_t target, std::string pName, json pValue, std::optional<int64_t> pType)
+    {
+        bool _brk = false;
+        json _args(json_array_arg);
+        _args.push_back(target);
+        _args.push_back(pName);
+        _args.push_back(pValue);
+        if(pType)
+        {
+            if(_brk) throw std::runtime_error("no gaps allowed");
+            else _args.push_back(*pType);
+        }
+        else _brk = true;
+        auto _ret = this->_client->call("sim.setProperty", _args);
+    }
+
+    void sim::setQuaternionProperty(int64_t target, std::string pName, std::vector<double> pValue, std::optional<json> options)
+    {
+        bool _brk = false;
+        json _args(json_array_arg);
+        _args.push_back(target);
+        _args.push_back(pName);
+        _args.push_back(pValue);
+        if(options)
+        {
+            if(_brk) throw std::runtime_error("no gaps allowed");
+            else _args.push_back(*options);
+        }
+        else _brk = true;
+        auto _ret = this->_client->call("sim.setQuaternionProperty", _args);
+    }
+
     void sim::setReferencedHandles(int64_t objectHandle, std::vector<int64_t> referencedHandles, std::optional<std::string> tag)
     {
         bool _brk = false;
@@ -4073,6 +4629,22 @@ namespace RemoteAPIObject
         auto _ret = this->_client->call("sim.setStringParam", _args);
     }
 
+    void sim::setStringProperty(int64_t target, std::string pName, std::string pValue, std::optional<json> options)
+    {
+        bool _brk = false;
+        json _args(json_array_arg);
+        _args.push_back(target);
+        _args.push_back(pName);
+        _args.push_back(pValue);
+        if(options)
+        {
+            if(_brk) throw std::runtime_error("no gaps allowed");
+            else _args.push_back(*options);
+        }
+        else _brk = true;
+        auto _ret = this->_client->call("sim.setStringProperty", _args);
+    }
+
     void sim::setStringSignal(std::string signalName, std::string signalValue)
     {
         bool _brk = false;
@@ -4080,6 +4652,54 @@ namespace RemoteAPIObject
         _args.push_back(signalName);
         _args.push_back(signalValue);
         auto _ret = this->_client->call("sim.setStringSignal", _args);
+    }
+
+    void sim::setTableProperty(int64_t target, std::string pName, json pValue, std::optional<json> options)
+    {
+        bool _brk = false;
+        json _args(json_array_arg);
+        _args.push_back(target);
+        _args.push_back(pName);
+        _args.push_back(pValue);
+        if(options)
+        {
+            if(_brk) throw std::runtime_error("no gaps allowed");
+            else _args.push_back(*options);
+        }
+        else _brk = true;
+        auto _ret = this->_client->call("sim.setTableProperty", _args);
+    }
+
+    void sim::setVector2Property(int64_t target, std::string pName, std::vector<double> pValue, std::optional<json> options)
+    {
+        bool _brk = false;
+        json _args(json_array_arg);
+        _args.push_back(target);
+        _args.push_back(pName);
+        _args.push_back(pValue);
+        if(options)
+        {
+            if(_brk) throw std::runtime_error("no gaps allowed");
+            else _args.push_back(*options);
+        }
+        else _brk = true;
+        auto _ret = this->_client->call("sim.setVector2Property", _args);
+    }
+
+    void sim::setVector3Property(int64_t target, std::string pName, std::vector<double> pValue, std::optional<json> options)
+    {
+        bool _brk = false;
+        json _args(json_array_arg);
+        _args.push_back(target);
+        _args.push_back(pName);
+        _args.push_back(pValue);
+        if(options)
+        {
+            if(_brk) throw std::runtime_error("no gaps allowed");
+            else _args.push_back(*options);
+        }
+        else _brk = true;
+        auto _ret = this->_client->call("sim.setVector3Property", _args);
     }
 
     void sim::setVisionSensorImg(int64_t sensorHandle, std::vector<uint8_t> image, std::optional<int64_t> options, std::optional<std::vector<int64_t>> pos, std::optional<std::vector<int64_t>> size)
@@ -4157,6 +4777,15 @@ namespace RemoteAPIObject
         _args.push_back(tolerance);
         auto _ret = this->_client->call("sim.subtractObjectFromPointCloud", _args);
         return _ret[0].as<int64_t>();
+    }
+
+    void sim::systemSemaphore(std::string key, bool acquire)
+    {
+        bool _brk = false;
+        json _args(json_array_arg);
+        _args.push_back(key);
+        _args.push_back(acquire);
+        auto _ret = this->_client->call("sim.systemSemaphore", _args);
     }
 
     int64_t sim::testCB(int64_t a, std::string cb, int64_t b)
@@ -4434,10 +5063,11 @@ namespace RemoteAPIObject
         return _ret[0].as<double>();
     }
 
-    json sim::waitForSignal(std::string sigName)
+    json sim::waitForSignal(int64_t target, std::string sigName)
     {
         bool _brk = false;
         json _args(json_array_arg);
+        _args.push_back(target);
         _args.push_back(sigName);
         auto _ret = this->_client->call("sim.waitForSignal", _args);
         return _ret[0].as<json>();
@@ -7433,6 +8063,16 @@ namespace RemoteAPIObject
         return _ret[0].as<int64_t>();
     }
 
+    int64_t simMujoco::flexcomp(std::string xml, json info)
+    {
+        bool _brk = false;
+        json _args(json_array_arg);
+        _args.push_back(xml);
+        _args.push_back(info);
+        auto _ret = this->_client->call("simMujoco.flexcomp", _args);
+        return _ret[0].as<int64_t>();
+    }
+
     json simMujoco::getCompositeInfo(int64_t injectionId, int64_t what)
     {
         bool _brk = false;
@@ -7441,6 +8081,25 @@ namespace RemoteAPIObject
         _args.push_back(what);
         auto _ret = this->_client->call("simMujoco.getCompositeInfo", _args);
         return _ret[0].as<json>();
+    }
+
+    json simMujoco::getFlexcompInfo(int64_t injectionId, int64_t what)
+    {
+        bool _brk = false;
+        json _args(json_array_arg);
+        _args.push_back(injectionId);
+        _args.push_back(what);
+        auto _ret = this->_client->call("simMujoco.getFlexcompInfo", _args);
+        return _ret[0].as<json>();
+    }
+
+    std::string simMujoco::getInfo(std::string what)
+    {
+        bool _brk = false;
+        json _args(json_array_arg);
+        _args.push_back(what);
+        auto _ret = this->_client->call("simMujoco.getInfo", _args);
+        return _ret[0].as<std::string>();
     }
 
     int64_t simMujoco::injectXML(std::string xml, std::string element, json info)
@@ -8083,6 +8742,13 @@ namespace RemoteAPIObject
         json _args(json_array_arg);
         _args.push_back(subscriptionHandle);
         auto _ret = this->_client->call("simROS2.shutdownSubscription", _args);
+    }
+
+    void simROS2::spinSome()
+    {
+        bool _brk = false;
+        json _args(json_array_arg);
+        auto _ret = this->_client->call("simROS2.spinSome", _args);
     }
 
     void simROS2::subscriptionTreatUInt8ArrayAsString(std::string subscriptionHandle)

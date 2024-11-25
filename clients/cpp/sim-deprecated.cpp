@@ -206,3 +206,53 @@ void sim::setObjectQuaternion(int64_t objectHandle, int64_t relativeToObjectHand
     _args.push_back(quaternion);
     auto _ret = this->_client->call("sim.setObjectQuaternion", _args);
 }
+
+std::vector<std::string> sim::getMatchingPersistentDataTags(std::string pattern)
+{
+    bool _brk = false;
+    json _args(json_array_arg);
+    _args.push_back(pattern);
+    auto _ret = this->_client->call("sim.getMatchingPersistentDataTags", _args);
+    return _ret[0].as<std::vector<std::string>>();
+}
+
+std::vector<std::string> sim::getPersistentDataTags()
+{
+    bool _brk = false;
+    json _args(json_array_arg);
+    auto _ret = this->_client->call("sim.getPersistentDataTags", _args);
+    return _ret[0].as<std::vector<std::string>>();
+}
+
+std::vector<uint8_t> sim::persistentDataRead(std::string dataTag)
+{
+    bool _brk = false;
+    json _args(json_array_arg);
+    _args.push_back(dataTag);
+    auto _ret = this->_client->call("sim.persistentDataRead", _args);
+    return _ret[0].as<std::vector<uint8_t>>();
+}
+
+void sim::persistentDataWrite(std::string dataTag, std::vector<uint8_t> dataValue, std::optional<int64_t> options)
+{
+    bool _brk = false;
+    json _args(json_array_arg);
+    _args.push_back(dataTag);
+    _args.push_back(bin(dataValue));
+    if(options)
+    {
+        if(_brk) throw std::runtime_error("no gaps allowed");
+        else _args.push_back(*options);
+    }
+    else _brk = true;
+    auto _ret = this->_client->call("sim.persistentDataWrite", _args);
+}
+
+json sim::waitForSignal(std::string sigName)
+{
+    bool _brk = false;
+    json _args(json_array_arg);
+    _args.push_back(sigName);
+    auto _ret = this->_client->call("sim.waitForSignal", _args);
+    return _ret[0].as<json>();
+}
