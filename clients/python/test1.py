@@ -28,6 +28,7 @@ client = RemoteAPIClient()
 client.timeout = 5
 
 sim = client.require('sim')
+print("acquired 'sim' namespace")
 simIK = client.require('simIK')
 
 a = [1,2,3]

@@ -52,6 +52,7 @@ class RemoteAPIClient:
         self.requiredItems = {}
         self.VERSION = 2
         self.timeout = 10 * 60
+        self.initialTimeout = 5
         self.sendCnt = 0
         main_globals = sys.modules['__main__'].__dict__
         main_globals['require'] = self.require
@@ -116,7 +117,20 @@ class RemoteAPIClient:
         self.socket.send(rawReq)
 
     def _recv(self):
-        rawResp = self.socket.recv()
+        if self.initialTimeout > 0:
+            # For first connection, so we don't block
+            if self.verbose > 0:
+                print('Connecting to CoppeliaSim...')
+            try:
+                self.socket.RCVTIMEO = self.initialTimeout * 1000
+                rawResp = self.socket.recv()
+            except zmq.Again:
+                raise Exception("Failed connecting to CoppeliaSim.")  # __EXCEPTION__
+            self.initialTimeout = 0
+            if self.verbose > 0:
+                print('Connected.')
+        else:
+            rawResp = self.socket.recv()
         if self.verbose > 1:
             print(f'Received raw len={len(rawResp)}, base64={b64(rawResp)}')
         resp = cbor.loads(rawResp)
