@@ -5,7 +5,7 @@ copying, etc.) contained in the same directory if it is present, or
 under the same terms of the files in the parent directory otherwise.
 
 -----------------------------------------------------------------------
-Copyright (C) 2021-2024 Coppelia Robotics AG
+Copyright (C) 2021-2025 Coppelia Robotics AG
 
 All rights reserved.
 
