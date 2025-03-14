@@ -1,9 +1,15 @@
-if __name__ == '__main__':
+if __name__ == "__main__":
     import sys
+    import argparse
 
-    if len(sys.argv) != 2:
-        print(f'usage: {sys.argv[0]} <output-file.json>')
-        sys.exit(2)
+    DESCRIPTION = """This Python script is designed to interact with CoppeliaSim (a robotics simulation platform) using its ZMQ Remote API.
+The script reads a Lua script, executes it within CoppeliaSim, and saves the resulting constants or data to a JSON file."""
+    parser = argparse.ArgumentParser(prog="get constant", description=DESCRIPTION)
+    parser.add_argument(
+        "output_file", help="file path where the script will save the output data"
+    )
+    args = parser.parse_args()
+    output_file = args.output_file
 
     try:
         import json
@@ -12,11 +18,11 @@ if __name__ == '__main__':
 
         client = RemoteAPIClient()
 
-        with open(sys.argv[1], 'wt') as f:
-            with open(f'{__file__[:-3]}.lua', 'rt') as g:
-                client._send({'eval': g.read()})
+        with open(output_file, "wt") as f:
+            with open(f"{__file__[:-3]}.lua", "rt") as g:
+                client._send({"eval": g.read()})
             constants = client._process_response(client._recv())
-            json.dump(constants, f, indent=4, separators=(',', ': '))
+            json.dump(constants, f, indent=4, separators=(",", ": "))
     except Exception as e:
-        print(f'error: {e}')
+        print(f"error: {e}")
         sys.exit(1)
