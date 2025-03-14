@@ -4,7 +4,7 @@ if __name__ == "__main__":
 
     DESCRIPTION = """This Python script is designed to interact with CoppeliaSim (a robotics simulation platform) using its ZMQ Remote API.
 The script reads a Lua script, executes it within CoppeliaSim, and saves the resulting constants or data to a JSON file."""
-    parser = argparse.ArgumentParser(prog="get constant", description=DESCRIPTION)
+    parser = argparse.ArgumentParser(description=DESCRIPTION)
     parser.add_argument(
         "output_file", help="file path where the script will save the output data"
     )
