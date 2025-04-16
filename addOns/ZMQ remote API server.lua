@@ -564,7 +564,6 @@ end
 
 function sysCall_info()
     return {
-        autoStart = sim.getNamedBoolParam('zmqRemoteApi.autoStart') ~= false,
         menu = 'Connectivity\nZMQ remote API server',
     }
 end
@@ -763,3 +762,5 @@ function sysCall_afterSimulation()
     end
     --]]
 end
+
+require('addOns.autoStart').setup{ns = 'zmqRemoteApi'}
