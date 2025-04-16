@@ -110,11 +110,11 @@ function sim.step()
         insideExtCall = insideExtCall + 1
         local tmp = currentClientInfo.asyncFuncCalls
         currentClientInfo.asyncFuncCalls = {}
-        for i = 1, #tmp, 1 do 
-            zmqRemoteApi.callRemoteFunction(tmp[i].func, tmp[i].args, true) 
+        for i = 1, #tmp, 1 do
+            zmqRemoteApi.callRemoteFunction(tmp[i].func, tmp[i].args, true)
         end
         insideExtCall = insideExtCall - 1
-        
+
         zmqRemoteApi.send({func = '_*wait*_', args = {}}) -- Tell the client to wait and send '_*executed*_' back
         nakedYield()
         -- if we arrived here, we have received the '_*executed*_' reply from the same client
@@ -131,7 +131,7 @@ function sim.readCustomDataBlock(obj, tag)
     -- via the remote API, we should always return a string, for backw. comp.
     local retVal = sim.readCustomStringData(obj, tag)
     if retVal == nil then
-        retVal = '' 
+        retVal = ''
     end
     return retVal
 end
@@ -277,8 +277,8 @@ function zmqRemoteApi.handleRequest(req)
     insideExtCall = insideExtCall + 1
     local tmp = currentClientInfo.asyncFuncCalls
     currentClientInfo.asyncFuncCalls = {}
-    for i = 1, #tmp, 1 do 
-        zmqRemoteApi.callRemoteFunction(tmp[i].func, tmp[i].args, true) 
+    for i = 1, #tmp, 1 do
+        zmqRemoteApi.callRemoteFunction(tmp[i].func, tmp[i].args, true)
     end
     insideExtCall = insideExtCall - 1
 
@@ -338,8 +338,6 @@ function zmqRemoteApi.handleRequest(req)
                     end
                 end
             end
-            
-            
 
             local function errHandler(err)
                 local trace = debug.traceback(err)
@@ -363,7 +361,7 @@ function zmqRemoteApi.handleRequest(req)
                     end
                 end
                 --local ret = {func(unpack(args, 1, req.argsL))}
-                
+
                 -- Try to assign correct types to text and buffers:
                 local args = returnTypes[reqFunc]
                 if args then
@@ -427,7 +425,6 @@ function zmqRemoteApi.receive()
             else
                 error('Error trying to decode received data:\n' .. retVal)
             end
-        
         end
     else
         error('Trying to receive data from Python where a send is expected')
@@ -439,7 +436,7 @@ function zmqRemoteApi.send(reply)
     if not receiveIsNext then
         local dat = reply
         local status, reply = pcall(cbor.encode, reply)
-        if not status then 
+        if not status then
             local s2, rep2 = pcall(getAsString, dat)
             if s2 then
                 error(reply .. "\n" .. rep2)
@@ -542,7 +539,7 @@ function zmqRemoteApi.resumeCoroutine()
     if coroutine.status(currentClientInfo.corout) ~= 'dead' then
         local ok, errorMsg = coroutine.resume(currentClientInfo.corout)
         currentClientInfo.idleSince = sim.getSystemTime()
-        if errorMsg then 
+        if errorMsg then
             error(debug.traceback(currentClientInfo.corout, errorMsg), 2)
         end
     end
@@ -738,7 +735,7 @@ end
 function sysCall_ext(funcName, ...)
     local retVal = table.pack(nil)
     insideExtCall = insideExtCall + 1
-    
+
     local fun = _G
     if string.find(funcName, "%.") then
         for w in funcName:gmatch("[^%.]+") do -- handle cases like sim.func or similar too
