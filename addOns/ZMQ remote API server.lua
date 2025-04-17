@@ -763,4 +763,4 @@ function sysCall_afterSimulation()
     --]]
 end
 
-require('addOns.autoStart').setup{ns = 'zmqRemoteApi'}
+require('addOns.autoStart').setup{ns = 'zmqRemoteApi', default = true}
