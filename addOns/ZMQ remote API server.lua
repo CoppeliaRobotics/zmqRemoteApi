@@ -1,5 +1,5 @@
 sim = require 'sim'
-removeLazyLoaders()
+_removeLazyLoaders()
 
 zmqRemoteApi = {}
 
