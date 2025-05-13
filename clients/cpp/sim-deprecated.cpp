@@ -207,15 +207,6 @@ void sim::setObjectQuaternion(int64_t objectHandle, int64_t relativeToObjectHand
     auto _ret = this->_client->call("sim.setObjectQuaternion", _args);
 }
 
-std::vector<std::string> sim::getMatchingPersistentDataTags(std::string pattern)
-{
-    bool _brk = false;
-    json _args(json_array_arg);
-    _args.push_back(pattern);
-    auto _ret = this->_client->call("sim.getMatchingPersistentDataTags", _args);
-    return _ret[0].as<std::vector<std::string>>();
-}
-
 std::vector<std::string> sim::getPersistentDataTags()
 {
     bool _brk = false;

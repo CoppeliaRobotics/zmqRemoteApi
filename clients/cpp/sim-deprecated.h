@@ -17,7 +17,6 @@ void setObjectMatrix(int64_t objectHandle, int64_t relativeToObjectHandle, std::
 void setObjectPosition(int64_t objectHandle, int64_t relativeToObjectHandle, std::vector<double> position);
 void setObjectQuaternion(int64_t objectHandle, int64_t relativeToObjectHandle, std::vector<double> quaternion);
 void setObjectOrientation(int64_t objectHandle, int64_t relativeToObjectHandle, std::vector<double> eulerAngles);
-std::vector<std::string> getMatchingPersistentDataTags(std::string pattern);
 std::vector<std::string> getPersistentDataTags();
 std::vector<uint8_t> persistentDataRead(std::string dataTag);
 void persistentDataWrite(std::string dataTag, std::vector<uint8_t> dataValue, std::optional<int64_t> options = {});
