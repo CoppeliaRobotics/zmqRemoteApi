@@ -57,6 +57,7 @@ namespace RemoteAPIObject
         int64_t closeScene();
         std::vector<uint8_t> combineRgbImages(std::vector<uint8_t> img1, std::vector<int64_t> img1Res, std::vector<uint8_t> img2, std::vector<int64_t> img2Res, int64_t operation);
         int64_t computeMassAndInertia(int64_t shapeHandle, double density);
+        json convertPropertyValue(json value, int64_t fromType, int64_t toType);
         std::vector<int64_t> copyPasteObjects(std::vector<int64_t> objectHandles, std::optional<int64_t> options = {});
         std::vector<json> copyTable(std::vector<json> original);
         int64_t createCollection(std::optional<int64_t> options = {});
@@ -76,8 +77,10 @@ namespace RemoteAPIObject
         void destroyCollection(int64_t collectionHandle);
         void destroyGraphCurve(int64_t graphHandle, int64_t curveId);
         int64_t duplicateGraphCurveToStatic(int64_t graphHandle, int64_t curveId, std::optional<std::string> curveName = {});
+        std::tuple<bool, json> executeLuaCode(std::string theCode);
         std::tuple<int64_t, json> executeScriptString(std::string stringToExecute, int64_t scriptHandle);
         void exportMesh(int64_t fileformat, std::string pathAndFilename, int64_t options, double scalingFactor, std::vector<double> vertices, std::vector<int64_t> indices);
+        void fastIdleLoop(bool enable);
         int64_t floatingViewAdd(double posX, double posY, double sizeX, double sizeY, int64_t options);
         int64_t floatingViewRemove(int64_t floatingViewHandle);
         int64_t generateShapeFromPath(std::vector<double> path, std::vector<double> section, std::optional<int64_t> options = {}, std::optional<std::vector<double>> upVector = {});
@@ -127,8 +130,11 @@ namespace RemoteAPIObject
         std::string getLastInfo();
         std::tuple<int64_t, std::vector<double>, std::vector<double>, std::vector<double>> getLightParameters(int64_t lightHandle);
         int64_t getLinkDummy(int64_t dummyHandle);
+        std::vector<std::string> getLoadedPlugins();
         int64_t getLongProperty(int64_t target, std::string pName, std::optional<json> options = {});
+        std::vector<std::string> getMatchingPersistentDataTags(std::string pattern);
         std::vector<double> getMatrixInverse(std::vector<double> matrix);
+        std::vector<double> getModelBB(int64_t handle);
         int64_t getModelProperty(int64_t objectHandle);
         bool getNamedBoolParam(std::string name);
         double getNamedFloatParam(std::string name);
@@ -144,6 +150,7 @@ namespace RemoteAPIObject
         std::vector<double> getObjectFloatArrayParam(int64_t objectHandle, int64_t parameterID);
         double getObjectFloatParam(int64_t objectHandle, int64_t parameterID);
         void getObjectFromUid(int64_t uid, std::optional<json> options = {});
+        int64_t getObjectHandle(std::string path, std::optional<json> options = {});
         std::tuple<int64_t, int64_t> getObjectHierarchyOrder(int64_t objectHandle);
         int64_t getObjectInt32Param(int64_t objectHandle, int64_t parameterID);
         std::vector<double> getObjectMatrix(int64_t objectHandle, std::optional<int64_t> relativeToObjectHandle = {});
@@ -162,6 +169,7 @@ namespace RemoteAPIObject
         std::tuple<std::vector<double>, std::vector<double>> getObjectVelocity(int64_t objectHandle);
         int64_t getObjects(int64_t index, int64_t objectType);
         std::vector<int64_t> getObjectsInTree(int64_t treeBaseHandle, std::optional<int64_t> objectType = {}, std::optional<int64_t> options = {});
+        std::vector<int64_t> getObjectsWithTag(std::string tagName, std::optional<bool> justModels = {});
         std::vector<double> getOctreeVoxels(int64_t octreeHandle);
         int64_t getPage();
         std::vector<double> getPathInterpolatedConfig(std::vector<double> path, std::vector<double> pathLengths, double t, std::optional<json> method = {}, std::optional<std::vector<int64_t>> types = {});
@@ -178,6 +186,7 @@ namespace RemoteAPIObject
         std::tuple<int64_t, int64_t, std::string> getPropertyInfo(int64_t target, std::string pName, std::optional<json> options = {});
         std::tuple<std::string, std::string> getPropertyName(int64_t target, int64_t index, std::optional<json> options = {});
         std::string getPropertyTypeString(int64_t pType);
+        std::vector<double> getQuaternionInverse(std::vector<double> quat);
         std::vector<double> getQuaternionProperty(int64_t target, std::string pName, std::optional<json> options = {});
         double getRandom(std::optional<int64_t> seed = {});
         bool getRealTimeSimulation();
@@ -247,9 +256,11 @@ namespace RemoteAPIObject
         int64_t isDeprecated(std::string funcOrConst);
         bool isDynamicallyEnabled(int64_t objectHandle);
         bool isHandle(int64_t objectHandle);
+        bool isPluginLoaded(std::string name);
         void launchExecutable(std::string filename, std::optional<std::string> parameters = {}, std::optional<int64_t> showStatus = {});
         std::tuple<std::vector<uint8_t>, std::vector<int64_t>> loadImage(int64_t options, std::string filename);
         int64_t loadModel(std::string filename);
+        int64_t loadPlugin(std::string name);
         void loadScene(std::string filename);
         std::vector<double> matrixToPose(std::vector<double> matrix);
         int64_t moduleEntry(int64_t handle, std::optional<std::string> label = {}, std::optional<int64_t> state = {});
@@ -276,6 +287,7 @@ namespace RemoteAPIObject
         void pushUserEvent(std::string event, int64_t handle, int64_t uid, json eventData, std::optional<int64_t> options = {});
         void quitSimulator();
         std::vector<uint8_t> readCustomBufferData(int64_t objectHandle, std::string tagName);
+        std::tuple<std::vector<uint8_t>, std::string> readCustomDataBlockEx(int64_t handle, std::string tag, std::optional<json> options = {});
         std::vector<std::string> readCustomDataTags(int64_t objectHandle);
         std::string readCustomStringData(int64_t objectHandle, std::string tagName);
         json readCustomTableData(int64_t handle, std::string tagName, std::optional<json> options = {});
@@ -342,7 +354,7 @@ namespace RemoteAPIObject
         void setIntProperty(int64_t target, std::string pName, int64_t pValue, std::optional<json> options = {});
         void setJointDependency(int64_t jointHandle, int64_t masterJointHandle, double offset, double multCoeff);
         void setJointInterval(int64_t objectHandle, bool cyclic, std::vector<double> interval);
-        void setJointMode(int64_t jointHandle, int64_t jointMode, int64_t options);
+        void setJointMode(int64_t jointHandle, int64_t jointMode);
         void setJointPosition(int64_t objectHandle, double position);
         void setJointTargetForce(int64_t objectHandle, double forceOrTorque, std::optional<bool> signedValue = {});
         void setJointTargetPosition(int64_t objectHandle, double targetPosition, std::optional<std::vector<double>> motionParams = {});
@@ -408,7 +420,7 @@ namespace RemoteAPIObject
         int64_t textEditorOpen(std::string initText, std::string properties);
         void textEditorShow(int64_t handle, bool showState);
         std::vector<uint8_t> transformBuffer(std::vector<uint8_t> inBuffer, int64_t inFormat, double multiplier, double offset, int64_t outFormat);
-        void transformImage(std::vector<uint8_t> image, std::vector<int64_t> resolution, int64_t options);
+        std::vector<uint8_t> transformImage(std::vector<uint8_t> image, std::vector<int64_t> resolution, int64_t options);
         std::vector<int64_t> ungroupShape(int64_t shapeHandle);
         std::vector<double> unpackDoubleTable(std::vector<uint8_t> data, std::optional<int64_t> startDoubleIndex = {}, std::optional<int64_t> doubleCount = {}, std::optional<int64_t> additionalByteOffset = {});
         std::vector<double> unpackFloatTable(std::vector<uint8_t> data, std::optional<int64_t> startFloatIndex = {}, std::optional<int64_t> floatCount = {}, std::optional<int64_t> additionalByteOffset = {});
@@ -421,6 +433,7 @@ namespace RemoteAPIObject
         double wait(double dt, std::optional<bool> simulationTime = {});
         json waitForSignal(int64_t target, std::string sigName);
         void writeCustomBufferData(int64_t objectHandle, std::string tagName, std::vector<uint8_t> data);
+        void writeCustomDataBlockEx(int64_t handle, std::string tag, std::vector<uint8_t> data, std::optional<json> options = {});
         void writeCustomStringData(int64_t objectHandle, std::string tagName, std::string data);
         void writeCustomTableData(int64_t handle, std::string tagName, json theTable, std::optional<json> options = {});
         void writeTexture(int64_t textureId, int64_t options, std::vector<uint8_t> textureData, std::optional<int64_t> posX = {}, std::optional<int64_t> posY = {}, std::optional<int64_t> sizeX = {}, std::optional<int64_t> sizeY = {}, std::optional<double> interpol = {});
@@ -3016,8 +3029,14 @@ namespace RemoteAPIObject
 #ifndef primitiveshape_spheroid
         const int primitiveshape_spheroid = 4;
 #endif
+#ifndef propertyinfo_deprecated
+        const int propertyinfo_deprecated = 16;
+#endif
 #ifndef propertyinfo_largedata
         const int propertyinfo_largedata = 256;
+#endif
+#ifndef propertyinfo_modelhashexclude
+        const int propertyinfo_modelhashexclude = 8;
 #endif
 #ifndef propertyinfo_notreadable
         const int propertyinfo_notreadable = 2;

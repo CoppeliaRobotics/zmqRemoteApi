@@ -600,6 +600,17 @@ namespace RemoteAPIObject
         return _ret[0].as<int64_t>();
     }
 
+    json sim::convertPropertyValue(json value, int64_t fromType, int64_t toType)
+    {
+        bool _brk = false;
+        json _args(json_array_arg);
+        _args.push_back(value);
+        _args.push_back(fromType);
+        _args.push_back(toType);
+        auto _ret = this->_client->call("sim.convertPropertyValue", _args);
+        return _ret[0].as<json>();
+    }
+
     std::vector<int64_t> sim::copyPasteObjects(std::vector<int64_t> objectHandles, std::optional<int64_t> options)
     {
         bool _brk = false;
@@ -902,6 +913,15 @@ namespace RemoteAPIObject
         return _ret[0].as<int64_t>();
     }
 
+    std::tuple<bool, json> sim::executeLuaCode(std::string theCode)
+    {
+        bool _brk = false;
+        json _args(json_array_arg);
+        _args.push_back(theCode);
+        auto _ret = this->_client->call("sim.executeLuaCode", _args);
+        return std::make_tuple(_ret[0].as<bool>(), _ret[1].as<json>());
+    }
+
     std::tuple<int64_t, json> sim::executeScriptString(std::string stringToExecute, int64_t scriptHandle)
     {
         bool _brk = false;
@@ -923,6 +943,14 @@ namespace RemoteAPIObject
         _args.push_back(vertices);
         _args.push_back(indices);
         auto _ret = this->_client->call("sim.exportMesh", _args);
+    }
+
+    void sim::fastIdleLoop(bool enable)
+    {
+        bool _brk = false;
+        json _args(json_array_arg);
+        _args.push_back(enable);
+        auto _ret = this->_client->call("sim.fastIdleLoop", _args);
     }
 
     int64_t sim::floatingViewAdd(double posX, double posY, double sizeX, double sizeY, int64_t options)
@@ -1530,6 +1558,14 @@ namespace RemoteAPIObject
         return _ret[0].as<int64_t>();
     }
 
+    std::vector<std::string> sim::getLoadedPlugins()
+    {
+        bool _brk = false;
+        json _args(json_array_arg);
+        auto _ret = this->_client->call("sim.getLoadedPlugins", _args);
+        return _ret[0].as<std::vector<std::string>>();
+    }
+
     int64_t sim::getLongProperty(int64_t target, std::string pName, std::optional<json> options)
     {
         bool _brk = false;
@@ -1546,12 +1582,30 @@ namespace RemoteAPIObject
         return _ret[0].as<int64_t>();
     }
 
+    std::vector<std::string> sim::getMatchingPersistentDataTags(std::string pattern)
+    {
+        bool _brk = false;
+        json _args(json_array_arg);
+        _args.push_back(pattern);
+        auto _ret = this->_client->call("sim.getMatchingPersistentDataTags", _args);
+        return _ret[0].as<std::vector<std::string>>();
+    }
+
     std::vector<double> sim::getMatrixInverse(std::vector<double> matrix)
     {
         bool _brk = false;
         json _args(json_array_arg);
         _args.push_back(matrix);
         auto _ret = this->_client->call("sim.getMatrixInverse", _args);
+        return _ret[0].as<std::vector<double>>();
+    }
+
+    std::vector<double> sim::getModelBB(int64_t handle)
+    {
+        bool _brk = false;
+        json _args(json_array_arg);
+        _args.push_back(handle);
+        auto _ret = this->_client->call("sim.getModelBB", _args);
         return _ret[0].as<std::vector<double>>();
     }
 
@@ -1716,6 +1770,21 @@ namespace RemoteAPIObject
         }
         else _brk = true;
         auto _ret = this->_client->call("sim.getObjectFromUid", _args);
+    }
+
+    int64_t sim::getObjectHandle(std::string path, std::optional<json> options)
+    {
+        bool _brk = false;
+        json _args(json_array_arg);
+        _args.push_back(path);
+        if(options)
+        {
+            if(_brk) throw std::runtime_error("no gaps allowed");
+            else _args.push_back(*options);
+        }
+        else _brk = true;
+        auto _ret = this->_client->call("sim.getObjectHandle", _args);
+        return _ret[0].as<int64_t>();
     }
 
     std::tuple<int64_t, int64_t> sim::getObjectHierarchyOrder(int64_t objectHandle)
@@ -1924,6 +1993,21 @@ namespace RemoteAPIObject
         return _ret[0].as<std::vector<int64_t>>();
     }
 
+    std::vector<int64_t> sim::getObjectsWithTag(std::string tagName, std::optional<bool> justModels)
+    {
+        bool _brk = false;
+        json _args(json_array_arg);
+        _args.push_back(tagName);
+        if(justModels)
+        {
+            if(_brk) throw std::runtime_error("no gaps allowed");
+            else _args.push_back(*justModels);
+        }
+        else _brk = true;
+        auto _ret = this->_client->call("sim.getObjectsWithTag", _args);
+        return _ret[0].as<std::vector<int64_t>>();
+    }
+
     std::vector<double> sim::getOctreeVoxels(int64_t octreeHandle)
     {
         bool _brk = false;
@@ -2127,6 +2211,15 @@ namespace RemoteAPIObject
         _args.push_back(pType);
         auto _ret = this->_client->call("sim.getPropertyTypeString", _args);
         return _ret[0].as<std::string>();
+    }
+
+    std::vector<double> sim::getQuaternionInverse(std::vector<double> quat)
+    {
+        bool _brk = false;
+        json _args(json_array_arg);
+        _args.push_back(quat);
+        auto _ret = this->_client->call("sim.getQuaternionInverse", _args);
+        return _ret[0].as<std::vector<double>>();
     }
 
     std::vector<double> sim::getQuaternionProperty(int64_t target, std::string pName, std::optional<json> options)
@@ -2927,6 +3020,15 @@ namespace RemoteAPIObject
         return _ret[0].as<bool>();
     }
 
+    bool sim::isPluginLoaded(std::string name)
+    {
+        bool _brk = false;
+        json _args(json_array_arg);
+        _args.push_back(name);
+        auto _ret = this->_client->call("sim.isPluginLoaded", _args);
+        return _ret[0].as<bool>();
+    }
+
     void sim::launchExecutable(std::string filename, std::optional<std::string> parameters, std::optional<int64_t> showStatus)
     {
         bool _brk = false;
@@ -2963,6 +3065,15 @@ namespace RemoteAPIObject
         json _args(json_array_arg);
         _args.push_back(filename);
         auto _ret = this->_client->call("sim.loadModel", _args);
+        return _ret[0].as<int64_t>();
+    }
+
+    int64_t sim::loadPlugin(std::string name)
+    {
+        bool _brk = false;
+        json _args(json_array_arg);
+        _args.push_back(name);
+        auto _ret = this->_client->call("sim.loadPlugin", _args);
         return _ret[0].as<int64_t>();
     }
 
@@ -3293,6 +3404,22 @@ namespace RemoteAPIObject
         _args.push_back(tagName);
         auto _ret = this->_client->call("sim.readCustomBufferData", _args);
         return _ret[0].as<std::vector<uint8_t>>();
+    }
+
+    std::tuple<std::vector<uint8_t>, std::string> sim::readCustomDataBlockEx(int64_t handle, std::string tag, std::optional<json> options)
+    {
+        bool _brk = false;
+        json _args(json_array_arg);
+        _args.push_back(handle);
+        _args.push_back(tag);
+        if(options)
+        {
+            if(_brk) throw std::runtime_error("no gaps allowed");
+            else _args.push_back(*options);
+        }
+        else _brk = true;
+        auto _ret = this->_client->call("sim.readCustomDataBlockEx", _args);
+        return std::make_tuple(_ret[0].as<std::vector<uint8_t>>(), _ret[1].as<std::string>());
     }
 
     std::vector<std::string> sim::readCustomDataTags(int64_t objectHandle)
@@ -4092,13 +4219,12 @@ namespace RemoteAPIObject
         auto _ret = this->_client->call("sim.setJointInterval", _args);
     }
 
-    void sim::setJointMode(int64_t jointHandle, int64_t jointMode, int64_t options)
+    void sim::setJointMode(int64_t jointHandle, int64_t jointMode)
     {
         bool _brk = false;
         json _args(json_array_arg);
         _args.push_back(jointHandle);
         _args.push_back(jointMode);
-        _args.push_back(options);
         auto _ret = this->_client->call("sim.setJointMode", _args);
     }
 
@@ -4869,7 +4995,7 @@ namespace RemoteAPIObject
         return _ret[0].as<std::vector<uint8_t>>();
     }
 
-    void sim::transformImage(std::vector<uint8_t> image, std::vector<int64_t> resolution, int64_t options)
+    std::vector<uint8_t> sim::transformImage(std::vector<uint8_t> image, std::vector<int64_t> resolution, int64_t options)
     {
         bool _brk = false;
         json _args(json_array_arg);
@@ -4877,6 +5003,7 @@ namespace RemoteAPIObject
         _args.push_back(resolution);
         _args.push_back(options);
         auto _ret = this->_client->call("sim.transformImage", _args);
+        return _ret[0].as<std::vector<uint8_t>>();
     }
 
     std::vector<int64_t> sim::ungroupShape(int64_t shapeHandle)
@@ -5101,6 +5228,22 @@ namespace RemoteAPIObject
         _args.push_back(tagName);
         _args.push_back(bin(data));
         auto _ret = this->_client->call("sim.writeCustomBufferData", _args);
+    }
+
+    void sim::writeCustomDataBlockEx(int64_t handle, std::string tag, std::vector<uint8_t> data, std::optional<json> options)
+    {
+        bool _brk = false;
+        json _args(json_array_arg);
+        _args.push_back(handle);
+        _args.push_back(tag);
+        _args.push_back(bin(data));
+        if(options)
+        {
+            if(_brk) throw std::runtime_error("no gaps allowed");
+            else _args.push_back(*options);
+        }
+        else _brk = true;
+        auto _ret = this->_client->call("sim.writeCustomDataBlockEx", _args);
     }
 
     void sim::writeCustomStringData(int64_t objectHandle, std::string tagName, std::string data)
