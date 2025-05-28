@@ -351,7 +351,7 @@ function zmqRemoteApi.handleRequest(req)
                 return trace
             end
             local status, retvals = xpcall(function()
-                local pret = table.pack(func(unpack(args, 1, req.argsL)))
+                local pret = table.pack(func(table.unpack(args, 1, req.argsL)))
                 local ret = {}
                 for i = 1, pret.n do
                     if pret[i] ~= nil then
@@ -360,7 +360,7 @@ function zmqRemoteApi.handleRequest(req)
                         ret[i] = tonil()
                     end
                 end
-                --local ret = {func(unpack(args, 1, req.argsL))}
+                --local ret = {func(table.unpack(args, 1, req.argsL))}
 
                 -- Try to assign correct types to text and buffers:
                 local args = returnTypes[reqFunc]
@@ -662,7 +662,7 @@ function zmqRemoteApi.callRemoteFunction(functionName, _args, cb)
             end
         end
     end
-    return unpack(retVal)
+    return table.unpack(retVal)
 end
 
 function sysCall_cleanup()
