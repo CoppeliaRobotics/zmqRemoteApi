@@ -1,7 +1,7 @@
-sim = require 'sim'
+local sim = require 'sim'
 _removeLazyLoaders()
 
-zmqRemoteApi = {}
+local zmqRemoteApi = {}
 
 function sim.setThreadAutomaticSwitch()
     -- Shadow the original function
@@ -193,8 +193,13 @@ function zmqRemoteApi.verbose()
 end
 
 function zmqRemoteApi.require(name)
-    _G[name] = require(name)
-    zmqRemoteApi.parseFuncsReturnTypes(name)
+    local vname = name
+    local pos = vname:find("-")
+    if pos then
+        vname = vname:sub(1, pos - 1)
+    end
+    _G[vname] = require(name)
+    zmqRemoteApi.parseFuncsReturnTypes(vname)
     if not sim.getBoolParam(sim.boolparam_execunsafeext) then
         sim.executeScriptString = nil
         sim.launchExecutable = nil
@@ -251,7 +256,9 @@ function zmqRemoteApi.info(obj)
     local ret = {}
     for k, v in pairs(obj) do
         if type(v) == 'table' then
-            ret[k] = zmqRemoteApi.info(v)
+            if getmetatable(v) == nil or isbuffer(v) then -- other objects are not (yet) supported
+                ret[k] = zmqRemoteApi.info(v)
+            end
         elseif type(v) == 'function' then
             ret[k] = {func = {}}
         elseif type(v) ~= 'function' then

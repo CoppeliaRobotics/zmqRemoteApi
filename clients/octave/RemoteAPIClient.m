@@ -110,8 +110,9 @@ classdef RemoteAPIClient < handle
         end
 
         function remoteObject = require(obj, name)
+            vname = regexprep(name, '-[^-]*', '');
             obj.call('zmqRemoteApi.require', {name});
-            remoteObject = obj.getObject(name);
+            remoteObject = obj.getObject(vname);
         end
 
         function setStepping(obj, enable)

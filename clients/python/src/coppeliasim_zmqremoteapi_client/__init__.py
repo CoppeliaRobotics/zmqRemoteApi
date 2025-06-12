@@ -210,11 +210,12 @@ class RemoteAPIClient:
         return ret
 
     def require(self, name):
-        if name in self.requiredItems:
-            ret = self.requiredItems[name]
+        vname = name.split('-')[0]
+        if vname in self.requiredItems:
+            ret = self.requiredItems[vname]
         else:
             self.call('zmqRemoteApi.require', [name])
-            ret = self.getObject(name)
+            ret = self.getObject(vname)
         return ret
 
     def getScriptFunctions(self, scriptHandle):
