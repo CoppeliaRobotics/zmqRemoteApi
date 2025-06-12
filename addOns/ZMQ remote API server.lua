@@ -1,4 +1,7 @@
 local sim = require 'sim'
+local simZMQ
+local cbor
+
 _removeLazyLoaders()
 
 zmqRemoteApi = {} -- needs to be global!
