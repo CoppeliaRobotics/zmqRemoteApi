@@ -1,7 +1,7 @@
 local sim = require 'sim'
 _removeLazyLoaders()
 
-local zmqRemoteApi = {}
+zmqRemoteApi = {} -- needs to be global!
 
 function sim.setThreadAutomaticSwitch()
     -- Shadow the original function
