@@ -2,7 +2,7 @@ local sim = require 'sim'
 local simZMQ
 local cbor
 
-_removeLazyLoaders()
+if _removeLazyLoaders then _removeLazyLoaders() end
 
 zmqRemoteApi = {} -- needs to be global!
 
