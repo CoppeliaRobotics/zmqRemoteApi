@@ -10,6 +10,17 @@ function sim.setThreadAutomaticSwitch()
     -- Shadow the original function
 end
 
+sim.callScriptFunction = wrap(sim.callScriptFunction, function(origFunc)
+    return function(...)
+        local retVal = table.pack(origFunc(...))
+        if #retVal == 0 then
+            return nil -- the remote API needs always at least a nil as return value
+        else
+            return table.unpack(retVal)
+        end
+    end
+end)
+
 sim.stopSimulation = wrap(sim.stopSimulation, function(origFunc)
     return function(wait)
         for k, v in pairs(allClients) do
