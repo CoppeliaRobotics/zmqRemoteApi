@@ -620,7 +620,7 @@ function sysCall_init()
             string.format('ZeroMQ Remote API server starting (rpcPort=%d)...', rpcPort)
         )
 --    end
-    cbor = require 'org.conman.cbor'
+    cbor = require 'simCBOR'
     context = simZMQ.ctx_new()
     rpcSocket = simZMQ.socket(context, simZMQ.REP)
     simZMQ.bind(rpcSocket, string.format('tcp://*:%d', rpcPort))
