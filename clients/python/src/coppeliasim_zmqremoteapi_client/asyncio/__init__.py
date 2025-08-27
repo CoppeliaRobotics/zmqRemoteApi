@@ -196,7 +196,7 @@ class RemoteAPIClient:
             elif len(v) == 1 and 'const' in v:
                 setattr(ret, k, v['const'])
             else:
-                setattr(ret, k, self.getObject(f'{name}.{k}', _info=v))
+                setattr(ret, k, await self.getObject(f'{name}.{k}', _info=v))
         if name == 'sim':
             ret.getScriptFunctions = self.getScriptFunctions
         return ret
