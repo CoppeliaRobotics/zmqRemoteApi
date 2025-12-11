@@ -393,7 +393,9 @@ function zmqRemoteApi.handleRequest(req)
                         elseif args[i] == 2 and type(ret[i]) == 'string' then
                             ret[i] = tobin(ret[i])
                         elseif type(ret[i]) == 'table' then
-                            if (not isbuffer(ret[i])) and (getmetatable(ret[i]) ~= cbornil) then 
+                            local mt = getmetatable(ret[i]) or {}
+                            -- FF 2025-12-11: skip calling tomap() if the object has a __tocbor metamethod!
+                            if (not isbuffer(ret[i])) and (mt ~= cbornil) and (not mt.__tocbor) then
                                 if table.isarray(ret[i]) then
                                     ret[i] = toarray(ret[i])
                                 else
