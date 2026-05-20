@@ -39,6 +39,7 @@ endif()
 set(CPPZMQ_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 FetchContent_Declare(cppzmq
     GIT_REPOSITORY https://github.com/zeromq/cppzmq
+    GIT_TAG v4.11.0
     SOURCE_DIR ${CMAKE_CURRENT_BINARY_DIR}/cppzmq
 )
 FetchContent_GetProperties(cppzmq)
