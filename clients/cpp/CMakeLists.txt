@@ -27,6 +27,7 @@ include(FetchContent)
 
 FetchContent_Declare(jsoncons
     GIT_REPOSITORY https://github.com/danielaparker/jsoncons
+    GIT_TAG v1.7.0
     SOURCE_DIR ${CMAKE_CURRENT_BINARY_DIR}/jsoncons
 )
 FetchContent_GetProperties(jsoncons)
