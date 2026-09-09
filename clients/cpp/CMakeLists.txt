@@ -30,11 +30,7 @@ FetchContent_Declare(jsoncons
     GIT_TAG v1.7.0
     SOURCE_DIR ${CMAKE_CURRENT_BINARY_DIR}/jsoncons
 )
-FetchContent_GetProperties(jsoncons)
-if(NOT jsoncons_POPULATED)
-    FetchContent_Populate(jsoncons)
-    #add_subdirectory(${jsoncons_SOURCE_DIR} ${jsoncons_BINARY_DIR} EXCLUDE_FROM_ALL)
-endif()
+FetchContent_MakeAvailable(jsoncons)
 
 set(CPPZMQ_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 FetchContent_Declare(cppzmq
@@ -42,11 +38,7 @@ FetchContent_Declare(cppzmq
     GIT_TAG v4.11.0
     SOURCE_DIR ${CMAKE_CURRENT_BINARY_DIR}/cppzmq
 )
-FetchContent_GetProperties(cppzmq)
-if(NOT cppzmq_POPULATED)
-    FetchContent_Populate(cppzmq)
-    add_subdirectory(${cppzmq_SOURCE_DIR} ${cppzmq_BINARY_DIR} EXCLUDE_FROM_ALL)
-endif()
+FetchContent_MakeAvailable(cppzmq)
 
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/generated)
 
