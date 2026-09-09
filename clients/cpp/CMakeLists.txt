@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.14)
 project(zmqRemoteApi-client-cpp3)
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
@@ -30,7 +30,9 @@ FetchContent_Declare(jsoncons
     GIT_TAG v1.7.0
     SOURCE_DIR ${CMAKE_CURRENT_BINARY_DIR}/jsoncons
 )
+set(JSONCONS_BUILD_TESTS OFF CACHE BOOL "Build jsoncons tests")
 FetchContent_MakeAvailable(jsoncons)
+set_property(TARGET jsoncons PROPERTY EXCLUDE_FROM_ALL TRUE)
 
 set(CPPZMQ_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 FetchContent_Declare(cppzmq
@@ -39,6 +41,7 @@ FetchContent_Declare(cppzmq
     SOURCE_DIR ${CMAKE_CURRENT_BINARY_DIR}/cppzmq
 )
 FetchContent_MakeAvailable(cppzmq)
+set_property(TARGET cppzmq PROPERTY EXCLUDE_FROM_ALL TRUE)
 
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/generated)
 
