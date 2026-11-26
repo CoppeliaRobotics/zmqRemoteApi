@@ -270,7 +270,7 @@ function zmqRemoteApi.info(obj)
     local ret = {}
     for k, v in pairs(obj) do
         if type(v) == 'table' then
-            if getmetatable(v) == nil or isbuffer(v) then -- other objects are not (yet) supported
+            if getmetatable(v) == nil or isinstance(v, sim.Buffer) then -- other objects are not (yet) supported
                 ret[k] = zmqRemoteApi.info(v)
             end
         elseif type(v) == 'function' then
@@ -395,7 +395,7 @@ function zmqRemoteApi.handleRequest(req)
                         elseif type(ret[i]) == 'table' then
                             local mt = getmetatable(ret[i]) or {}
                             -- FF 2025-12-11: skip calling tomap() if the object has a __tocbor metamethod!
-                            if (not isbuffer(ret[i])) and (mt ~= cbornil) and (not mt.__tocbor) then
+                            if (not isinstance(ret[i], sim.Buffer)) and (mt ~= cbornil) and (not mt.__tocbor) then
                                 if table.isarray(ret[i]) then
                                     ret[i] = toarray(ret[i])
                                 else
